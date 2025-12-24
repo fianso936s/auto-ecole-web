@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -24,14 +24,74 @@ import {
   Mail,
   MapPin
 } from "lucide-react";
-import { DEMO_STUDENTS, STUDENT_SKILLS, DEMO_EVENTS } from "../../data/adminMockData";
+import { studentsApi } from "../../lib/api/students";
+import { lessonsApi } from "../../lib/api/lessons";
 import CalendarCore from "../../components/CalendarCore";
+import { toast } from "sonner";
+import { useSocketEvent } from "../../hooks/useSocketEvent";
 
 const AdminStudents: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [students, setStudents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [studentDetails, setStudentDetails] = useState<any>(null);
+  const [studentLessons, setStudentLessons] = useState<any[]>([]);
 
-  const selectedStudent = DEMO_STUDENTS.find(s => s.id === selectedStudentId);
+  useEffect(() => {
+    fetchStudents();
+  }, [searchTerm]);
+
+  useSocketEvent("student:create", () => fetchStudents());
+  useSocketEvent("student:update", () => {
+    fetchStudents();
+    if (selectedStudentId) fetchStudentDetails(selectedStudentId);
+  });
+  useSocketEvent("student:delete", () => {
+    fetchStudents();
+    setSelectedStudentId(null);
+  });
+
+  useEffect(() => {
+    if (selectedStudentId) {
+      fetchStudentDetails(selectedStudentId);
+    }
+  }, [selectedStudentId]);
+
+  const fetchStudents = async () => {
+    setLoading(true);
+    try {
+      const data = await studentsApi.list({ query: searchTerm });
+      setStudents(data);
+    } catch (error) {
+      toast.error("Erreur lors de la récupération des élèves");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStudentDetails = async (id: string) => {
+    try {
+      const [details, lessons] = await Promise.all([
+        studentsApi.get(id),
+        lessonsApi.list({ studentId: id })
+      ]);
+      setStudentDetails(details);
+      
+      const formattedLessons = lessons.map((l: any) => ({
+        id: l.id,
+        title: `Leçon avec ${l.instructor.firstName}`,
+        start: l.startAt,
+        end: l.endAt,
+        status: l.status,
+      }));
+      setStudentLessons(formattedLessons);
+    } catch (error) {
+      toast.error("Erreur lors de la récupération des détails de l'élève");
+    }
+  };
+
+  const selectedStudent = students.find(s => s.id === selectedStudentId);
 
   if (selectedStudentId && selectedStudent) {
     return (
@@ -44,7 +104,7 @@ const AdminStudents: React.FC = () => {
             <h1 className="text-2xl font-bold">{selectedStudent.firstName} {selectedStudent.lastName}</h1>
             <p className="text-sm text-gray-500">Élève ID: {selectedStudent.id}</p>
           </div>
-          <Badge className="ml-auto bg-green-100 text-green-700">{selectedStudent.status}</Badge>
+          <Badge className="ml-auto bg-green-100 text-green-700">ACTIF</Badge>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -55,13 +115,13 @@ const AdminStudents: React.FC = () => {
                   {selectedStudent.firstName[0]}{selectedStudent.lastName[0]}
                 </div>
                 <h2 className="font-bold text-lg">{selectedStudent.firstName} {selectedStudent.lastName}</h2>
-                <p className="text-sm text-gray-500">Permis B • {selectedStudent.transmission}</p>
+                <p className="text-sm text-gray-500">Permis B</p>
               </div>
 
               <div className="space-y-3 pt-4 border-t">
                 <div className="flex items-center gap-3 text-sm">
                   <Mail size={16} className="text-gray-400" />
-                  <span className="text-gray-600">{selectedStudent.email}</span>
+                  <span className="text-gray-600">{selectedStudent.user?.email}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Phone size={16} className="text-gray-400" />
@@ -69,27 +129,14 @@ const AdminStudents: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <MapPin size={16} className="text-gray-400" />
-                  <span className="text-gray-600">Paris, France</span>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-500">Progression</span>
-                  <span className="font-bold">{selectedStudent.progress}%</span>
-                </div>
-                <div className="w-full bg-gray-100 rounded-full h-2">
-                  <div 
-                    className="bg-indigo-600 h-2 rounded-full" 
-                    style={{width: `${selectedStudent.progress}%`}}
-                  />
+                  <span className="text-gray-600">{selectedStudent.city}, {selectedStudent.postalCode}</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="lg:col-span-3 border-none shadow-sm overflow-hidden">
-            <Tabs defaultValue="progression" className="w-full">
+            <Tabs defaultValue="planning" className="w-full">
               <CardHeader className="p-0 border-b">
                 <TabsList className="w-full justify-start rounded-none bg-transparent h-14 px-4 gap-4">
                   <TabsTrigger value="planning" className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none h-full gap-2">
@@ -101,71 +148,24 @@ const AdminStudents: React.FC = () => {
                   <TabsTrigger value="paiements" className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none h-full gap-2">
                     <CreditCard size={16} /> Paiements
                   </TabsTrigger>
-                  <TabsTrigger value="documents" className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none h-full gap-2">
-                    <FileText size={16} /> Documents
-                  </TabsTrigger>
-                  <TabsTrigger value="examens" className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none h-full gap-2">
-                    <GraduationCap size={16} /> Examens
-                  </TabsTrigger>
                 </TabsList>
               </CardHeader>
               <CardContent className="p-6">
                 <TabsContent value="planning" className="m-0 h-[500px]">
                   <CalendarCore 
-                    events={DEMO_EVENTS as any} 
+                    events={studentLessons} 
                     view="timeGridWeek"
                     editable={false}
                   />
                 </TabsContent>
                 <TabsContent value="progression" className="m-0 space-y-8">
-                  {STUDENT_SKILLS.map((cat, i) => (
-                    <div key={i} className="space-y-4">
-                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                        <div className="w-6 h-6 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
-                          {i+1}
-                        </div>
-                        {cat.category}
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {cat.skills.map((skill, j) => (
-                          <div key={j} className="p-4 border rounded-xl space-y-3">
-                            <div className="flex justify-between items-start">
-                              <span className="text-sm font-medium text-gray-700">{skill.label}</span>
-                              <Badge variant="secondary" className={
-                                skill.status === "ACQUIRED" ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"
-                              }>
-                                {skill.status === "ACQUIRED" ? "Acquis" : "En cours"}
-                              </Badge>
-                            </div>
-                            <div className="flex gap-1">
-                              {[1, 2, 3, 4].map(level => (
-                                <div 
-                                  key={level} 
-                                  className={`h-1.5 flex-1 rounded-full ${
-                                    level <= skill.level ? "bg-indigo-600" : "bg-gray-100"
-                                  }`} 
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                  <div className="text-center py-12 text-gray-500">
+                    Suivi des compétences bientôt disponible en direct...
+                  </div>
                 </TabsContent>
                 <TabsContent value="paiements" className="m-0">
                   <div className="text-center py-12 text-gray-500">
-                    Historique des paiements en cours de chargement...
-                  </div>
-                </TabsContent>
-                <TabsContent value="documents" className="m-0">
-                  <div className="text-center py-12 text-gray-500">
-                    Documents de l'élève en cours de chargement...
-                  </div>
-                </TabsContent>
-                <TabsContent value="examens" className="m-0">
-                  <div className="text-center py-12 text-gray-500">
-                    Historique des examens en cours de chargement...
+                    Historique des paiements bientôt disponible en direct...
                   </div>
                 </TabsContent>
               </CardContent>
@@ -202,79 +202,60 @@ const AdminStudents: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Filter size={16} /> Filtres
-              </Button>
-            </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="relative overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b text-gray-500">
-                  <th className="pb-3 font-medium">Élève</th>
-                  <th className="pb-3 font-medium">Transmission</th>
-                  <th className="pb-3 font-medium">Progression</th>
-                  <th className="pb-3 font-medium">Solde</th>
-                  <th className="pb-3 font-medium">Statut</th>
-                  <th className="pb-3 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {DEMO_STUDENTS.map((student) => (
-                  <tr 
-                    key={student.id} 
-                    className="group hover:bg-gray-50 cursor-pointer transition-colors"
-                    onClick={() => setSelectedStudentId(student.id)}
-                  >
-                    <td className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-                          {student.firstName[0]}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900">{student.firstName} {student.lastName}</div>
-                          <div className="text-xs text-gray-500">{student.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4">
-                      <Badge variant="outline" className="font-medium">
-                        {student.transmission}
-                      </Badge>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 w-16 bg-gray-100 rounded-full">
-                          <div 
-                            className="bg-indigo-600 h-1.5 rounded-full" 
-                            style={{width: `${student.progress}%`}}
-                          />
-                        </div>
-                        <span className="text-xs font-bold text-gray-700">{student.progress}%</span>
-                      </div>
-                    </td>
-                    <td className="py-4">
-                      <span className={`font-semibold ${student.balance < 0 ? "text-red-600" : "text-gray-900"}`}>
-                        {student.balance}€
-                      </span>
-                    </td>
-                    <td className="py-4">
-                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-                        {student.status}
-                      </Badge>
-                    </td>
-                    <td className="py-4 text-right">
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical size={16} />
-                      </Button>
-                    </td>
+            {loading ? (
+              <div className="text-center py-12">Chargement...</div>
+            ) : (
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b text-gray-500">
+                    <th className="pb-3 font-medium">Élève</th>
+                    <th className="pb-3 font-medium">Ville</th>
+                    <th className="pb-3 font-medium">Téléphone</th>
+                    <th className="pb-3 font-medium">Date d'inscription</th>
+                    <th className="pb-3 font-medium text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y">
+                  {students.map((student) => (
+                    <tr 
+                      key={student.id} 
+                      className="group hover:bg-gray-50 cursor-pointer transition-colors"
+                      onClick={() => setSelectedStudentId(student.id)}
+                    >
+                      <td className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                            {student.firstName[0]}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-gray-900">{student.firstName} {student.lastName}</div>
+                            <div className="text-xs text-gray-500">{student.user?.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 text-gray-600">
+                        {student.city}
+                      </td>
+                      <td className="py-4 text-gray-600">
+                        {student.phone}
+                      </td>
+                      <td className="py-4 text-gray-500">
+                        {new Date(student.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-4 text-right">
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical size={16} />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </CardContent>
       </Card>

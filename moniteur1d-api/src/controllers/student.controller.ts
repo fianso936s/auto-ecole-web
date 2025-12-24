@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
 import { z } from "zod";
 import bcrypt from "bcrypt";
+import { logAction } from "../lib/audit.js";
+import { AuthRequest } from "../middleware/auth.js";
+import { emitEvent } from "../lib/socket.js";
 
 const studentSchema = z.object({
   email: z.string().email(),
@@ -16,7 +19,7 @@ const studentSchema = z.object({
   cpfEligible: z.boolean().optional(),
 });
 
-export const getStudents = async (req: Request, res: Response) => {
+export const getStudents = async (req: AuthRequest, res: Response) => {
   const { query, status, page = "1" } = req.query;
   const skip = (parseInt(page as string) - 1) * 10;
 
@@ -48,7 +51,7 @@ export const getStudents = async (req: Request, res: Response) => {
   }
 };
 
-export const createStudent = async (req: Request, res: Response) => {
+export const createStudent = async (req: AuthRequest, res: Response) => {
   try {
     const data = studentSchema.parse(req.body);
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -76,7 +79,12 @@ export const createStudent = async (req: Request, res: Response) => {
       }
     });
 
-    res.status(201).json(student);
+    await logAction("CREATE", "Student", student.id, req.user?.id);
+    emitEvent("student:create", student);
+    
+    // Ne pas renvoyer le mot de passe haché
+    const { password: _, ...studentWithoutPassword } = student;
+    res.status(201).json(studentWithoutPassword);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
@@ -85,7 +93,7 @@ export const createStudent = async (req: Request, res: Response) => {
   }
 };
 
-export const getStudentById = async (req: Request, res: Response) => {
+export const getStudentById = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   try {
@@ -111,7 +119,7 @@ export const getStudentById = async (req: Request, res: Response) => {
   }
 };
 
-export const updateStudent = async (req: Request, res: Response) => {
+export const updateStudent = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const updateSchema = studentSchema.partial();
 
@@ -132,6 +140,8 @@ export const updateStudent = async (req: Request, res: Response) => {
       },
     });
 
+    await logAction("UPDATE", "Student", student.id, req.user?.id, data);
+    emitEvent("student:update", student);
     res.json(student);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -141,7 +151,7 @@ export const updateStudent = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteStudent = async (req: Request, res: Response) => {
+export const deleteStudent = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   try {
@@ -151,6 +161,8 @@ export const deleteStudent = async (req: Request, res: Response) => {
     if (!profile) return res.status(404).json({ message: "Élève non trouvé" });
 
     await prisma.user.delete({ where: { id: profile.userId } });
+    await logAction("DELETE", "Student", id, req.user?.id);
+    emitEvent("student:delete", id);
     res.status(204).send();
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la suppression de l'élève" });

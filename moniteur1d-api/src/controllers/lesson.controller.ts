@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
 import { z } from "zod";
 import { AuthRequest } from "../middleware/auth.js";
+import { logAction } from "../lib/audit.js";
+import { emitEvent } from "../lib/socket.js";
 
 const lessonSchema = z.object({
   studentId: z.string(),
@@ -121,6 +123,8 @@ export const createLesson = async (req: AuthRequest, res: Response) => {
       }
     });
 
+    await logAction("CREATE", "Lesson", lesson.id, req.user?.id);
+    emitEvent("lesson:create", lesson);
     res.status(201).json(lesson);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -144,6 +148,8 @@ export const updateLesson = async (req: AuthRequest, res: Response) => {
         endAt: data.endAt ? new Date(data.endAt) : undefined,
       }
     });
+    await logAction("UPDATE", "Lesson", lesson.id, req.user?.id, data);
+    emitEvent("lesson:update", lesson);
     res.json(lesson);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la mise à jour de la leçon" });
@@ -157,6 +163,8 @@ export const confirmLesson = async (req: AuthRequest, res: Response) => {
       where: { id },
       data: { status: "CONFIRMED" }
     });
+    await logAction("CONFIRM", "Lesson", id, req.user?.id);
+    emitEvent("lesson:update", lesson);
     res.json(lesson);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la confirmation" });
@@ -191,6 +199,8 @@ export const cancelLesson = async (req: AuthRequest, res: Response) => {
       }
     });
 
+    await logAction("CANCEL", "Lesson", id, req.user?.id, { reason });
+    emitEvent("lesson:update", cancelledLesson);
     res.json(cancelledLesson);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de l'annulation" });
@@ -256,6 +266,8 @@ export const completeLesson = async (req: AuthRequest, res: Response) => {
       }
     }
 
+    await logAction("COMPLETE", "Lesson", id, req.user?.id, { summary, nextGoals, skillsCount: skills?.length });
+    emitEvent("lesson:update", lesson);
     res.json(lesson);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la finalisation de la leçon" });

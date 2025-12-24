@@ -3,7 +3,11 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import hpp from "hpp";
 import dotenv from "dotenv";
+import { createServer } from "http";
+import { initSocket } from "./lib/socket.js";
+import { errorHandler } from "./middleware/error.js";
 import authRoutes from "./routes/auth.routes.js";
 import offerRoutes from "./routes/offer.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
@@ -29,13 +33,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Global Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Trop de requêtes effectuées depuis cette adresse IP, réessayez plus tard.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Middlewares
+app.use(limiter);
 app.use(helmet());
 app.use(cors({
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
   credentials: true
 }));
 app.use(cookieParser());
+app.use(hpp());
 
 // Webhook route must come BEFORE express.json()
 app.use("/billing/webhook", express.raw({ type: "application/json" }), (req, res, next) => {
@@ -43,7 +58,7 @@ app.use("/billing/webhook", express.raw({ type: "application/json" }), (req, res
   next();
 });
 
-app.use(express.json());
+app.use(express.json({ limit: "10kb" })); // Protection against large payloads
 
 // Routes
 app.use("/auth", authRoutes);
@@ -66,13 +81,6 @@ app.use("/crm", crmRoutes);
 app.use("/settings", settingRoutes);
 app.use("/exams", examRoutes);
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
-
 // Health check
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
@@ -83,7 +91,13 @@ app.get("/", (req, res) => {
   res.send("Moniteur1D API is running");
 });
 
-app.listen(PORT, () => {
+// Error handling - must be after all routes
+app.use(errorHandler);
+
+const httpServer = createServer(app);
+initSocket(httpServer);
+
+httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 

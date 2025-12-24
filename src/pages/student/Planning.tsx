@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CalendarCore from "../../components/CalendarCore";
 import type { CalendarEvent } from "../../types/calendar";
 import {
@@ -19,31 +19,50 @@ import {
   Info,
   Calendar as CalendarIcon
 } from "lucide-react";
-
-// Mock Data
-const STUDENT_EVENTS: CalendarEvent[] = [
-  {
-    id: "1",
-    title: "Leçon de conduite",
-    start: "2023-12-22T14:00:00",
-    end: "2023-12-22T16:00:00",
-    status: "CONFIRMED",
-    instructorName: "Jean Moniteur",
-    location: "Gare de Lyon",
-  },
-  {
-    id: "2",
-    title: "Leçon de conduite",
-    start: "2023-12-27T10:00:00",
-    end: "2023-12-27T12:00:00",
-    status: "PLANNED",
-    instructorName: "Jean Moniteur",
-    location: "Gare de Lyon",
-  },
-];
+import { lessonsApi } from "../../lib/api/lessons";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 const StudentPlanning: React.FC = () => {
   const [view, setView] = useState<"calendar" | "list">("calendar");
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchMyLessons();
+  }, []);
+
+  const fetchMyLessons = async () => {
+    setLoading(true);
+    try {
+      const data = await lessonsApi.list();
+      const formatted = data.map((l: any) => ({
+        id: l.id,
+        title: "Leçon de conduite",
+        start: l.startAt,
+        end: l.endAt,
+        status: l.status,
+        instructorName: `${l.instructor.firstName} ${l.instructor.lastName}`,
+        location: l.location,
+      }));
+      setEvents(formatted);
+    } catch (error) {
+      toast.error("Erreur lors de la récupération de votre planning");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = async (id: string) => {
+    try {
+      await lessonsApi.cancel(id, "Annulation par l'élève");
+      toast.success("Leçon annulée");
+      fetchMyLessons();
+    } catch (error: any) {
+      toast.error(error.message || "Erreur lors de l'annulation");
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -76,24 +95,36 @@ const StudentPlanning: React.FC = () => {
         </div>
       </div>
 
-      {view === "calendar" ? (
+      {loading ? (
+        <div className="text-center py-12">Chargement...</div>
+      ) : view === "calendar" ? (
         <div className="min-h-[600px]">
           <CalendarCore 
-            events={STUDENT_EVENTS} 
+            events={events} 
             editable={false}
             view="timeGridWeek"
           />
         </div>
       ) : (
         <div className="space-y-4">
-          {STUDENT_EVENTS.map((event) => (
+          {events.length === 0 ? (
+            <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-dashed">
+              Aucune leçon prévue.
+            </div>
+          ) : events.map((event) => (
             <Card key={event.id} className="border-none shadow-sm overflow-hidden">
               <div className="flex flex-col md:flex-row">
                 <div className={`p-6 md:w-48 flex flex-col justify-center items-center text-center text-white ${
-                  event.status === "CONFIRMED" ? "bg-indigo-600" : "bg-gray-400"
+                  event.status === "CONFIRMED" ? "bg-indigo-600" : 
+                  event.status === "PLANNED" ? "bg-blue-500" :
+                  event.status === "CANCELLED" ? "bg-red-500" : "bg-gray-400"
                 }`}>
-                  <div className="text-sm font-bold uppercase tracking-widest opacity-80">22 Décembre</div>
-                  <div className="text-2xl font-black mt-1">14:00</div>
+                  <div className="text-sm font-bold uppercase tracking-widest opacity-80">
+                    {format(new Date(event.start), "d MMMM", { locale: fr })}
+                  </div>
+                  <div className="text-2xl font-black mt-1">
+                    {format(new Date(event.start), "HH:mm")}
+                  </div>
                   <Badge variant="outline" className="mt-2 border-white/30 text-white bg-white/10">
                     {event.status}
                   </Badge>
@@ -113,7 +144,15 @@ const StudentPlanning: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">Annuler</Button>
+                    {["PLANNED", "CONFIRMED"].includes(event.status) && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleCancel(event.id)}
+                      >
+                        Annuler
+                      </Button>
+                    )}
                     <Button variant="secondary" size="sm">Détails</Button>
                   </div>
                 </CardContent>

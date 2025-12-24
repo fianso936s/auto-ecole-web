@@ -7,8 +7,10 @@ const router = Router();
 // Specific rate limit for contact form to prevent spam
 const contactLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // Limit each IP to 5 contact submissions per hour
-  message: { message: "Trop de tentatives. Veuillez réessayer plus tard." }
+  max: 3, // Limit each IP to 3 contact submissions per hour
+  message: "Trop de messages envoyés. Veuillez réessayer plus tard.",
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 router.post("/", contactLimiter, submitContact);

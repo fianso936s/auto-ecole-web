@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -15,9 +15,44 @@ import {
   CheckCircle2,
   XCircle
 } from "lucide-react";
-import { DEMO_VEHICLES } from "../../data/adminMockData";
+import { vehiclesApi } from "../../lib/api/vehicles";
+import { toast } from "sonner";
+import { useSocketEvent } from "../../hooks/useSocketEvent";
 
 const AdminVehicles: React.FC = () => {
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
+  useSocketEvent("vehicle:create", () => fetchVehicles());
+  useSocketEvent("vehicle:update", () => fetchVehicles());
+  useSocketEvent("vehicle:delete", () => fetchVehicles());
+
+  const fetchVehicles = async () => {
+    setLoading(true);
+    try {
+      const data = await vehiclesApi.list();
+      setVehicles(data);
+    } catch (error) {
+      toast.error("Erreur lors de la récupération des véhicules");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleActive = async (id: string, currentStatus: boolean) => {
+    try {
+      await vehiclesApi.toggleActive(id, !currentStatus);
+      toast.success("Statut du véhicule mis à jour");
+      fetchVehicles();
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour");
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -40,7 +75,7 @@ const AdminVehicles: React.FC = () => {
               </div>
               <Badge variant="outline" className="bg-white border-blue-200 text-blue-700">Total</Badge>
             </div>
-            <div className="text-3xl font-bold text-blue-900">{DEMO_VEHICLES.length}</div>
+            <div className="text-3xl font-bold text-blue-900">{vehicles.length}</div>
             <p className="text-sm text-primary font-medium mt-1">Véhicules enregistrés</p>
           </CardContent>
         </Card>
@@ -54,7 +89,7 @@ const AdminVehicles: React.FC = () => {
               <Badge variant="outline" className="bg-white border-emerald-200 text-emerald-700">Actifs</Badge>
             </div>
             <div className="text-3xl font-bold text-emerald-900">
-              {DEMO_VEHICLES.filter(v => v.isActive).length}
+              {vehicles.filter(v => v.isActive).length}
             </div>
             <p className="text-sm text-emerald-600 font-medium mt-1">Prêts pour les leçons</p>
           </CardContent>
@@ -69,7 +104,7 @@ const AdminVehicles: React.FC = () => {
               <Badge variant="outline" className="bg-white border-amber-200 text-amber-700">Auto</Badge>
             </div>
             <div className="text-3xl font-bold text-amber-900">
-              {DEMO_VEHICLES.filter(v => v.transmission === "AUTO").length}
+              {vehicles.filter(v => v.transmission === "AUTO").length}
             </div>
             <p className="text-sm text-amber-600 font-medium mt-1">Véhicules automatiques</p>
           </CardContent>
@@ -89,56 +124,63 @@ const AdminVehicles: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="relative overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b text-gray-500">
-                  <th className="pb-3 font-medium">Véhicule</th>
-                  <th className="pb-3 font-medium">Immatriculation</th>
-                  <th className="pb-3 font-medium">Transmission</th>
-                  <th className="pb-3 font-medium">Statut</th>
-                  <th className="pb-3 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {DEMO_VEHICLES.map((vehicle) => (
-                  <tr key={vehicle.id} className="group hover:bg-gray-50 transition-colors">
-                    <td className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                          <Car size={20} />
-                        </div>
-                        <div className="font-semibold text-gray-900">{vehicle.name}</div>
-                      </div>
-                    </td>
-                    <td className="py-4">
-                      <span className="px-2 py-1 bg-gray-100 rounded text-xs font-mono font-bold text-gray-700 border">
-                        {vehicle.plate}
-                      </span>
-                    </td>
-                    <td className="py-4">
-                      <Badge variant="secondary" className={
-                        vehicle.transmission === "MANUAL" ? "bg-slate-100 text-slate-700" : "bg-indigo-100 text-indigo-700"
-                      }>
-                        {vehicle.transmission === "MANUAL" ? "Manuelle" : "Automatique"}
-                      </Badge>
-                    </td>
-                    <td className="py-4">
-                      <button className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                        vehicle.isActive 
-                          ? "bg-emerald-100 text-emerald-700" 
-                          : "bg-red-100 text-red-700"
-                      }`}>
-                        {vehicle.isActive ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
-                        {vehicle.isActive ? "Actif" : "Hors service"}
-                      </button>
-                    </td>
-                    <td className="py-4 text-right">
-                      <Button variant="ghost" size="sm">Modifier</Button>
-                    </td>
+            {loading ? (
+              <div className="text-center py-12">Chargement...</div>
+            ) : (
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b text-gray-500">
+                    <th className="pb-3 font-medium">Véhicule</th>
+                    <th className="pb-3 font-medium">Immatriculation</th>
+                    <th className="pb-3 font-medium">Transmission</th>
+                    <th className="pb-3 font-medium">Statut</th>
+                    <th className="pb-3 font-medium text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y">
+                  {vehicles.map((vehicle) => (
+                    <tr key={vehicle.id} className="group hover:bg-gray-50 transition-colors">
+                      <td className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                            <Car size={20} />
+                          </div>
+                          <div className="font-semibold text-gray-900">{vehicle.name}</div>
+                        </div>
+                      </td>
+                      <td className="py-4">
+                        <span className="px-2 py-1 bg-gray-100 rounded text-xs font-mono font-bold text-gray-700 border">
+                          {vehicle.plateNumber}
+                        </span>
+                      </td>
+                      <td className="py-4">
+                        <Badge variant="secondary" className={
+                          vehicle.transmission === "MANUAL" ? "bg-slate-100 text-slate-700" : "bg-indigo-100 text-indigo-700"
+                        }>
+                          {vehicle.transmission === "MANUAL" ? "Manuelle" : "Automatique"}
+                        </Badge>
+                      </td>
+                      <td className="py-4">
+                        <button 
+                          onClick={() => handleToggleActive(vehicle.id, vehicle.isActive)}
+                          className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                            vehicle.isActive 
+                              ? "bg-emerald-100 text-emerald-700" 
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {vehicle.isActive ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                          {vehicle.isActive ? "Actif" : "Hors service"}
+                        </button>
+                      </td>
+                      <td className="py-4 text-right">
+                        <Button variant="ghost" size="sm">Modifier</Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </CardContent>
       </Card>

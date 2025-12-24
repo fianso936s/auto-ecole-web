@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -21,13 +21,67 @@ import {
   ShieldCheck,
   Star
 } from "lucide-react";
-import { DEMO_INSTRUCTORS, DEMO_EVENTS } from "../../data/adminMockData";
+import { instructorsApi } from "../../lib/api/instructors";
+import { lessonsApi } from "../../lib/api/lessons";
 import CalendarCore from "../../components/CalendarCore";
+import { toast } from "sonner";
+import { useSocketEvent } from "../../hooks/useSocketEvent";
 
 const AdminInstructors: React.FC = () => {
   const [selectedInstructorId, setSelectedInstructorId] = useState<string | null>(null);
+  const [instructors, setInstructors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [instructorLessons, setInstructorLessons] = useState<any[]>([]);
 
-  const selectedInstructor = DEMO_INSTRUCTORS.find(i => i.id === selectedInstructorId);
+  useEffect(() => {
+    fetchInstructors();
+  }, []);
+
+  useSocketEvent("instructor:create", () => fetchInstructors());
+  useSocketEvent("instructor:update", () => {
+    fetchInstructors();
+    if (selectedInstructorId) fetchInstructorLessons(selectedInstructorId);
+  });
+  useSocketEvent("instructor:delete", () => {
+    fetchInstructors();
+    setSelectedInstructorId(null);
+  });
+
+  useEffect(() => {
+    if (selectedInstructorId) {
+      fetchInstructorLessons(selectedInstructorId);
+    }
+  }, [selectedInstructorId]);
+
+  const fetchInstructors = async () => {
+    setLoading(true);
+    try {
+      const data = await instructorsApi.list();
+      setInstructors(data);
+    } catch (error) {
+      toast.error("Erreur lors de la récupération des moniteurs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchInstructorLessons = async (id: string) => {
+    try {
+      const lessons = await lessonsApi.list({ instructorId: id });
+      const formattedLessons = lessons.map((l: any) => ({
+        id: l.id,
+        title: `Leçon avec ${l.student.firstName} ${l.student.lastName}`,
+        start: l.startAt,
+        end: l.endAt,
+        status: l.status,
+      }));
+      setInstructorLessons(formattedLessons);
+    } catch (error) {
+      toast.error("Erreur lors de la récupération du planning");
+    }
+  };
+
+  const selectedInstructor = instructors.find(i => i.id === selectedInstructorId);
 
   if (selectedInstructorId && selectedInstructor) {
     return (
@@ -40,7 +94,9 @@ const AdminInstructors: React.FC = () => {
             <h1 className="text-2xl font-bold">{selectedInstructor.firstName} {selectedInstructor.lastName}</h1>
             <p className="text-sm text-gray-500">Moniteur ID: {selectedInstructor.id}</p>
           </div>
-          <Badge className="ml-auto bg-green-100 text-green-700">ACTIF</Badge>
+          <Badge className={`ml-auto ${selectedInstructor.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
+            {selectedInstructor.isActive ? "ACTIF" : "INACTIF"}
+          </Badge>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -51,17 +107,12 @@ const AdminInstructors: React.FC = () => {
                   {selectedInstructor.firstName[0]}{selectedInstructor.lastName[0]}
                 </div>
                 <h2 className="font-bold text-lg">{selectedInstructor.firstName} {selectedInstructor.lastName}</h2>
-                <div className="flex items-center gap-1 text-amber-500 mt-1">
-                  <Star size={14} fill="currentColor" />
-                  <span className="text-sm font-bold">{selectedInstructor.rating}</span>
-                  <span className="text-gray-400 text-xs">({selectedInstructor.lessonsCount} leçons)</span>
-                </div>
               </div>
 
               <div className="space-y-3 pt-4 border-t">
                 <div className="flex items-center gap-3 text-sm">
                   <Mail size={16} className="text-gray-400" />
-                  <span className="text-gray-600">{selectedInstructor.email}</span>
+                  <span className="text-gray-600">{selectedInstructor.user?.email}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Phone size={16} className="text-gray-400" />
@@ -69,7 +120,7 @@ const AdminInstructors: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <ShieldCheck size={16} className="text-gray-400" />
-                  <span className="text-gray-600">{selectedInstructor.licenseNumber}</span>
+                  <span className="text-gray-600">{selectedInstructor.licenseNumber || "N/A"}</span>
                 </div>
               </div>
             </CardContent>
@@ -82,9 +133,6 @@ const AdminInstructors: React.FC = () => {
                   <TabsTrigger value="planning" className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none h-full gap-2">
                     <Calendar size={16} /> Planning
                   </TabsTrigger>
-                  <TabsTrigger value="availability" className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none h-full gap-2">
-                    <Clock size={16} /> Disponibilités
-                  </TabsTrigger>
                   <TabsTrigger value="profile" className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none h-full gap-2">
                     <User size={16} /> Profil complet
                   </TabsTrigger>
@@ -93,28 +141,15 @@ const AdminInstructors: React.FC = () => {
               <CardContent className="p-6">
                 <TabsContent value="planning" className="m-0 h-[500px]">
                   <CalendarCore 
-                    events={DEMO_EVENTS as any} 
+                    events={instructorLessons} 
                     view="timeGridWeek"
-                    editable={true}
+                    editable={false}
                   />
                 </TabsContent>
-                <TabsContent value="availability" className="m-0 space-y-6">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-bold">Horaires de travail récurrents</h3>
-                    <Button size="sm" variant="outline">Gérer les créneaux</Button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"].map(day => (
-                      <div key={day} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
-                        <span className="font-medium">{day}</span>
-                        <span className="text-sm text-gray-600">08:00 - 12:00, 13:00 - 18:00</span>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
                 <TabsContent value="profile" className="m-0">
-                  <div className="text-center py-12 text-gray-500">
-                    Informations contractuelles en cours de chargement...
+                  <div className="space-y-4">
+                    <h3 className="font-bold">Bio</h3>
+                    <p className="text-sm text-gray-600">{selectedInstructor.bio || "Aucune bio renseignée."}</p>
                   </div>
                 </TabsContent>
               </CardContent>
@@ -141,59 +176,55 @@ const AdminInstructors: React.FC = () => {
       <Card className="border-none shadow-sm">
         <CardContent className="pt-6">
           <div className="relative overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b text-gray-500">
-                  <th className="pb-3 font-medium">Moniteur</th>
-                  <th className="pb-3 font-medium">N° Autorisation</th>
-                  <th className="pb-3 font-medium">Performance</th>
-                  <th className="pb-3 font-medium">Statut</th>
-                  <th className="pb-3 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {DEMO_INSTRUCTORS.map((instructor) => (
-                  <tr 
-                    key={instructor.id} 
-                    className="group hover:bg-gray-50 cursor-pointer transition-colors"
-                    onClick={() => setSelectedInstructorId(instructor.id)}
-                  >
-                    <td className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-                          {instructor.firstName[0]}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900">{instructor.firstName} {instructor.lastName}</div>
-                          <div className="text-xs text-gray-500">{instructor.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 text-gray-600 font-mono text-xs">
-                      {instructor.licenseNumber}
-                    </td>
-                    <td className="py-4">
-                      <div className="flex items-center gap-1.5">
-                        <Star size={14} className="text-amber-500 fill-amber-500" />
-                        <span className="font-bold">{instructor.rating}</span>
-                        <span className="text-gray-400 text-xs">({instructor.lessonsCount}h)</span>
-                      </div>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${instructor.isActive ? "bg-green-500" : "bg-gray-300"}`} />
-                        <span className="text-xs font-medium">{instructor.isActive ? "Actif" : "Inactif"}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 text-right">
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical size={16} />
-                      </Button>
-                    </td>
+            {loading ? (
+              <div className="text-center py-12">Chargement...</div>
+            ) : (
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b text-gray-500">
+                    <th className="pb-3 font-medium">Moniteur</th>
+                    <th className="pb-3 font-medium">N° Autorisation</th>
+                    <th className="pb-3 font-medium">Statut</th>
+                    <th className="pb-3 font-medium text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y">
+                  {instructors.map((instructor) => (
+                    <tr 
+                      key={instructor.id} 
+                      className="group hover:bg-gray-50 cursor-pointer transition-colors"
+                      onClick={() => setSelectedInstructorId(instructor.id)}
+                    >
+                      <td className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                            {instructor.firstName[0]}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-gray-900">{instructor.firstName} {instructor.lastName}</div>
+                            <div className="text-xs text-gray-500">{instructor.user?.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 text-gray-600 font-mono text-xs">
+                        {instructor.licenseNumber || "N/A"}
+                      </td>
+                      <td className="py-4">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${instructor.isActive ? "bg-green-500" : "bg-gray-300"}`} />
+                          <span className="text-xs font-medium">{instructor.isActive ? "Actif" : "Inactif"}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 text-right">
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical size={16} />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </CardContent>
       </Card>

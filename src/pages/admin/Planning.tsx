@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CalendarCore from "../../components/CalendarCore";
 import type { CalendarEvent } from "../../types/calendar";
-import { DEMO_EVENTS } from "../../data/adminMockData";
 import {
   Card,
   CardContent,
@@ -21,62 +20,127 @@ import {
 } from "lucide-react";
 import LessonModal from "../../components/modals/LessonModal";
 import { toast } from "sonner";
+import { lessonsApi } from "../../lib/api/lessons";
+import { instructorsApi } from "../../lib/api/instructors";
+import { useSocketEvent } from "../../hooks/useSocketEvent";
 
 const AdminPlanning: React.FC = () => {
-  const [events, setEvents] = useState<CalendarEvent[]>(DEMO_EVENTS as any);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [instructors, setInstructors] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [hasConflict, setHasConflict] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [filterInstructor, setFilterInstructor] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    fetchInstructors();
+    fetchLessons();
+  }, [filterInstructor]);
+
+  useSocketEvent("lesson:create", () => {
+    fetchLessons();
+    toast.info("Une nouvelle leçon a été créée");
+  });
+
+  useSocketEvent("lesson:update", () => {
+    fetchLessons();
+  });
+
+  const fetchInstructors = async () => {
+    try {
+      const data = await instructorsApi.list();
+      setInstructors(data);
+    } catch (error) {
+      console.error("Failed to fetch instructors");
+    }
+  };
+
+  const fetchLessons = async () => {
+    setLoading(true);
+    try {
+      const data = await lessonsApi.list({ 
+        instructorId: filterInstructor || undefined 
+      });
+      
+      const formattedEvents = data.map((lesson: any) => ({
+        id: lesson.id,
+        title: `${lesson.student.firstName} ${lesson.student.lastName} (${lesson.vehicle?.name || "Sans véhicule"})`,
+        start: lesson.startAt,
+        end: lesson.endAt,
+        status: lesson.status,
+        instructorName: `${lesson.instructor.firstName} ${lesson.instructor.lastName}`,
+        location: lesson.location,
+        studentName: `${lesson.student.firstName} ${lesson.student.lastName}`,
+      }));
+      
+      setEvents(formattedEvents);
+    } catch (error) {
+      toast.error("Erreur lors de la récupération du planning");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreate = (start: Date, end: Date) => {
-    setSelectedEvent({ start, end });
+    setSelectedEvent({ startAt: start.toISOString(), endAt: end.toISOString() });
     setIsModalOpen(true);
   };
 
-  const handleMove = (eventId: string, start: Date, end: Date) => {
-    // Simuler une détection de conflit si l'heure est 10h
-    if (start.getHours() === 10) {
-      setHasConflict(true);
-      toast.error("Conflit détecté : Le moniteur est déjà occupé.");
-      return;
+  const handleMove = async (eventId: string, start: Date, end: Date) => {
+    try {
+      await lessonsApi.update(eventId, { 
+        startAt: start.toISOString(), 
+        endAt: end.toISOString() 
+      });
+      toast.success("Leçon déplacée avec succès");
+      fetchLessons();
+    } catch (error: any) {
+      if (error.status === 409) {
+        setHasConflict(true);
+        toast.error(error.message || "Conflit détecté");
+      } else {
+        toast.error("Erreur lors du déplacement");
+      }
     }
-
-    setEvents((prev) =>
-      prev.map((e) => (e.id === eventId ? { ...e, start, end } : e))
-    );
-    toast.success("Leçon déplacée avec succès");
   };
 
-  const handleResize = (eventId: string, start: Date, end: Date) => {
-    setEvents((prev) =>
-      prev.map((e) => (e.id === eventId ? { ...e, start, end } : e))
-    );
-    toast.success("Durée de la leçon mise à jour");
+  const handleResize = async (eventId: string, start: Date, end: Date) => {
+    try {
+      await lessonsApi.update(eventId, { 
+        startAt: start.toISOString(), 
+        endAt: end.toISOString() 
+      });
+      toast.success("Durée de la leçon mise à jour");
+      fetchLessons();
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour de la durée");
+    }
   };
 
   const handleSelect = (eventId: string) => {
     const event = events.find((e) => e.id === eventId);
-    setSelectedEvent(event);
-    setIsModalOpen(true);
+    if (event) {
+      setSelectedEvent(event);
+      setIsModalOpen(true);
+    }
   };
 
-  const handleSaveLesson = (data: any) => {
-    if (selectedEvent?.id) {
-      setEvents((prev) =>
-        prev.map((e) => (e.id === selectedEvent.id ? { ...e, ...data } : e))
-      );
-      toast.success("Leçon modifiée");
-    } else {
-      const newEvent = {
-        id: Math.random().toString(36).substr(2, 9),
-        title: `Leçon - ${data.studentId}`,
-        ...data,
-        status: "PLANNED",
-      };
-      setEvents((prev) => [...prev, newEvent]);
-      toast.success("Nouvelle leçon créée");
+  const handleSaveLesson = async (data: any) => {
+    try {
+      if (selectedEvent?.id) {
+        await lessonsApi.update(selectedEvent.id, data);
+        toast.success("Leçon modifiée");
+      } else {
+        await lessonsApi.create(data);
+        toast.success("Nouvelle leçon créée");
+      }
+      setIsModalOpen(false);
+      fetchLessons();
+    } catch (error: any) {
+      toast.error(error.message || "Erreur lors de l'enregistrement");
     }
-    setIsModalOpen(false);
   };
 
   return (
@@ -113,14 +177,11 @@ const AdminPlanning: React.FC = () => {
           <div className="flex-1">
             <h3 className="text-sm font-bold text-red-800">Conflit détecté</h3>
             <p className="text-xs text-red-700 mt-1">
-              Jean Moniteur a déjà une leçon prévue avec Alice Martin sur ce créneau.
+              Un conflit a été détecté pour ce créneau (moniteur, élève ou véhicule déjà occupé).
             </p>
             <div className="mt-3 flex gap-2">
-              <Button size="xs" variant="destructive" onClick={() => setHasConflict(false)}>
-                Ignorer et forcer
-              </Button>
               <Button size="xs" variant="outline" className="bg-white" onClick={() => setHasConflict(false)}>
-                Annuler le déplacement
+                Fermer
               </Button>
             </div>
           </div>
@@ -148,6 +209,8 @@ const AdminPlanning: React.FC = () => {
                     type="text"
                     placeholder="Élève, moniteur..."
                     className="w-full rounded-lg border-gray-200 bg-gray-50 py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
               </div>
@@ -156,10 +219,15 @@ const AdminPlanning: React.FC = () => {
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-400">
                   Moniteur
                 </label>
-                <select className="w-full rounded-lg border-gray-200 bg-gray-50 p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-                  <option>Tous les moniteurs</option>
-                  <option>Jean Dupont</option>
-                  <option>Marie Curie</option>
+                <select 
+                  className="w-full rounded-lg border-gray-200 bg-gray-50 p-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                  value={filterInstructor}
+                  onChange={(e) => setFilterInstructor(e.target.value)}
+                >
+                  <option value="">Tous les moniteurs</option>
+                  {instructors.map(inst => (
+                    <option key={inst.id} value={inst.id}>{inst.firstName} {inst.lastName}</option>
+                  ))}
                 </select>
               </div>
 
@@ -183,29 +251,6 @@ const AdminPlanning: React.FC = () => {
                   ))}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions Card */}
-          <Card className="border-none shadow-sm h-fit bg-indigo-900 text-white">
-            <CardHeader>
-              <CardTitle className="text-sm font-bold uppercase tracking-wider opacity-80">
-                Actions Rapides
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-white/10 text-white border-white/20 border">
-                <CheckCircle2 size={18} className="text-emerald-400" />
-                Confirmer sélection
-              </Button>
-              <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-white/10 text-white border-white/20 border">
-                <XCircle size={18} className="text-red-400" />
-                Annuler sélection
-              </Button>
-              <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-white/10 text-white border-white/20 border">
-                <Clock size={18} className="text-amber-400" />
-                Marquer no-show
-              </Button>
             </CardContent>
           </Card>
         </div>

@@ -394,7 +394,7 @@ const Home: React.FC = () => {
             </div>
           ) : (
             <motion.div
-              className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4"
+              className="flex flex-wrap justify-center gap-8"
               variants={{
                 hidden: { opacity: 0 },
                 show: {
@@ -417,7 +417,7 @@ const Home: React.FC = () => {
                   }}
                   whileHover={{ y: -10, rotateX: 2, rotateY: 2 }}
                   transition={{ type: "spring", stiffness: 300 }}
-                  className={`group relative rounded-3xl border p-8 ${offer.highlight ? "border-primary/30 bg-primary/5 shadow-2xl shadow-primary/10" : "border-border bg-card shadow-sm"} overflow-hidden backdrop-blur-md transition-all`}
+                  className={`group relative w-full max-w-sm rounded-3xl border p-8 md:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)] ${offer.highlight ? "border-primary/30 bg-primary/5 shadow-2xl shadow-primary/10" : "border-border bg-card shadow-sm"} overflow-hidden backdrop-blur-md transition-all`}
                 >
                   {offer.highlight && (
                     <div className="absolute right-0 top-0 rounded-bl-xl bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-tighter text-white">

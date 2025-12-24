@@ -20,6 +20,10 @@ export const createCheckoutSession = async (req: AuthRequest, res: Response) => 
       return res.status(404).json({ message: "Pré-inscription non trouvée" });
     }
 
+    if (preRegistration.userId !== req.user.id && req.user.role !== "ADMIN") {
+      return res.status(403).json({ message: "Accès refusé - Cette pré-inscription ne vous appartient pas" });
+    }
+
     const amount = type === "DEPOSIT" ? 250 : preRegistration.offer.price; // Example: 250€ deposit or full price
 
     const session = await stripe.checkout.sessions.create({

@@ -113,11 +113,11 @@ const Tarifs: React.FC = () => {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="flex flex-wrap justify-center gap-6">
             {offres.map((offre) => (
               <Card
                 key={offre.id || offre.slug}
-                className={`group border-2 transition-all duration-300 hover:-translate-y-1 ${
+                className={`group w-full max-w-sm border-2 transition-all duration-300 hover:-translate-y-1 sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] ${
                   offre.highlight
                     ? "border-primary bg-primary/[0.02] shadow-xl shadow-primary/10"
                     : "border-border/50 bg-card shadow-sm hover:border-primary/30"
@@ -170,7 +170,7 @@ const Tarifs: React.FC = () => {
 
         {/* Tableau des prix unitaires */}
         <StaggerContainer
-          className="mb-20 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4"
+          className="mb-20 flex flex-wrap justify-center gap-6"
           delay={0.1}
         >
           {[
@@ -191,14 +191,14 @@ const Tarifs: React.FC = () => {
               detail: "Le jour J",
             },
           ].map((item, i) => (
-            <StaggerItem key={i}>
-              <Card className="border border-border/50 bg-card text-center shadow-sm transition-shadow hover:shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-lg font-medium text-muted-foreground">
+            <StaggerItem key={i} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-sm">
+              <Card className="flex h-full flex-col border border-border/50 bg-card text-center shadow-sm transition-shadow hover:shadow-md">
+                <CardHeader className="flex-grow">
+                  <CardTitle className="flex min-h-[3rem] items-center justify-center text-center text-lg font-medium text-muted-foreground">
                     {item.label}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pb-8">
                   <p className="text-3xl font-bold text-foreground">
                     {item.price}
                   </p>

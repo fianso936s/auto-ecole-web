@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,9 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Search, MapPin, Calendar, Clock, Car, User } from "lucide-react";
+import { studentsApi } from "../../lib/api/students";
+import { instructorsApi } from "../../lib/api/instructors";
+import { vehiclesApi } from "../../lib/api/vehicles";
 
 interface LessonModalProps {
   isOpen: boolean;
@@ -25,17 +28,61 @@ const LessonModal: React.FC<LessonModalProps> = ({
   initialData,
 }) => {
   const [formData, setFormData] = useState({
-    studentId: initialData?.studentId || "",
-    instructorId: initialData?.instructorId || "",
-    vehicleId: initialData?.vehicleId || "",
-    startAt: initialData?.start || "",
-    endAt: initialData?.end || "",
-    location: initialData?.location || "Centre Ville",
+    studentId: "",
+    instructorId: "",
+    vehicleId: "",
+    startAt: "",
+    endAt: "",
+    location: "Centre Ville",
   });
+
+  const [students, setStudents] = useState<any[]>([]);
+  const [instructors, setInstructors] = useState<any[]>([]);
+  const [vehicles, setVehicles] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        studentId: initialData?.studentId || "",
+        instructorId: initialData?.instructorId || "",
+        vehicleId: initialData?.vehicleId || "",
+        startAt: initialData?.startAt || initialData?.start || "",
+        endAt: initialData?.endAt || initialData?.end || "",
+        location: initialData?.location || "Centre Ville",
+      });
+      fetchData();
+    }
+  }, [isOpen, initialData]);
+
+  const fetchData = async () => {
+    try {
+      const [s, i, v] = await Promise.all([
+        studentsApi.list(),
+        instructorsApi.list(),
+        vehiclesApi.list()
+      ]);
+      setStudents(s);
+      setInstructors(i);
+      setVehicles(v);
+    } catch (error) {
+      console.error("Failed to fetch data for modal");
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
+  };
+
+  const formatDateTimeLocal = (dateStr: string) => {
+    if (!dateStr) return "";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return "";
+      return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    } catch {
+      return "";
+    }
   };
 
   return (
@@ -49,21 +96,23 @@ const LessonModal: React.FC<LessonModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="grid grid-cols-1 gap-4">
-            {/* Student Search */}
+            {/* Student selection */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <User size={16} className="text-indigo-500" />
                 Élève
               </Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                <Input 
-                  placeholder="Rechercher un élève..." 
-                  className="pl-10"
-                  value={formData.studentId}
-                  onChange={(e) => setFormData({...formData, studentId: e.target.value})}
-                />
-              </div>
+              <select 
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                value={formData.studentId}
+                onChange={(e) => setFormData({...formData, studentId: e.target.value})}
+                required
+              >
+                <option value="">Sélectionner un élève</option>
+                {students.map(s => (
+                  <option key={s.id} value={s.id}>{s.firstName} {s.lastName}</option>
+                ))}
+              </select>
             </div>
 
             {/* Instructor & Vehicle */}
@@ -77,10 +126,12 @@ const LessonModal: React.FC<LessonModalProps> = ({
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   value={formData.instructorId}
                   onChange={(e) => setFormData({...formData, instructorId: e.target.value})}
+                  required
                 >
                   <option value="">Sélectionner</option>
-                  <option value="1">Jean Dupont</option>
-                  <option value="2">Marie Curie</option>
+                  {instructors.map(i => (
+                    <option key={i.id} value={i.id}>{i.firstName} {i.lastName}</option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-2">
@@ -93,9 +144,10 @@ const LessonModal: React.FC<LessonModalProps> = ({
                   value={formData.vehicleId}
                   onChange={(e) => setFormData({...formData, vehicleId: e.target.value})}
                 >
-                  <option value="">Sélectionner</option>
-                  <option value="1">Peugeot 208 (MANUAL)</option>
-                  <option value="2">Renault Zoe (AUTO)</option>
+                  <option value="">Facultatif</option>
+                  {vehicles.map(v => (
+                    <option key={v.id} value={v.id}>{v.name} ({v.transmission})</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -109,8 +161,9 @@ const LessonModal: React.FC<LessonModalProps> = ({
                 </Label>
                 <Input 
                   type="datetime-local" 
-                  value={formData.startAt ? new Date(formData.startAt).toISOString().slice(0, 16) : ""}
+                  value={formatDateTimeLocal(formData.startAt)}
                   onChange={(e) => setFormData({...formData, startAt: e.target.value})}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -120,8 +173,9 @@ const LessonModal: React.FC<LessonModalProps> = ({
                 </Label>
                 <Input 
                   type="datetime-local" 
-                  value={formData.endAt ? new Date(formData.endAt).toISOString().slice(0, 16) : ""}
+                  value={formatDateTimeLocal(formData.endAt)}
                   onChange={(e) => setFormData({...formData, endAt: e.target.value})}
+                  required
                 />
               </div>
             </div>
@@ -136,6 +190,7 @@ const LessonModal: React.FC<LessonModalProps> = ({
                 placeholder="Ex: Gare de Lyon, Agence..." 
                 value={formData.location}
                 onChange={(e) => setFormData({...formData, location: e.target.value})}
+                required
               />
             </div>
           </div>

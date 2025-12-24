@@ -11,6 +11,19 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
   const { type, preRegistrationId } = req.body;
 
   try {
+    // Vérification que la pré-inscription appartient à l'utilisateur
+    const preRegistration = await prisma.preRegistration.findUnique({
+      where: { id: preRegistrationId }
+    });
+
+    if (!preRegistration) {
+      return res.status(404).json({ message: "Pré-inscription non trouvée" });
+    }
+
+    if (preRegistration.userId !== req.user.id && req.user.role !== "ADMIN") {
+      return res.status(403).json({ message: "Accès refusé - Cette pré-inscription ne vous appartient pas" });
+    }
+
     const key = `${req.user.id}/${preRegistrationId}/${Date.now()}-${req.file.originalname}`;
     const url = await uploadFile(req.file, key);
 

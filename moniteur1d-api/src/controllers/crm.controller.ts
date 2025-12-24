@@ -3,6 +3,8 @@ import prisma from "../lib/prisma.js";
 import { z } from "zod";
 import { AuthRequest } from "../middleware/auth.js";
 import bcrypt from "bcrypt";
+import { logAction } from "../lib/audit.js";
+import { emitEvent } from "../lib/socket.js";
 
 const leadSchema = z.object({
   firstName: z.string().min(2),
@@ -24,13 +26,6 @@ const taskSchema = z.object({
   leadId: z.string().optional(),
   studentId: z.string().optional(),
 });
-
-// Helper for AuditLog
-const logAction = async (action: string, entity: string, entityId: string, userId?: string, metadata?: any) => {
-  await prisma.auditLog.create({
-    data: { action, entity, entityId, userId, metadata }
-  });
-};
 
 export const getLeads = async (req: AuthRequest, res: Response) => {
   const { status, owner, q, page = "1" } = req.query;
@@ -73,6 +68,7 @@ export const createLead = async (req: AuthRequest, res: Response) => {
     });
 
     await logAction("CREATE", "Lead", lead.id, req.user?.id);
+    emitEvent("crm:lead:create", lead);
     res.status(201).json(lead);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la création du lead" });
@@ -92,6 +88,7 @@ export const updateLead = async (req: AuthRequest, res: Response) => {
     });
 
     await logAction("UPDATE", "Lead", lead.id, req.user?.id, data);
+    emitEvent("crm:lead:update", lead);
     res.json(lead);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la mise à jour" });
@@ -130,6 +127,7 @@ export const convertLead = async (req: AuthRequest, res: Response) => {
     });
 
     await logAction("CONVERT", "Lead", id, req.user?.id, { userId: user.id });
+    emitEvent("crm:lead:convert", { leadId: id, userId: user.id });
     res.json({ message: "Lead converti avec succès", userId: user.id });
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la conversion" });

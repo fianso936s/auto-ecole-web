@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
 import { z } from "zod";
 import bcrypt from "bcrypt";
+import { logAction } from "../lib/audit.js";
+import { AuthRequest } from "../middleware/auth.js";
+import { emitEvent } from "../lib/socket.js";
 
 const instructorSchema = z.object({
   email: z.string().email(),
@@ -14,7 +17,7 @@ const instructorSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-export const getInstructors = async (req: Request, res: Response) => {
+export const getInstructors = async (req: AuthRequest, res: Response) => {
   try {
     const instructors = await prisma.instructorProfile.findMany({
       include: {
@@ -34,7 +37,7 @@ export const getInstructors = async (req: Request, res: Response) => {
   }
 };
 
-export const createInstructor = async (req: Request, res: Response) => {
+export const createInstructor = async (req: AuthRequest, res: Response) => {
   try {
     const data = instructorSchema.parse(req.body);
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -60,7 +63,12 @@ export const createInstructor = async (req: Request, res: Response) => {
       }
     });
 
-    res.status(201).json(instructor);
+    await logAction("CREATE", "Instructor", instructor.id, req.user?.id);
+    emitEvent("instructor:create", instructor);
+    
+    // Ne pas renvoyer le mot de passe haché
+    const { password: _, ...instructorWithoutPassword } = instructor;
+    res.status(201).json(instructorWithoutPassword);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
@@ -69,7 +77,7 @@ export const createInstructor = async (req: Request, res: Response) => {
   }
 };
 
-export const getInstructorById = async (req: Request, res: Response) => {
+export const getInstructorById = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   try {
@@ -95,7 +103,7 @@ export const getInstructorById = async (req: Request, res: Response) => {
   }
 };
 
-export const updateInstructor = async (req: Request, res: Response) => {
+export const updateInstructor = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const updateSchema = instructorSchema.partial();
 
@@ -114,6 +122,8 @@ export const updateInstructor = async (req: Request, res: Response) => {
       },
     });
 
+    await logAction("UPDATE", "Instructor", instructor.id, req.user?.id, data);
+    emitEvent("instructor:update", instructor);
     res.json(instructor);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -123,7 +133,7 @@ export const updateInstructor = async (req: Request, res: Response) => {
   }
 };
 
-export const toggleInstructorActive = async (req: Request, res: Response) => {
+export const toggleInstructorActive = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const { isActive } = req.body;
 
@@ -132,20 +142,35 @@ export const toggleInstructorActive = async (req: Request, res: Response) => {
       where: { id },
       data: { isActive },
     });
+    await logAction("TOGGLE_ACTIVE", "Instructor", id, req.user?.id, { isActive });
+    emitEvent("instructor:update", instructor);
     res.json(instructor);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors du changement de statut" });
   }
 };
 
-export const deleteInstructor = async (req: Request, res: Response) => {
+export const deleteInstructor = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   try {
-    const profile = await prisma.instructorProfile.findUnique({ where: { id } });
+    const profile = await prisma.instructorProfile.findUnique({ 
+      where: { id },
+      include: { _count: { select: { lessons: { where: { startAt: { gte: new Date() } } } } } }
+    });
+    
     if (!profile) return res.status(404).json({ message: "Moniteur non trouvé" });
 
+    // Safety check: no future lessons
+    if (profile._count.lessons > 0) {
+      return res.status(400).json({ 
+        message: "Impossible de supprimer un moniteur ayant des leçons futures prévues." 
+      });
+    }
+
     await prisma.user.delete({ where: { id: profile.userId } });
+    await logAction("DELETE", "Instructor", id, req.user?.id);
+    emitEvent("instructor:delete", id);
     res.status(204).send();
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la suppression du moniteur" });

@@ -8,7 +8,7 @@ import {
   completeLesson 
 } from "../controllers/lesson.controller.js";
 import { authenticate } from "../middleware/auth.js";
-import { requireRole } from "../lib/auth/guards.js";
+import { requireRole, requireLessonAccess } from "../lib/auth/guards.js";
 
 const router = Router();
 
@@ -16,10 +16,12 @@ router.use(authenticate);
 
 router.get("/", getLessons);
 router.post("/", requireRole(["ADMIN", "INSTRUCTOR"]), createLesson);
-router.patch("/:id", requireRole(["ADMIN", "INSTRUCTOR"]), updateLesson);
-router.post("/:id/confirm", requireRole(["ADMIN", "INSTRUCTOR"]), confirmLesson);
-router.post("/:id/cancel", cancelLesson); // Géré à l'intérieur pour les règles 48h
-router.post("/:id/complete", requireRole(["INSTRUCTOR"]), completeLesson);
+
+// Routes spécifiques à une leçon
+router.patch("/:id", requireRole(["ADMIN", "INSTRUCTOR"]), requireLessonAccess(), updateLesson);
+router.post("/:id/confirm", requireRole(["ADMIN", "INSTRUCTOR"]), requireLessonAccess(), confirmLesson);
+router.post("/:id/cancel", requireLessonAccess(), cancelLesson); 
+router.post("/:id/complete", requireRole(["INSTRUCTOR"]), requireLessonAccess(), completeLesson);
 
 export default router;
 

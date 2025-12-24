@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -21,13 +21,86 @@ import {
   MessageSquare,
   Calendar
 } from "lucide-react";
-import { DEMO_LEADS, LEAD_ACTIVITIES } from "../../data/adminMockData";
+import { crmApi } from "../../lib/api/crm";
+import { toast } from "sonner";
+import { useSocketEvent } from "../../hooks/useSocketEvent";
 
 const CRM: React.FC = () => {
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [leads, setLeads] = useState<any[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [note, setNote] = useState("");
 
-  const selectedLead = DEMO_LEADS.find(l => l.id === selectedLeadId);
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
+  useSocketEvent("crm:lead:create", () => {
+    fetchLeads();
+    toast.info("Nouveau prospect reçu !");
+  });
+
+  useSocketEvent("crm:lead:update", () => {
+    fetchLeads();
+  });
+
+  useSocketEvent("crm:lead:convert", () => {
+    fetchLeads();
+  });
+
+  useEffect(() => {
+    if (selectedLeadId) {
+      fetchActivities(selectedLeadId);
+    }
+  }, [selectedLeadId]);
+
+  const fetchLeads = async () => {
+    setLoading(true);
+    try {
+      const data = await crmApi.leads.list();
+      setLeads(data);
+    } catch (error) {
+      toast.error("Erreur lors de la récupération des prospects");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchActivities = async (leadId: string) => {
+    try {
+      const data = await crmApi.activities.list(leadId);
+      setActivities(data);
+    } catch (error) {
+      toast.error("Erreur lors de la récupération des activités");
+    }
+  };
+
+  const handleAddActivity = async () => {
+    if (!selectedLeadId || !note.trim()) return;
+    try {
+      await crmApi.activities.create(selectedLeadId, { type: "NOTE", content: note });
+      setNote("");
+      fetchActivities(selectedLeadId);
+      toast.success("Note ajoutée");
+    } catch (error) {
+      toast.error("Erreur lors de l'ajout de la note");
+    }
+  };
+
+  const handleConvert = async (leadId: string) => {
+    try {
+      await crmApi.leads.convert(leadId);
+      toast.success("Prospect converti en élève");
+      fetchLeads();
+      setSelectedLeadId(null);
+    } catch (error) {
+      toast.error("Erreur lors de la conversion");
+    }
+  };
+
+  const selectedLead = leads.find(l => l.id === selectedLeadId);
 
   const columns = [
     { id: "NEW", title: "Nouveaux", color: "bg-primary" },
@@ -45,7 +118,7 @@ const CRM: React.FC = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold">{selectedLead.firstName} {selectedLead.lastName}</h1>
-            <p className="text-sm text-gray-500">Lead ID: {selectedLead.id} • Créé le {selectedLead.createdAt}</p>
+            <p className="text-sm text-gray-500">Lead ID: {selectedLead.id} • Créé le {new Date(selectedLead.createdAt).toLocaleDateString()}</p>
           </div>
           <div className="ml-auto flex gap-2">
             <Button size="sm" variant="outline" className="gap-2">
@@ -54,9 +127,15 @@ const CRM: React.FC = () => {
             <Button size="sm" variant="outline" className="gap-2">
               <Mail size={16} /> Email
             </Button>
-            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 gap-2">
-              <UserPlus size={16} /> Convertir en élève
-            </Button>
+            {selectedLead.status !== "CONVERTED" && (
+              <Button 
+                size="sm" 
+                className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+                onClick={() => handleConvert(selectedLead.id)}
+              >
+                <UserPlus size={16} /> Convertir en élève
+              </Button>
+            )}
           </div>
         </div>
 
@@ -68,7 +147,7 @@ const CRM: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="relative space-y-6 before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
-                  {LEAD_ACTIVITIES.map((activity) => (
+                  {activities.map((activity) => (
                     <div key={activity.id} className="relative pl-12">
                       <div className={`absolute left-0 top-0 w-9 h-9 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${
                         activity.type === "CALL" ? "bg-primary/10 text-primary" :
@@ -81,8 +160,8 @@ const CRM: React.FC = () => {
                       </div>
                       <div>
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-sm text-gray-900">{activity.actor}</span>
-                          <span className="text-xs text-gray-400">{new Date(activity.date).toLocaleString()}</span>
+                          <span className="font-bold text-sm text-gray-900">{activity.actorUserId || "Système"}</span>
+                          <span className="text-xs text-gray-400">{new Date(activity.createdAt).toLocaleString()}</span>
                         </div>
                         <p className="text-sm text-gray-600 mt-1">{activity.content}</p>
                       </div>
@@ -97,9 +176,18 @@ const CRM: React.FC = () => {
                         className="w-full bg-transparent border-none focus:ring-0 text-sm placeholder:text-gray-400 resize-none"
                         placeholder="Ajouter une note ou un commentaire..."
                         rows={2}
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
                       />
                       <div className="flex justify-end mt-2">
-                        <Button size="sm" className="text-xs h-8">Enregistrer</Button>
+                        <Button 
+                          size="sm" 
+                          className="text-xs h-8"
+                          onClick={handleAddActivity}
+                          disabled={!note.trim()}
+                        >
+                          Enregistrer
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -120,8 +208,8 @@ const CRM: React.FC = () => {
                     <span className="font-bold text-sm">Relance prévue</span>
                   </div>
                   <p className="text-sm text-indigo-600">
-                    {selectedLead.nextFollowUp 
-                      ? new Date(selectedLead.nextFollowUp).toLocaleString()
+                    {selectedLead.nextFollowUpAt 
+                      ? new Date(selectedLead.nextFollowUpAt).toLocaleString()
                       : "Non planifiée"}
                   </p>
                   <Button variant="link" className="text-indigo-700 p-0 h-auto text-xs mt-2 underline">
@@ -140,23 +228,6 @@ const CRM: React.FC = () => {
                     </div>
                     <span className="text-sm font-bold">{selectedLead.score}%</span>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-lg">Tâches liées</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-2 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                    <div className="w-4 h-4 rounded border-2" />
-                    <span className="text-sm text-gray-700">Vérifier les documents CPF</span>
-                  </div>
-                  <Button variant="ghost" className="w-full text-xs text-indigo-600 gap-1">
-                    <Plus size={14} /> Ajouter une tâche
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -199,7 +270,9 @@ const CRM: React.FC = () => {
         </div>
       </div>
 
-      {view === "kanban" ? (
+      {loading ? (
+        <div className="flex justify-center py-12">Chargement...</div>
+      ) : view === "kanban" ? (
         <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide min-h-[600px]">
           {columns.map((col) => (
             <div key={col.id} className="flex-none w-80 flex flex-col gap-4">
@@ -208,7 +281,7 @@ const CRM: React.FC = () => {
                   <div className={`w-2 h-2 rounded-full ${col.color}`} />
                   <h3 className="font-bold text-gray-700 uppercase tracking-wider text-xs">{col.title}</h3>
                   <Badge variant="secondary" className="bg-gray-100 text-gray-500">
-                    {DEMO_LEADS.filter(l => l.status === col.id).length}
+                    {leads.filter(l => l.status === col.id).length}
                   </Badge>
                 </div>
                 <Button variant="ghost" size="icon" className="h-6 w-6">
@@ -217,7 +290,7 @@ const CRM: React.FC = () => {
               </div>
               
               <div className="flex-1 space-y-3">
-                {DEMO_LEADS.filter(l => l.status === col.id).map((lead) => (
+                {leads.filter(l => l.status === col.id).map((lead) => (
                   <Card 
                     key={lead.id} 
                     className="border-none shadow-sm cursor-pointer hover:shadow-md transition-all hover:-translate-y-1"
@@ -237,18 +310,20 @@ const CRM: React.FC = () => {
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                           <Mail size={12} /> {lead.email}
                         </div>
-                        {lead.nextFollowUp && (
+                        {lead.nextFollowUpAt && (
                           <div className="flex items-center gap-2 text-xs text-indigo-600 font-medium">
-                            <Clock size={12} /> Relance: {new Date(lead.nextFollowUp).toLocaleDateString()}
+                            <Clock size={12} /> Relance: {new Date(lead.nextFollowUpAt).toLocaleDateString()}
                           </div>
                         )}
                       </div>
                       
                       <div className="flex items-center justify-between pt-2 border-t mt-2">
                         <div className="flex -space-x-2">
-                          <div className="w-6 h-6 rounded-full border-2 border-white bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">JD</div>
+                          <div className="w-6 h-6 rounded-full border-2 border-white bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">
+                            {lead.firstName[0]}{lead.lastName[0]}
+                          </div>
                         </div>
-                        <span className="text-[10px] text-gray-400">Ajouté le {lead.createdAt}</span>
+                        <span className="text-[10px] text-gray-400">Ajouté le {new Date(lead.createdAt).toLocaleDateString()}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -276,12 +351,12 @@ const CRM: React.FC = () => {
                   <th className="pb-3 font-medium">Prospect</th>
                   <th className="pb-3 font-medium">Statut</th>
                   <th className="pb-3 font-medium">Score</th>
-                  <th className="pb-3 font-medium">Dernière activité</th>
+                  <th className="pb-3 font-medium">Date d'ajout</th>
                   <th className="pb-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {DEMO_LEADS.map((lead) => (
+                {leads.map((lead) => (
                   <tr 
                     key={lead.id} 
                     className="group hover:bg-gray-50 cursor-pointer"
@@ -301,7 +376,7 @@ const CRM: React.FC = () => {
                       </Badge>
                     </td>
                     <td className="py-4 font-bold">{lead.score}%</td>
-                    <td className="py-4 text-gray-500 text-xs">{lead.createdAt}</td>
+                    <td className="py-4 text-gray-500 text-xs">{new Date(lead.createdAt).toLocaleDateString()}</td>
                     <td className="py-4 text-right">
                       <Button variant="ghost" size="icon"><MoreVertical size={16} /></Button>
                     </td>

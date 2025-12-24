@@ -94,9 +94,9 @@ const Offres: React.FC = () => {
         </ScrollAnimation>
 
         {/* Liste des offres */}
-        <StaggerContainer className="mb-20 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <StaggerContainer className="mb-20 flex flex-wrap justify-center gap-6">
           {offres.map((offre) => (
-            <StaggerItem key={offre.id || offre.slug}>
+            <StaggerItem key={offre.id || offre.slug} className="w-full max-w-sm sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)]">
               <Card
                 className={`flex h-full flex-col transition-all duration-300 hover:shadow-xl ${offre.highlight ? "relative z-10 scale-105 border-2 border-primary shadow-lg" : "border-border/50 shadow-sm"}`}
               >
