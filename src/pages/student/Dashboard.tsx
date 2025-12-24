@@ -80,7 +80,7 @@ const StudentDashboard: React.FC = () => {
           <Card className="border-none shadow-sm bg-blue-50/50">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <BarChart3 size={20} />
                 </div>
                 <div>
@@ -122,7 +122,7 @@ const StudentDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { title: "Planning", icon: Calendar, link: "/app/planning", color: "bg-purple-100 text-purple-600" },
-          { title: "Progression", icon: BarChart3, link: "/app/progression", color: "bg-blue-100 text-blue-600" },
+          { title: "Progression", icon: BarChart3, link: "/app/progression", color: "bg-primary/10 text-primary" },
           { title: "Paiements", icon: CreditCard, link: "/app/paiements", color: "bg-green-100 text-green-600" },
           { title: "Documents", icon: FileText, link: "/app/documents", color: "bg-amber-100 text-amber-600" },
         ].map((item, i) => (

@@ -84,7 +84,7 @@ const Login: React.FC = () => {
       >
         <Card className="border-none shadow-2xl">
           <CardHeader className="space-y-1 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-hover">
               <span className="text-2xl font-bold text-white">M1</span>
             </div>
             <CardTitle className="text-3xl font-bold">Connexion</CardTitle>
@@ -199,7 +199,7 @@ const Login: React.FC = () => {
                     <p className="font-mono">password123</p>
                   </div>
                 </div>
-                <p className="mt-2 text-[10px] text-blue-600 dark:text-blue-300">
+                <p className="mt-2 text-[10px] text-primary dark:text-primary/80">
                   💡 Exécutez <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">npm run prisma:seed</code> dans moniteur1d-api pour créer ces comptes
                 </p>
               </div>
@@ -208,7 +208,7 @@ const Login: React.FC = () => {
             <div className="mt-6 text-center text-sm">
               <Link
                 to="/"
-                className="text-blue-600 hover:underline dark:text-blue-400"
+                className="text-primary hover:underline dark:text-primary/80"
               >
                 ← Retour à l'accueil
               </Link>

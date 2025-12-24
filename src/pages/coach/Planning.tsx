@@ -94,7 +94,7 @@ const CoachPlanning: React.FC = () => {
                   } ${idx % 7 === 6 ? "border-r-0" : ""}`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className={`text-sm font-medium ${isSameDay(day, new Date()) ? "flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white" : ""}`}>
+                    <span className={`text-sm font-medium ${isSameDay(day, new Date()) ? "flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground" : ""}`}>
                       {format(day, "d")}
                     </span>
                   </div>

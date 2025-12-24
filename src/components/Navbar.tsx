@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, Car } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Sheet,
@@ -23,6 +23,19 @@ const navLinks = [
   { name: "Zones", href: "/zones" },
   { name: "Contact", href: "/contact" },
 ];
+
+// Logo Component with Icon
+const Logo = ({ className = "" }: { className?: string }) => (
+  <div className={cn("flex items-center gap-2", className)}>
+    <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-hover shadow-elevation-1">
+      <Car className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
+      <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-accent-warm" />
+    </div>
+    <span className="font-display text-xl font-black tracking-tight text-foreground">
+      Moniteur<span className="text-primary">1D</span>
+    </span>
+  </div>
+);
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -59,26 +72,21 @@ const Navbar: React.FC = () => {
 
   return (
     <nav
-      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/70 shadow-sm backdrop-blur-md transition-all duration-300"
+      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 shadow-elevation-1 backdrop-blur-lg transition-all duration-300"
       aria-label="Navigation principale"
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
           to="/"
-          className="group flex items-center space-x-2"
+          className="group"
           aria-label="Moniteur1D - Accueil"
         >
-          <span className="font-display text-2xl font-black tracking-tight text-foreground">
-            Moniteur
-            <span className="text-primary transition-colors group-hover:text-primary/80">
-              1D
-            </span>
-          </span>
+          <Logo className="transition-transform duration-200 group-hover:scale-[1.02]" />
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex lg:items-center lg:space-x-8">
+        <div className="hidden lg:flex lg:items-center lg:space-x-6">
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -86,7 +94,7 @@ const Navbar: React.FC = () => {
               aria-current={isActive(link.href) ? "page" : undefined}
               className={cn(
                 "group relative py-2 text-sm font-semibold transition-all hover:text-primary",
-                isActive(link.href) ? "text-primary" : "text-foreground/70"
+                isActive(link.href) ? "text-primary" : "text-muted-foreground"
               )}
             >
               {link.name}
@@ -102,28 +110,25 @@ const Navbar: React.FC = () => {
           ))}
         </div>
 
-        {/* Desktop CTAs & Theme Toggle */}
-        <div className="hidden lg:flex lg:items-center lg:space-x-4">
+        {/* Desktop CTAs & Theme Toggle - Simplified to 2 CTAs max */}
+        <div className="hidden lg:flex lg:items-center lg:space-x-3">
           <ThemeToggle />
           {user ? (
             <>
-              <Button variant="secondary" size="sm" asChild>
+              <Button variant="outline" size="sm" asChild>
                 <Link to={getDashboardLink() || "/"}>Mon espace</Link>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
                 Déconnexion
               </Button>
             </>
           ) : (
             <>
-              <Button variant="tertiary" size="sm" asChild>
-                <Link to="/tarifs#simulateur">Simuler mon prix</Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild>
                 <Link to="/login">Connexion</Link>
               </Button>
               <Button variant="primary" size="sm" asChild>
-                <Link to="/preinscription">S'inscrire maintenant</Link>
+                <Link to="/preinscription">S'inscrire</Link>
               </Button>
             </>
           )}
@@ -148,13 +153,11 @@ const Navbar: React.FC = () => {
               className="flex h-full w-full flex-col border-l border-border/40 bg-background/95 p-6 backdrop-blur-xl sm:max-w-xs"
             >
               <SheetHeader className="mb-8 text-left">
-                <SheetTitle className="font-display text-2xl font-black">
-                  Moniteur<span className="text-primary">1D</span>
-                </SheetTitle>
+                <Logo />
               </SheetHeader>
 
               <nav
-                className="flex flex-col space-y-4"
+                className="flex flex-col space-y-2"
                 aria-label="Navigation mobile"
               >
                 {navLinks.map((link) => (
@@ -164,10 +167,10 @@ const Navbar: React.FC = () => {
                     onClick={() => setIsOpen(false)}
                     aria-current={isActive(link.href) ? "page" : undefined}
                     className={cn(
-                      "border-b border-border/10 py-2 text-lg font-medium transition-colors",
+                      "rounded-lg px-3 py-3 text-base font-medium transition-all",
                       isActive(link.href)
-                        ? "text-accent"
-                        : "text-muted-foreground hover:text-accent"
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
                     {link.name}
@@ -175,11 +178,11 @@ const Navbar: React.FC = () => {
                 ))}
               </nav>
 
-              <div className="mt-auto flex flex-col space-y-4 pt-6">
+              <div className="mt-auto flex flex-col space-y-3 border-t border-border/50 pt-6">
                 {user ? (
                   <>
                     <Button
-                      variant="secondary"
+                      variant="outline"
                       size="lg"
                       className="w-full"
                       asChild
@@ -188,7 +191,7 @@ const Navbar: React.FC = () => {
                       <Link to={getDashboardLink() || "/"}>Mon espace</Link>
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="lg"
                       className="w-full"
                       onClick={() => {
@@ -201,15 +204,6 @@ const Navbar: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      className="w-full"
-                      asChild
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Link to="/tarifs#simulateur">Simuler mon prix</Link>
-                    </Button>
                     <Button
                       variant="outline"
                       size="lg"
@@ -226,7 +220,7 @@ const Navbar: React.FC = () => {
                       asChild
                       onClick={() => setIsOpen(false)}
                     >
-                      <Link to="/preinscription">S'inscrire maintenant</Link>
+                      <Link to="/preinscription">S'inscrire</Link>
                     </Button>
                   </>
                 )}

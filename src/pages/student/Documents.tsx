@@ -44,7 +44,7 @@ const StudentDocuments: React.FC = () => {
                   <div className="flex gap-4">
                     <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 ${
                       doc.status === "APPROVED" ? "bg-green-100 text-green-600" :
-                      doc.status === "PENDING" ? "bg-blue-100 text-blue-600" :
+                      doc.status === "PENDING" ? "bg-primary/10 text-primary" :
                       doc.status === "REJECTED" ? "bg-red-100 text-red-600" :
                       "bg-gray-100 text-gray-400"
                     }`}>

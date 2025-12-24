@@ -127,7 +127,7 @@ const StudentProgression: React.FC = () => {
                       <div className="flex items-center gap-3">
                         <div className={`h-6 w-6 rounded-full flex items-center justify-center ${
                           skill.status === "ACQUIRED" ? "bg-green-100 text-green-600" :
-                          skill.status === "IN_PROGRESS" ? "bg-blue-100 text-blue-600" :
+                          skill.status === "IN_PROGRESS" ? "bg-primary/10 text-primary" :
                           "bg-gray-100 text-gray-400"
                         }`}>
                           {skill.status === "ACQUIRED" ? <CheckCircle2 size={14} /> : 

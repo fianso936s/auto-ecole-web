@@ -30,7 +30,7 @@ const CRM: React.FC = () => {
   const selectedLead = DEMO_LEADS.find(l => l.id === selectedLeadId);
 
   const columns = [
-    { id: "NEW", title: "Nouveaux", color: "bg-blue-500" },
+    { id: "NEW", title: "Nouveaux", color: "bg-primary" },
     { id: "FOLLOW_UP", title: "À relancer", color: "bg-amber-500" },
     { id: "CONVERTED", title: "Convertis", color: "bg-emerald-500" },
     { id: "LOST", title: "Perdus", color: "bg-red-500" },
@@ -71,7 +71,7 @@ const CRM: React.FC = () => {
                   {LEAD_ACTIVITIES.map((activity) => (
                     <div key={activity.id} className="relative pl-12">
                       <div className={`absolute left-0 top-0 w-9 h-9 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${
-                        activity.type === "CALL" ? "bg-blue-100 text-blue-600" :
+                        activity.type === "CALL" ? "bg-primary/10 text-primary" :
                         activity.type === "EMAIL" ? "bg-purple-100 text-purple-600" :
                         "bg-gray-100 text-gray-600"
                       }`}>

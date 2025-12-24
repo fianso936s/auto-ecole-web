@@ -50,7 +50,7 @@ export const Unauthorized: React.FC = () => {
       </p>
       <button
         onClick={() => window.history.back()}
-        className="rounded-md bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
+        className="rounded-md bg-primary px-6 py-2 text-primary-foreground transition-colors hover:bg-primary-hover"
       >
         Retour
       </button>

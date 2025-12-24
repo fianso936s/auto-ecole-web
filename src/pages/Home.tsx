@@ -258,44 +258,45 @@ const Home: React.FC = () => {
       {/* Hero Section with Parallax */}
       <section
         ref={heroRef}
-        className="relative flex min-h-[90vh] items-center overflow-hidden bg-[var(--bg-hero)] px-4 pb-20 pt-32"
+        className="relative flex min-h-[70vh] items-center overflow-hidden bg-[var(--bg-hero)] px-4 pb-16 pt-24 md:min-h-[85vh] md:pb-20 md:pt-32"
       >
         <div className="absolute inset-0 z-0 opacity-60">
-          <div className="hero-bg-element absolute right-[-10%] top-20 h-[500px] w-[500px] rounded-full bg-primary/10 blur-[120px]" />
-          <div className="hero-bg-element absolute bottom-0 left-[-5%] h-[400px] w-[400px] rounded-full bg-primary/20 blur-[100px]" />
+          <div className="hero-bg-element absolute right-[-10%] top-20 h-[300px] w-[300px] rounded-full bg-primary/10 blur-[80px] md:h-[500px] md:w-[500px] md:blur-[120px]" />
+          <div className="hero-bg-element absolute bottom-0 left-[-5%] h-[250px] w-[250px] rounded-full bg-primary/20 blur-[60px] md:h-[400px] md:w-[400px] md:blur-[100px]" />
         </div>
 
         <div className="container relative z-10 mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6 }}
           >
-            <Badge className="mb-6 cursor-default border-primary/20 bg-primary/10 px-4 py-1.5 text-primary transition-all hover:bg-primary/20">
+            <Badge className="mb-4 cursor-default border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary transition-all hover:bg-primary/20 md:mb-6 md:px-4 md:py-1.5 md:text-sm">
               Auto-école Nouvelle Génération
             </Badge>
-            <h1 className="mb-6 text-foreground">
+            <h1 className="mb-4 text-foreground md:mb-6">
               Réussissez votre <span className="text-primary">permis</span>{" "}
-              <br /> en toute sérénité
+              <br className="hidden sm:block" /> en toute sérénité
             </h1>
-            <p className="mx-auto mb-10 max-w-2xl text-xl font-medium leading-relaxed text-muted-foreground">
+            <p className="mx-auto mb-8 max-w-2xl text-base font-medium leading-relaxed text-muted-foreground md:mb-10 md:text-xl">
               Une formation premium, flexible et connectée. Apprenez à votre
               rythme avec les meilleurs moniteurs de votre région.
             </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
               <Button
                 size="lg"
                 variant="primary"
                 asChild
                 rightIcon={<ArrowRight className="h-4 w-4" />}
+                className="w-full sm:w-auto"
               >
                 <Link to="/preinscription">S'inscrire maintenant</Link>
               </Button>
               <Button
                 size="lg"
                 variant="secondary"
-                className="border-slate-300 dark:border-slate-700"
                 asChild
+                className="w-full sm:w-auto"
               >
                 <Link to="/tarifs#simulateur">Simuler mon budget</Link>
               </Button>
@@ -305,10 +306,10 @@ const Home: React.FC = () => {
       </section>
 
       {/* Social Proof: Logos & Count-up */}
-      <section className="border-y border-white/5 bg-black/20 py-16 backdrop-blur-sm">
+      <section className="border-y border-white/5 bg-black/20 py-10 backdrop-blur-sm md:py-16">
         <div className="container mx-auto px-4">
           <motion.div
-            className="grid grid-cols-2 gap-8 text-center md:grid-cols-4"
+            className="grid grid-cols-2 gap-6 text-center md:grid-cols-4 md:gap-8"
             variants={{
               hidden: { opacity: 0 },
               show: {
@@ -345,30 +346,30 @@ const Home: React.FC = () => {
               </motion.div>
             ))}
           </motion.div>
-          <div className="mt-16 flex flex-wrap items-center justify-center gap-8 opacity-30 grayscale transition-all duration-500 hover:grayscale-0 md:gap-16">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-6 opacity-30 grayscale transition-all duration-500 hover:grayscale-0 md:mt-16 md:gap-16">
             {/* Mock Logos */}
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-8 w-24 rounded-md bg-white/20" />
+              <div key={i} className="h-6 w-16 rounded-md bg-white/20 md:h-8 md:w-24" />
             ))}
           </div>
         </div>
       </section>
 
       {/* Quiz Section */}
-      <section className="relative overflow-hidden bg-[var(--bg-main)] px-4 py-24">
+      <section className="relative overflow-hidden bg-[var(--bg-main)] px-4 py-16 md:py-24">
         <div className="absolute inset-0 origin-left -skew-y-3 bg-primary/5" />
         <div className="container relative z-10 mx-auto">
-          <div className="mb-16 text-center">
+          <div className="mb-10 text-center md:mb-16">
             <Badge
               variant="outline"
-              className="mb-4 border-primary bg-primary/5 text-primary"
+              className="mb-3 border-primary bg-primary/5 text-xs text-primary md:mb-4 md:text-sm"
             >
               Aide au choix
             </Badge>
-            <h2 className="mb-4 text-foreground">
+            <h2 className="mb-3 text-foreground md:mb-4">
               Tu ne sais pas quel pack choisir ?
             </h2>
-            <p className="mx-auto max-w-xl text-muted-foreground">
+            <p className="mx-auto max-w-xl text-sm text-muted-foreground md:text-base">
               Réponds à 3 questions rapides pour découvrir la formule qui
               correspond exactement à tes besoins et ton profil.
             </p>
@@ -378,11 +379,11 @@ const Home: React.FC = () => {
       </section>
 
       {/* Offres: 4 Premium Cards with 3D Hover */}
-      <section className="bg-slate-50/50 px-4 py-24 dark:bg-primary/5">
+      <section className="bg-slate-50/50 px-4 py-16 dark:bg-primary/5 md:py-24">
         <div className="container mx-auto">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4">Nos Offres Premium</h2>
-            <p className="text-muted-foreground">
+          <div className="mb-10 text-center md:mb-16">
+            <h2 className="mb-3 md:mb-4">Nos Offres Premium</h2>
+            <p className="text-sm text-muted-foreground md:text-base">
               Des formules adaptées à chaque profil de conducteur.
             </p>
           </div>
@@ -463,26 +464,26 @@ const Home: React.FC = () => {
       {/* Comment ça marche: Timeline Responsive + Progress Line */}
       <section
         ref={timelineRef}
-        className="relative overflow-hidden px-4 py-24"
+        className="relative overflow-hidden px-4 py-16 md:py-24"
       >
         <div className="container relative mx-auto max-w-4xl">
-          <div className="mb-20 text-center">
-            <h2 className="mb-4">Votre parcours vers le permis</h2>
-            <p className="text-muted-foreground">
+          <div className="mb-12 text-center md:mb-20">
+            <h2 className="mb-3 md:mb-4">Votre parcours vers le permis</h2>
+            <p className="text-sm text-muted-foreground md:text-base">
               Une méthode structurée pour une réussite garantie.
             </p>
           </div>
 
           <div className="relative">
             {/* GSAP Progress Line */}
-            <div className="absolute bottom-0 left-8 top-0 w-0.5 bg-border md:left-1/2 md:-translate-x-1/2" />
+            <div className="absolute bottom-0 left-6 top-0 w-0.5 bg-border md:left-1/2 md:-translate-x-1/2" />
             <div
               ref={progressLineRef}
-              className="absolute left-8 top-0 w-0.5 origin-top bg-primary md:left-1/2 md:-translate-x-1/2"
+              className="absolute left-6 top-0 w-0.5 origin-top bg-primary md:left-1/2 md:-translate-x-1/2"
               style={{ height: "100%" }}
             />
 
-            <div className="space-y-24">
+            <div className="space-y-12 md:space-y-24">
               {timelineSteps.map((step, idx) => (
                 <motion.div
                   key={idx}
@@ -506,7 +507,7 @@ const Home: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="absolute left-8 z-10 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_20px_rgba(59,130,246,0.2)] md:left-1/2">
+                  <div className="absolute left-6 z-10 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_20px_hsl(var(--primary)/0.2)] md:left-1/2 md:h-10 md:w-10">
                     <span className="text-primary">{step.icon}</span>
                   </div>
 
@@ -519,9 +520,9 @@ const Home: React.FC = () => {
       </section>
 
       {/* Planning & App: Mock Agenda with Tabs */}
-      <section className="bg-primary/5 px-4 py-24">
+      <section className="bg-primary/5 px-4 py-16 md:py-24">
         <div className="container mx-auto">
-          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -529,14 +530,14 @@ const Home: React.FC = () => {
             >
               <Badge
                 variant="outline"
-                className="mb-6 border-primary bg-primary/5 text-primary"
+                className="mb-4 border-primary bg-primary/5 text-xs text-primary md:mb-6 md:text-sm"
               >
                 L'Expérience Digitale
               </Badge>
-              <h2 className="mb-6 text-foreground">
+              <h2 className="mb-4 text-foreground md:mb-6">
                 Gérez votre planning en un clic
               </h2>
-              <p className="mb-8 text-lg text-muted-foreground">
+              <p className="mb-6 text-base text-muted-foreground md:mb-8 md:text-lg">
                 Notre application intelligente vous permet de réserver vos
                 heures, suivre votre progression et échanger avec votre moniteur
                 instantanément.
@@ -636,12 +637,12 @@ const Home: React.FC = () => {
       </section>
 
       {/* Avis: Carousel Fluide Embla */}
-      <section className="overflow-hidden px-4 py-24">
+      <section className="overflow-hidden px-4 py-16 md:py-24">
         <div className="container mx-auto">
-          <div className="mb-12 flex items-end justify-between">
+          <div className="mb-8 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="mb-4">Ce qu'ils en pensent</h2>
-              <p className="text-muted-foreground">
+              <h2 className="mb-2 md:mb-4">Ce qu'ils en pensent</h2>
+              <p className="text-sm text-muted-foreground md:text-base">
                 Ils ont réussi leur permis avec nous.
               </p>
             </div>
@@ -649,30 +650,30 @@ const Home: React.FC = () => {
               <Button
                 variant="secondary"
                 size="icon"
-                className="rounded-full"
+                className="h-9 w-9 rounded-full md:h-10 md:w-10"
                 aria-label="Avis précédent"
               >
-                <ChevronRight className="h-5 w-5 rotate-180" />
+                <ChevronRight className="h-4 w-4 rotate-180 md:h-5 md:w-5" />
               </Button>
               <Button
                 variant="secondary"
                 size="icon"
-                className="rounded-full"
+                className="h-9 w-9 rounded-full md:h-10 md:w-10"
                 aria-label="Avis suivant"
               >
-                <ChevronRight className="h-5 w-5" />
+                <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
             </div>
           </div>
 
           <div className="embla overflow-hidden" ref={emblaRef}>
-            <div className="embla__container flex gap-6">
+            <div className="embla__container flex gap-4 md:gap-6">
               {reviews.map((review, idx) => (
                 <div
                   key={idx}
-                  className="embla__slide min-w-0 flex-[0_0_100%] md:flex-[0_0_45%] lg:flex-[0_0_30%]"
+                  className="embla__slide min-w-0 flex-[0_0_85%] sm:flex-[0_0_70%] md:flex-[0_0_45%] lg:flex-[0_0_30%]"
                 >
-                  <Card className="glass flex h-full flex-col justify-between border-border bg-card/80 p-8 shadow-md transition-colors duration-500 hover:border-primary/40">
+                  <Card className="glass flex h-full flex-col justify-between border-border bg-card/80 p-5 shadow-md transition-colors duration-500 hover:border-primary/40 md:p-8">
                     <div>
                       <div className="mb-4 flex gap-1">
                         {[...Array(review.rating)].map((_, i) => (
@@ -706,10 +707,10 @@ const Home: React.FC = () => {
       </section>
 
       {/* FAQ: Accordion + Recherche */}
-      <section className="bg-primary/5 px-4 py-24">
+      <section className="bg-primary/5 px-4 py-16 md:py-24">
         <div className="container mx-auto max-w-3xl">
-          <div className="mb-16 text-center">
-            <h2 className="mb-8 text-foreground">Questions Fréquentes</h2>
+          <div className="mb-10 text-center md:mb-16">
+            <h2 className="mb-6 text-foreground md:mb-8">Questions Fréquentes</h2>
             <div className="relative mx-auto max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -749,21 +750,21 @@ const Home: React.FC = () => {
       </section>
 
       {/* Zones: Map Placeholder Glass + Cards Villes */}
-      <section className="px-4 py-24">
+      <section className="px-4 py-16 md:py-24">
         <div className="container mx-auto">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 text-foreground">Où nous trouver ?</h2>
-            <p className="text-muted-foreground">
+          <div className="mb-10 text-center md:mb-16">
+            <h2 className="mb-3 text-foreground md:mb-4">Où nous trouver ?</h2>
+            <p className="text-sm text-muted-foreground md:text-base">
               Plusieurs zones d'examen couvertes pour plus de proximité.
             </p>
           </div>
 
-          <div className="grid h-[600px] grid-cols-1 gap-8 lg:h-[500px] lg:grid-cols-3">
-            <div className="group relative h-full lg:col-span-2">
+          <div className="grid h-auto grid-cols-1 gap-6 lg:h-[500px] lg:grid-cols-3 lg:gap-8">
+            <div className="group relative h-[350px] lg:col-span-2 lg:h-full">
               <InteractiveMap />
             </div>
 
-            <div className="custom-scrollbar space-y-4 overflow-y-auto pr-2">
+            <div className="custom-scrollbar flex flex-row gap-3 overflow-x-auto pb-2 lg:flex-col lg:space-y-4 lg:overflow-y-auto lg:pr-2">
               {ZONES.map((zone, i) => (
                 <div
                   key={i}
@@ -799,20 +800,20 @@ const Home: React.FC = () => {
       </section>
 
       {/* Final CTA Area */}
-      <section className="relative overflow-hidden rounded-t-[3rem] bg-slate-900 px-4 py-24 text-center text-white dark:bg-slate-950">
+      <section className="relative overflow-hidden rounded-t-[2rem] bg-slate-900 px-4 py-16 text-center text-white dark:bg-slate-950 md:rounded-t-[3rem] md:py-24">
         <div className="absolute inset-0 bg-primary/10 opacity-50" />
         <div className="container relative z-10 mx-auto">
-          <h2 className="mb-8 text-white">Prêt à prendre la route ?</h2>
-          <p className="mx-auto mb-12 max-w-2xl text-xl text-slate-300">
+          <h2 className="mb-6 text-white md:mb-8">Prêt à prendre la route ?</h2>
+          <p className="mx-auto mb-8 max-w-2xl text-base text-slate-300 md:mb-12 md:text-xl">
             Inscrivez-vous en 2 minutes et commencez vos premières leçons dès la
             semaine prochaine.
           </p>
-          <div className="flex flex-col justify-center gap-6 sm:flex-row">
+          <div className="flex flex-col justify-center gap-4 sm:flex-row sm:gap-6">
             <Button
               size="lg"
               variant="primary"
               asChild
-              className="shadow-lg shadow-primary/20"
+              className="w-full shadow-lg shadow-primary/20 sm:w-auto"
             >
               <Link to="/preinscription">S'inscrire maintenant</Link>
             </Button>
@@ -820,18 +821,18 @@ const Home: React.FC = () => {
               size="lg"
               variant="secondary"
               asChild
-              className="border-white/20 bg-white/10 text-white hover:bg-white/20"
+              className="w-full border-white/20 bg-white/10 text-white hover:bg-white/20 sm:w-auto"
             >
               <Link to="/contact">Parler à un conseiller</Link>
             </Button>
           </div>
-          <div className="mt-12 flex items-center justify-center gap-8 text-sm text-slate-400">
+          <div className="mt-8 flex flex-col items-center justify-center gap-4 text-sm text-slate-400 sm:flex-row sm:gap-8 md:mt-12">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-green-500" /> Paiement
+              <ShieldCheck className="h-4 w-4 text-success" /> Paiement
               sécurisé
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-500" /> Éligible CPF
+              <CheckCircle2 className="h-4 w-4 text-success" /> Éligible CPF
             </div>
           </div>
         </div>

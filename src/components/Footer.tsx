@@ -9,7 +9,22 @@ import {
   Mail,
   Phone,
   MapPin,
+  Car,
 } from "lucide-react";
+import { cn } from "../lib/utils";
+
+// Logo Component with Icon (shared with Navbar)
+const Logo = ({ className = "" }: { className?: string }) => (
+  <div className={cn("flex items-center gap-2", className)}>
+    <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-hover shadow-elevation-1">
+      <Car className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
+      <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-accent-warm" />
+    </div>
+    <span className="font-display text-xl font-black tracking-tight text-foreground">
+      Moniteur<span className="text-primary">1D</span>
+    </span>
+  </div>
+);
 
 const Footer: React.FC = () => {
   return (
@@ -43,10 +58,10 @@ const Footer: React.FC = () => {
           <div className="space-y-6">
             <Link
               to="/"
-              className="block font-display text-2xl font-bold"
+              className="block"
               aria-label="Moniteur1D - Accueil"
             >
-              Moniteur<span className="text-accent">1D</span>
+              <Logo />
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
               L'auto-école moderne qui s'adapte à votre vie. Formation premium,

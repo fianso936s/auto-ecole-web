@@ -29,7 +29,7 @@ const CoachProfile: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <Card className="md:col-span-1 h-fit">
           <CardContent className="pt-8 flex flex-col items-center text-center">
-            <div className="h-24 w-24 rounded-full bg-blue-600 flex items-center justify-center text-3xl font-bold text-white mb-4 ring-4 ring-blue-50">
+            <div className="h-24 w-24 rounded-full bg-primary flex items-center justify-center text-3xl font-bold text-primary-foreground mb-4 ring-4 ring-primary/10">
               {user?.profile?.firstName?.[0] || "C"}
             </div>
             <h2 className="text-xl font-bold">{user?.profile?.firstName} {user?.profile?.lastName}</h2>
@@ -72,7 +72,7 @@ const CoachProfile: React.FC = () => {
               <textarea 
                 id="bio" 
                 rows={4}
-                className="w-full rounded-lg border-gray-200 text-sm focus:ring-blue-500 p-3 bg-gray-50"
+                className="w-full rounded-lg border-border text-sm focus:ring-primary p-3 bg-muted"
                 placeholder="Décrivez votre expérience et votre pédagogie..."
               />
             </div>
@@ -81,10 +81,10 @@ const CoachProfile: React.FC = () => {
               <div className="flex flex-wrap gap-2">
                 {["Paris 15e", "Issy-les-Moulineaux", "Vanves"].map(zone => (
                   <Badge key={zone} variant="outline" className="flex items-center gap-1 bg-white">
-                    <MapPin size={12} className="text-blue-500" /> {zone}
+                    <MapPin size={12} className="text-primary" /> {zone}
                   </Badge>
                 ))}
-                <Button variant="ghost" size="sm" className="h-7 text-blue-600">+ Ajouter</Button>
+                <Button variant="ghost" size="sm" className="h-7 text-primary">+ Ajouter</Button>
               </div>
             </div>
             <div className="pt-4 border-t flex justify-end">
@@ -97,7 +97,7 @@ const CoachProfile: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Award className="text-blue-600" />
+            <Award className="text-primary" />
             Certifications & Expérience
           </CardTitle>
         </CardHeader>

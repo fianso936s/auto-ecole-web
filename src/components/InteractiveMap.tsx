@@ -88,10 +88,10 @@ const InteractiveMap: React.FC = () => {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center rounded-3xl border-2 border-dashed border-blue-200 bg-slate-100/50 backdrop-blur-sm dark:border-blue-900 dark:bg-slate-900/50">
         <div className="relative">
-          <div className="absolute inset-0 animate-ping rounded-full bg-blue-500 opacity-20"></div>
-          <MapPin className="relative z-10 h-12 w-12 text-blue-600" />
+          <div className="absolute inset-0 animate-ping rounded-full bg-primary opacity-20"></div>
+          <MapPin className="relative z-10 h-12 w-12 text-primary" />
         </div>
-        <div className="mt-6 animate-pulse px-4 text-center text-sm font-bold uppercase tracking-widest text-blue-600/60">
+        <div className="mt-6 animate-pulse px-4 text-center text-sm font-bold uppercase tracking-widest text-primary/60">
           Carte interactive en cours de chargement
         </div>
       </div>
@@ -112,7 +112,7 @@ const InteractiveMap: React.FC = () => {
         <Button
           variant="primary"
           onClick={handleRetry}
-          className="h-auto rounded-full px-8 py-6 text-lg shadow-lg shadow-blue-500/20"
+          className="h-auto rounded-full px-8 py-6 text-lg shadow-elevation-3 shadow-primary/20"
           rightIcon={<RefreshCcw className="h-5 w-5" />}
         >
           Réessayer

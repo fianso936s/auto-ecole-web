@@ -59,7 +59,7 @@ const CoachDashboard: React.FC = () => {
           {lessons.map((lesson) => (
             <Card key={lesson.id} className="overflow-hidden">
               <div className="flex flex-col md:flex-row">
-                <div className="bg-blue-600 p-4 text-white md:w-32 md:flex-col md:justify-center md:text-center">
+                <div className="bg-primary p-4 text-primary-foreground md:w-32 md:flex-col md:justify-center md:text-center">
                   <div className="text-sm font-medium opacity-80">
                     {format(new Date(lesson.startTime), "HH:mm")}
                   </div>

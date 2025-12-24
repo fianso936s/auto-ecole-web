@@ -63,7 +63,7 @@ const CoachStudentDetail: React.FC = () => {
           </h2>
           <p className="text-gray-500">Élève depuis le {format(new Date(student.createdAt), "d MMMM yyyy", { locale: fr })}</p>
         </div>
-        <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+        <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
           En formation
         </Badge>
       </div>
@@ -97,14 +97,14 @@ const CoachStudentDetail: React.FC = () => {
               <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
                 <TabsTrigger 
                   value="planning" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent py-4 px-6"
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-4 px-6"
                 >
                   <Calendar className="mr-2 h-4 w-4" />
                   Planning
                 </TabsTrigger>
                 <TabsTrigger 
                   value="progression" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent py-4 px-6"
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-4 px-6"
                 >
                   <BarChart3 className="mr-2 h-4 w-4" />
                   Progression
@@ -147,7 +147,7 @@ const CoachStudentDetail: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <Card className="bg-blue-50 border-none">
                       <CardContent className="p-4">
-                        <p className="text-xs font-bold text-blue-600 uppercase">Heures effectuées</p>
+                        <p className="text-xs font-bold text-primary uppercase">Heures effectuées</p>
                         <p className="text-2xl font-black text-blue-900 mt-1">{progress?.hoursDone || 0}h / {progress?.hoursTotal || 20}h</p>
                       </CardContent>
                     </Card>
@@ -169,7 +169,7 @@ const CoachStudentDetail: React.FC = () => {
                         </div>
                         <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                           <div 
-                            className="h-full bg-blue-600 rounded-full" 
+                            className="h-full bg-primary rounded-full" 
                             style={{ width: `${cat.percentage}%` }} 
                           />
                         </div>

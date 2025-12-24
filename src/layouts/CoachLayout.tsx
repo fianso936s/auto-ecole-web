@@ -49,11 +49,11 @@ const CoachLayout: React.FC = () => {
             <ChevronLeft size={24} />
           </button>
         ) : (
-          <div className="text-xl font-bold text-blue-600">M1 Coach</div>
+          <div className="text-xl font-bold text-primary">M1 Coach</div>
         )}
         <div className="flex items-center gap-3">
           <button className="p-2 text-gray-500">
-            <PlusCircle size={24} className="text-blue-600" />
+            <PlusCircle size={24} className="text-primary" />
           </button>
           <div className="flex h-8 w-8 items-center justify-center rounded-full border border-blue-200 bg-blue-100 text-xs font-bold text-blue-700">
             {user?.profile?.firstName?.[0] || "C"}
@@ -64,7 +64,7 @@ const CoachLayout: React.FC = () => {
       {/* Desktop Sidebar */}
       <aside className="fixed bottom-0 left-0 top-0 z-30 hidden w-64 flex-col border-r bg-white md:flex">
         <div className="p-6">
-          <div className="text-2xl font-bold text-blue-600">Moniteur1D</div>
+          <div className="text-2xl font-bold text-primary">Moniteur1D</div>
           <div className="mt-1 text-xs font-medium uppercase tracking-wider text-gray-400">
             Espace Moniteur
           </div>
@@ -129,7 +129,7 @@ const CoachLayout: React.FC = () => {
                 </p>
               </div>
               <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto pb-1">
-                <button className="flex-none rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700">
+                <button className="flex-none rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover">
                   Nouvelle leçon
                 </button>
                 <button className="flex-none rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
@@ -156,7 +156,7 @@ const CoachLayout: React.FC = () => {
               key={item.path}
               to={item.path}
               className={`flex h-full w-20 flex-col items-center justify-center transition-colors ${
-                isActive ? "text-blue-600" : "text-gray-400"
+                isActive ? "text-primary" : "text-muted-foreground"
               }`}
             >
               <Icon size={24} />

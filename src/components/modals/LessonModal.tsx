@@ -104,7 +104,7 @@ const LessonModal: React.FC<LessonModalProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
-                  <Calendar size={16} className="text-blue-500" />
+                  <Calendar size={16} className="text-primary" />
                   Début
                 </Label>
                 <Input 
@@ -115,7 +115,7 @@ const LessonModal: React.FC<LessonModalProps> = ({
               </div>
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
-                  <Clock size={16} className="text-blue-500" />
+                  <Clock size={16} className="text-primary" />
                   Fin
                 </Label>
                 <Input 

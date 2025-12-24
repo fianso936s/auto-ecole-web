@@ -181,7 +181,7 @@ const AdminDashboard: React.FC = () => {
                   key={task.id}
                   className="flex items-center gap-4 rounded-lg border p-3 transition-colors hover:bg-gray-50"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <TrendingUp size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -198,7 +198,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               ))}
             </div>
-            <Button variant="ghost" className="mt-4 w-full text-blue-600">
+            <Button variant="ghost" className="mt-4 w-full text-primary">
               Voir toutes les tâches
             </Button>
           </CardContent>

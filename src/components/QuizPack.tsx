@@ -230,7 +230,7 @@ const QuizPack: React.FC = () => {
               {/* Progress Bar Top */}
               <div className="absolute left-0 top-0 h-1.5 w-full bg-white/5">
                 <motion.div
-                  className="h-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                  className="h-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.5)]"
                   initial={{ width: 0 }}
                   animate={{
                     width: `${((currentStep + 1) / questions.length) * 100}%`,
@@ -241,7 +241,7 @@ const QuizPack: React.FC = () => {
 
               <CardHeader className="pb-4 pt-8">
                 <div className="mb-4 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-widest text-blue-500">
+                  <span className="text-xs font-bold uppercase tracking-widest text-primary">
                     Question {currentStep + 1} / {questions.length}
                   </span>
                   {currentStep > 0 && (
@@ -273,14 +273,14 @@ const QuizPack: React.FC = () => {
                           variant="outline"
                           className={`group relative min-h-[70px] w-full justify-between overflow-hidden border-white/10 px-6 text-lg transition-all duration-300 ${
                             isSelected
-                              ? "border-blue-400 bg-blue-600 text-white hover:bg-blue-700"
+                              ? "border-primary/40 bg-primary text-primary-foreground hover:bg-primary-hover"
                               : "glass hover:border-white/20 hover:bg-white/5"
                           }`}
                           onClick={() => handleAnswer(option.value)}
                         >
                           <div className="relative z-10 flex items-center gap-4">
                             <div
-                              className={`rounded-xl p-2 transition-colors ${isSelected ? "bg-white/20" : "bg-blue-500/10 text-blue-500"}`}
+                              className={`rounded-xl p-2 transition-colors ${isSelected ? "bg-white/20" : "bg-primary/10 text-primary"}`}
                             >
                               {option.icon}
                             </div>
@@ -294,7 +294,7 @@ const QuizPack: React.FC = () => {
                               <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                className="rounded-full bg-white p-1 text-blue-600"
+                                className="rounded-full bg-white p-1 text-primary"
                               >
                                 <Check className="h-4 w-4" />
                               </motion.div>
@@ -311,7 +311,7 @@ const QuizPack: React.FC = () => {
                 <div className="pt-6 text-center">
                   <button
                     onClick={() => setIsSkipped(true)}
-                    className="text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-blue-500"
+                    className="text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-primary"
                   >
                     Passer le quiz
                   </button>
@@ -330,8 +330,8 @@ const QuizPack: React.FC = () => {
               stiffness: 120,
             }}
           >
-            <Card className="glass relative overflow-hidden border-blue-500/30 shadow-2xl">
-              <div className="absolute right-0 top-0 rounded-bl-2xl bg-blue-600 px-6 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-lg">
+            <Card className="glass relative overflow-hidden border-primary/30 shadow-elevation-4">
+              <div className="absolute right-0 top-0 rounded-bl-2xl bg-primary px-6 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground shadow-lg">
                 Recommandation
               </div>
 
@@ -340,32 +340,32 @@ const QuizPack: React.FC = () => {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: "spring" }}
-                  className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full border border-blue-500/20 bg-blue-500/10"
+                  className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full border border-primary/20 bg-primary/10"
                 >
-                  <CheckCircle2 className="h-12 w-12 text-blue-500" />
+                  <CheckCircle2 className="h-12 w-12 text-primary" />
                 </motion.div>
                 <CardTitle className="mb-3 text-3xl font-black md:text-4xl">
                   Le pack idéal pour toi :
                 </CardTitle>
-                <CardDescription className="text-lg font-medium text-blue-400/80">
+                <CardDescription className="text-lg font-medium text-primary/80">
                   Analyse de tes besoins terminée
                 </CardDescription>
               </CardHeader>
 
               <CardContent className="px-6 pb-12 md:px-10">
                 {recommendedPack && (
-                  <div className="overflow-hidden rounded-3xl border border-blue-500/20 bg-blue-500/5">
+                  <div className="overflow-hidden rounded-3xl border border-primary/20 bg-primary/5">
                     <div className="p-8 md:p-10">
                       <div className="mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-center">
                         <div>
                           <h3 className="mb-2 text-3xl font-bold">
                             {recommendedPack.title}
                           </h3>
-                          <p className="font-medium italic text-blue-400/90">
+                          <p className="font-medium italic text-primary/90">
                             "{recommendedPack.reason}"
                           </p>
                         </div>
-                        <div className="self-start rounded-2xl bg-blue-600 px-6 py-3 text-4xl font-black text-white shadow-xl shadow-blue-600/20 md:self-center">
+                        <div className="self-start rounded-2xl bg-primary px-6 py-3 text-4xl font-black text-primary-foreground shadow-xl shadow-primary/20 md:self-center">
                           {recommendedPack.price}
                         </div>
                       </div>
@@ -376,7 +376,7 @@ const QuizPack: React.FC = () => {
                             key={i}
                             className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/5 p-3 text-muted-foreground"
                           >
-                            <Check className="h-5 w-5 shrink-0 text-blue-500" />
+                            <Check className="h-5 w-5 shrink-0 text-primary" />
                             <span className="text-sm font-medium">{feat}</span>
                           </div>
                         ))}
@@ -410,7 +410,7 @@ const QuizPack: React.FC = () => {
                   Besoin d'explorer d'autres options ?{" "}
                   <Link
                     to="/offres"
-                    className="font-semibold text-blue-500 hover:underline"
+                    className="font-semibold text-primary hover:underline"
                   >
                     Voir toutes nos offres Premium
                   </Link>

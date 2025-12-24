@@ -135,7 +135,7 @@ const Financement: React.FC = () => {
                 size="lg"
                 variant="primary"
                 asChild
-                className="shadow-lg shadow-blue-500/20"
+                className="shadow-elevation-3 shadow-primary/20"
               >
                 <Link to="/preinscription">S'inscrire maintenant</Link>
               </Button>

@@ -61,7 +61,7 @@ const StudentExams: React.FC = () => {
                 <div className={`p-6 md:w-48 flex flex-col justify-center items-center text-center text-white ${
                   exam.status === "PASSED" ? "bg-green-600" :
                   exam.status === "FAILED" ? "bg-red-600" :
-                  "bg-blue-600"
+                  "bg-primary"
                 }`}>
                   <Award size={32} className="mb-2" />
                   <div className="text-sm font-bold uppercase tracking-widest opacity-80">{exam.type}</div>

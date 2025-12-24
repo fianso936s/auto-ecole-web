@@ -180,7 +180,7 @@ const LessonDetail: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <UserIcon size={20} />
               </div>
               <div>
@@ -279,8 +279,8 @@ const LessonDetail: React.FC = () => {
                               onClick={() => handleSkillChange(skill.id, level)}
                               className={`h-8 w-8 rounded-full border flex items-center justify-center transition-all ${
                                 (skillRatings[skill.id]?.level ?? -1) >= level 
-                                  ? "bg-blue-600 border-blue-600 text-white" 
-                                  : "bg-white text-gray-400"
+                                  ? "bg-primary border-primary text-primary-foreground" 
+                                  : "bg-card text-muted-foreground"
                               }`}
                             >
                               {level}
@@ -329,7 +329,7 @@ const LessonDetail: React.FC = () => {
           </div>
 
           <Button 
-            className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700" 
+            className="w-full h-12 text-lg" 
             onClick={handleSubmit}
             disabled={submitting}
           >

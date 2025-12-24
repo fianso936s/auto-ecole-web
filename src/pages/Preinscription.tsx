@@ -330,10 +330,10 @@ const Preinscription: React.FC = () => {
                     initial={false}
                     animate={{
                       backgroundColor: isActive
-                        ? "var(--color-primary, #3B82F6)"
+                        ? "hsl(var(--primary))"
                         : "var(--color-bg-card, #ffffff)",
                       borderColor: isActive
-                        ? "var(--color-primary, #3B82F6)"
+                        ? "hsl(var(--primary))"
                         : "var(--color-border-medium, #e5e5e5)",
                       scale: isCurrent ? 1.2 : 1,
                     }}

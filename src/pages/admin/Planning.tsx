@@ -169,7 +169,7 @@ const AdminPlanning: React.FC = () => {
                 </label>
                 <div className="space-y-2 pt-1">
                   {[
-                    { label: "Plannifié", color: "bg-blue-500" },
+                    { label: "Plannifié", color: "bg-primary" },
                     { label: "Confirmé", color: "bg-emerald-500" },
                     { label: "Terminé", color: "bg-indigo-500" },
                     { label: "Annulé", color: "bg-red-500" },

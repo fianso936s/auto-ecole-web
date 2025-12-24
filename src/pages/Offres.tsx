@@ -101,7 +101,7 @@ const Offres: React.FC = () => {
                 className={`flex h-full flex-col transition-all duration-300 hover:shadow-xl ${offre.highlight ? "relative z-10 scale-105 border-2 border-primary shadow-lg" : "border-border/50 shadow-sm"}`}
               >
                 {offre.highlight && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#1D4ED8] px-4 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-br from-primary to-primary-hover px-4 py-1 text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-elevation-2">
                     Le plus populaire
                   </div>
                 )}
@@ -155,7 +155,7 @@ const Offres: React.FC = () => {
                 </CardContent>
                 <CardFooter className="pt-2">
                   <Button
-                    className={`w-full py-6 font-bold ${offre.highlight ? "bg-blue-600 shadow-lg shadow-blue-200 hover:bg-blue-700" : ""}`}
+                    className="w-full py-6 font-bold"
                     variant={offre.highlight ? "primary" : "outline"}
                     asChild
                   >
@@ -306,7 +306,7 @@ const Offres: React.FC = () => {
               size="lg"
               variant="primary"
               asChild
-              className="shadow-lg shadow-blue-500/20"
+              className="shadow-elevation-3 shadow-primary/20"
             >
               <Link to="/tarifs">Simuler mon tarif</Link>
             </Button>

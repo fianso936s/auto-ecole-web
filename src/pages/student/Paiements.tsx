@@ -107,7 +107,7 @@ const StudentPaiements: React.FC = () => {
 
       <Card className="bg-blue-50/50 border-blue-100">
         <CardContent className="p-6 flex items-start gap-4">
-          <div className="p-2 rounded-xl bg-blue-100 text-blue-600">
+          <div className="p-2 rounded-xl bg-primary/10 text-primary">
             <FileText size={20} />
           </div>
           <div className="flex-1">
@@ -115,7 +115,7 @@ const StudentPaiements: React.FC = () => {
             <p className="text-sm text-blue-800 mt-1">
               Saviez-vous que vous pouvez financer vos heures de conduite supplémentaires via votre compte CPF ?
             </p>
-            <Button variant="link" className="p-0 h-auto text-blue-600 font-bold mt-2 flex items-center gap-1">
+            <Button variant="link" className="p-0 h-auto text-primary font-bold mt-2 flex items-center gap-1">
               En savoir plus sur les aides <ChevronRight size={14} />
             </Button>
           </div>

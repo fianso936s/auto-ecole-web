@@ -35,13 +35,13 @@ const AdminVehicles: React.FC = () => {
         <Card className="border-none shadow-sm bg-blue-50">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary">
                 <Car size={24} />
               </div>
               <Badge variant="outline" className="bg-white border-blue-200 text-blue-700">Total</Badge>
             </div>
             <div className="text-3xl font-bold text-blue-900">{DEMO_VEHICLES.length}</div>
-            <p className="text-sm text-blue-600 font-medium mt-1">Véhicules enregistrés</p>
+            <p className="text-sm text-primary font-medium mt-1">Véhicules enregistrés</p>
           </CardContent>
         </Card>
         

@@ -154,7 +154,7 @@ const Contact: React.FC = () => {
             transition={{ delay: 0.2 }}
             className="space-y-8"
           >
-            <Card className="border-none bg-blue-600 text-white shadow-lg">
+            <Card className="border-none bg-primary text-primary-foreground shadow-elevation-3">
               <CardHeader>
                 <CardTitle className="text-2xl">Coordonnées</CardTitle>
                 <CardDescription className="text-blue-100">

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,18 +6,33 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%; /* Pur blanc pour contraste max */
-    --foreground: 222 47% 6%; /* Navy profond #020617 */
+    /* === CORE COLORS === */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 6%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 6%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 6%;
-    --primary: 221 83% 53%; /* Bleu intense #2563EB */
+    
+    /* Primary: Bleu Moniteur1D signature */
+    --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 199 89% 40%; /* Cyan plus sombre #0284C7 */
+    --primary-hover: 221 83% 45%;
+    
+    /* Secondary: Slate neutral */
+    --secondary: 215 20% 65%;
     --secondary-foreground: 222 47% 6%;
+    
+    /* Accent: Orange/Amber pour CTAs urgents */
+    --accent-warm: 25 95% 53%;
+    --accent-warm-foreground: 0 0% 100%;
+    
+    /* Success: Vert validation */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215 25% 27%; /* Slate 700 pour WCAG AAA */
+    --muted-foreground: 215 30% 23%;
     --accent: 221 83% 53%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84% 60%;
@@ -25,74 +40,97 @@
     --border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 221 83% 53%;
+    
+    /* === RADIUS SYSTEM === */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
     --radius: 0.75rem;
-
-    --brand-primary: #1e40af;
-    --brand-accent: #2563eb;
-    --brand-neutral: #f1f5f9;
-    --brand-success: #15803d;
-    --radius-premium: 1.25rem;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow:
-      0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-    --shadow-lg:
-      0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
-
-    --bg-main: #ffffff;
-    --bg-hero: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
-    --bg-gradient: radial-gradient(circle at top right, #ffffff, #f8fafc);
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --radius-2xl: 2rem;
+    
+    /* === ELEVATION SYSTEM === */
+    --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --elevation-2: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --elevation-3: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --elevation-4: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* === TRANSITION TOKENS === */
+    --transition-fast: 150ms;
+    --transition-normal: 250ms;
+    --transition-slow: 400ms;
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    /* === BRAND COLORS (HSL-based) === */
+    --brand-primary-hsl: 221 83% 53%;
+    --brand-accent-hsl: 25 95% 53%;
+    --brand-success-hsl: 142 76% 36%;
+    
+    /* === BACKGROUNDS === */
+    --bg-main: hsl(0 0% 100%);
+    --bg-subtle: hsl(210 40% 98%);
+    --bg-hero: linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(214 32% 95%) 50%, hsl(214 32% 91%) 100%);
+    --bg-gradient: radial-gradient(ellipse at top right, hsl(0 0% 100%), hsl(210 40% 98%));
     --bg-halo: radial-gradient(
       circle at 50% 50%,
-      rgba(37, 99, 235, 0.03) 0%,
+      hsla(221, 83%, 53%, 0.05) 0%,
       transparent 70%
     );
 
-    --logo-color: #1e40af;
-    --text-tertiary: #475569;
-    --border-medium: #cbd5e1;
+    --logo-color: hsl(221 83% 35%);
+    --text-tertiary: hsl(215 20% 35%);
+    --border-medium: hsl(214 32% 80%);
   }
 
   .dark {
-    --background: 222 47% 4%; /* Slate 950 #020617 */
+    --background: 222 47% 4%;
     --foreground: 210 40% 98%;
-    --card: 222 47% 8%; /* Slate 900 #0F172A */
+    --card: 222 47% 8%;
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 4%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%; /* Bleu vif #3B82F6 */
+    
+    --primary: 217 91% 60%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 173 80% 40%;
+    --primary-hover: 217 91% 68%;
+    
+    --secondary: 215 20% 40%;
     --secondary-foreground: 210 40% 98%;
+    
+    --accent-warm: 25 95% 55%;
+    --accent-warm-foreground: 0 0% 100%;
+    
+    --success: 142 76% 42%;
+    --success-foreground: 0 0% 100%;
+    
     --muted: 217 33% 12%;
-    --muted-foreground: 215 20% 75%; /* Slate 300 */
+    --muted-foreground: 215 20% 75%;
     --accent: 217 91% 60%;
     --accent-foreground: 210 40% 98%;
-    --border: 215 25% 18%; /* Slate 800 */
+    --border: 215 25% 18%;
     --input: 215 25% 18%;
     --ring: 217 91% 60%;
 
-    --brand-primary: #3b82f6;
-    --brand-accent: #14b8a6;
-    --brand-neutral: #0f172a;
-    --brand-success: #10b981;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
-    --shadow:
-      0 10px 15px -3px rgb(0 0 0 / 0.7), 0 4px 6px -4px rgb(0 0 0 / 0.7);
-    --shadow-lg:
-      0 20px 25px -5px rgb(0 0 0 / 0.8), 0 8px 10px -6px rgb(0 0 0 / 0.8);
+    /* Elevation Dark */
+    --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --elevation-2: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    --elevation-3: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+    --elevation-4: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
 
-    --bg-main: #020617;
-    --bg-hero: linear-gradient(135deg, #020617 0%, #0f172a 50%, #1e293b 100%);
-    --bg-gradient: radial-gradient(circle at top right, #0f172a, #020617);
+    --bg-main: hsl(222 47% 4%);
+    --bg-subtle: hsl(222 47% 8%);
+    --bg-hero: linear-gradient(135deg, hsl(222 47% 4%) 0%, hsl(222 47% 8%) 50%, hsl(217 33% 17%) 100%);
+    --bg-gradient: radial-gradient(ellipse at top right, hsl(222 47% 8%), hsl(222 47% 4%));
     --bg-halo: radial-gradient(
       circle at 50% 50%,
-      rgba(59, 130, 246, 0.08) 0%,
+      hsla(217, 91%, 60%, 0.1) 0%,
       transparent 70%
     );
 
-    --logo-color: #60a5fa;
-    --text-tertiary: #94a3b8;
-    --border-medium: #334155;
+    --logo-color: hsl(217 91% 70%);
+    --text-tertiary: hsl(215 20% 65%);
+    --border-medium: hsl(215 25% 30%);
   }
 
   body {
@@ -193,6 +231,33 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Interactive utilities */
+  .interactive {
+    @apply transition-all duration-[var(--transition-fast)] ease-[var(--ease-standard)];
+  }
+
+  .interactive-lift {
+    @apply interactive hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .interactive-scale {
+    @apply interactive hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .interactive-glow {
+    @apply interactive hover:shadow-[0_0_20px_hsl(var(--primary)/0.2)];
+  }
+
+  /* Gradient text utility */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent;
+  }
+
+  /* Underline animation */
+  .link-underline {
+    @apply relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-300 hover:after:scale-x-100;
+  }
 }
 
 @layer components {
@@ -200,13 +265,56 @@
     @apply border border-white/20 bg-white/70 backdrop-blur-md dark:border-white/10 dark:bg-black/40;
   }
 
+  .glass-subtle {
+    @apply border border-border/50 bg-background/80 backdrop-blur-sm;
+  }
+
   .card-premium {
-    @apply glass rounded-[var(--radius)] p-6 shadow-[var(--shadow)] transition-all duration-300 hover:shadow-[var(--shadow-lg)];
+    @apply rounded-[var(--radius-lg)] border border-border/50 bg-card p-6 shadow-[var(--elevation-2)] transition-all duration-[var(--transition-normal)] hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[var(--elevation-3)];
+  }
+
+  .card-interactive {
+    @apply card-premium cursor-pointer active:translate-y-0 active:scale-[0.995];
   }
 
   .btn-premium {
-    @apply rounded-full bg-accent px-6 py-3 font-semibold text-white 
-           shadow-lg shadow-accent/20 transition-all duration-200 
-           hover:-translate-y-0.5 hover:shadow-accent/40 active:scale-95;
+    @apply rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground 
+           shadow-[var(--elevation-2)] shadow-primary/20 transition-all duration-[var(--transition-fast)] 
+           hover:-translate-y-0.5 hover:shadow-[var(--elevation-3)] hover:shadow-primary/30 active:translate-y-0 active:scale-[0.98];
+  }
+
+  .btn-warm {
+    @apply rounded-full bg-[hsl(var(--accent-warm))] px-6 py-3 font-semibold text-white
+           shadow-[var(--elevation-2)] transition-all duration-[var(--transition-fast)]
+           hover:-translate-y-0.5 hover:bg-[hsl(25_95%_45%)] hover:shadow-[var(--elevation-3)] active:translate-y-0 active:scale-[0.98];
+  }
+
+  /* Icon button with hover ring effect */
+  .icon-btn {
+    @apply relative flex h-10 w-10 items-center justify-center rounded-[var(--radius)] transition-all duration-[var(--transition-fast)];
+  }
+
+  .icon-btn::before {
+    content: "";
+    @apply absolute inset-0 rounded-[var(--radius)] opacity-0 ring-2 ring-primary/20 transition-opacity duration-[var(--transition-fast)];
+  }
+
+  .icon-btn:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Badge with subtle animation */
+  .badge-interactive {
+    @apply transition-all duration-[var(--transition-fast)] hover:scale-105 hover:shadow-sm;
+  }
+
+  /* Input with enhanced focus state */
+  .input-enhanced {
+    @apply transition-all duration-[var(--transition-fast)] focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.1)] focus:border-primary;
+  }
+
+  /* List item with hover indicator */
+  .list-item-interactive {
+    @apply relative pl-4 transition-all duration-[var(--transition-fast)] before:absolute before:left-0 before:top-1/2 before:h-0 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-primary before:transition-all before:duration-[var(--transition-fast)] hover:pl-5 hover:before:h-full;
   }
 }
