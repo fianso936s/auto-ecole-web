@@ -50,7 +50,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(cookieParser());
-app.use(hpp());
+app.use(hpp() as any);
 
 // Webhook route must come BEFORE express.json()
 app.use("/billing/webhook", express.raw({ type: "application/json" }), (req, res, next) => {

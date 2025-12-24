@@ -10,7 +10,7 @@ import {
 import { authenticate } from "../middleware/auth.js";
 import { requireRole } from "../lib/auth/guards.js";
 import { validate } from "../middleware/validate.js";
-import { instructorSchema, updateInstructorSchema } from "../lib/validations/instructor.schema.ts";
+import { instructorSchema, updateInstructorSchema } from "../lib/validations/instructor.schema.js";
 
 const router = Router();
 

@@ -37,12 +37,12 @@ export const submitPreRegistration = async (req: AuthRequest, res: Response) => 
     // Update Lead status
     await prisma.lead.upsert({
       where: { email: preRegistration.user.email },
-      update: { status: "SUBMITTED" },
+      update: { status: "NEW" },
       create: {
         email: preRegistration.user.email,
         firstName: preRegistration.user.profile?.firstName || "",
         lastName: preRegistration.user.profile?.lastName || "",
-        status: "SUBMITTED",
+        status: "NEW",
         source: "website"
       }
     });
