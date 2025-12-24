@@ -1,0 +1,470 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
+
+enum LeadStatus {
+  NEW
+  FOLLOW_UP
+  CONVERTED
+  LOST
+}
+
+enum PreRegistrationStatus {
+  DRAFT
+  SUBMITTED
+  PAID_DEPOSIT
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum Transmission {
+  MANUAL
+  AUTO
+}
+
+enum LessonStatus {
+  PLANNED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum SkillStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  ACQUIRED
+}
+
+enum ExamType {
+  CODE
+  DRIVING
+}
+
+enum ExamStatus {
+  NOT_SCHEDULED
+  SCHEDULED
+  PASSED
+  FAILED
+}
+
+enum LeadActivityType {
+  CALL
+  EMAIL
+  SMS
+  NOTE
+  MEETING
+  STATUS_CHANGE
+}
+
+enum TaskStatus {
+  TODO
+  DOING
+  DONE
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  password         String
+  role             Role              @default(STUDENT)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  profile          Profile?
+  studentProfile   StudentProfile?
+  instructorProfile InstructorProfile?
+  auditLogs        AuditLog[]
+  notifications    NotificationLog[]
+  payments         Payment[]
+  preRegistrations PreRegistration[]
+  ownedLeads       Lead[]            @relation("InstructorLeads")
+  assignedTasks    Task[]            @relation("AssignedTasks")
+  leadActivities   LeadActivity[]
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  phone     String?
+  address   String?
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StudentProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName   String
+  lastName    String
+  phone       String
+  birthDate   DateTime?
+  address     String?
+  city        String
+  postalCode  String?
+  cpfEligible Boolean?  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lessons     Lesson[]
+  skills      StudentSkill[]
+  exams       Exam[]
+  tasks       Task[]
+  requests    LessonRequest[]
+}
+
+model InstructorProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName     String
+  lastName      String
+  phone         String
+  licenseNumber String?
+  bio           String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  availabilitySlots AvailabilitySlot[]
+  timeOffs          TimeOff[]
+  lessons           Lesson[]
+  lessonNotes       LessonNote[]
+}
+
+model Vehicle {
+  id           String       @id @default(cuid())
+  name         String
+  plateNumber  String       @unique
+  transmission Transmission @default(MANUAL)
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  lessons      Lesson[]
+}
+
+model AvailabilitySlot {
+  id           String            @id @default(cuid())
+  instructorId String
+  instructor   InstructorProfile @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  startAt      DateTime
+  endAt        DateTime
+  location     String?
+  recurringRule String?
+  isBlocked    Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+
+  @@index([startAt, endAt])
+  @@index([instructorId])
+}
+
+model TimeOff {
+  id           String            @id @default(cuid())
+  instructorId String
+  instructor   InstructorProfile @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  startAt      DateTime
+  endAt        DateTime
+  reason       String?
+  createdAt    DateTime          @default(now())
+
+  @@index([startAt, endAt])
+  @@index([instructorId])
+}
+
+model Lesson {
+  id              String            @id @default(cuid())
+  studentId       String
+  student         StudentProfile    @relation(fields: [studentId], references: [id])
+  instructorId    String
+  instructor      InstructorProfile @relation(fields: [instructorId], references: [id])
+  vehicleId       String?
+  vehicle         Vehicle?          @relation(fields: [vehicleId], references: [id])
+  startAt         DateTime
+  endAt           DateTime
+  location        String
+  status          LessonStatus      @default(PLANNED)
+  cancelReason    String?
+  cancelledByRole Role?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  note            LessonNote?
+  signature       LessonSignature?
+  skills          LessonSkill[]
+
+  @@index([startAt, endAt])
+  @@index([studentId])
+  @@index([instructorId])
+  @@index([status])
+}
+
+model LessonNote {
+  id           String            @id @default(cuid())
+  lessonId     String            @unique
+  lesson       Lesson            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  instructorId String
+  instructor   InstructorProfile @relation(fields: [instructorId], references: [id])
+  summary      String
+  nextGoals    String?
+  createdAt    DateTime          @default(now())
+}
+
+model LessonSignature {
+  id               String   @id @default(cuid())
+  lessonId         String   @unique
+  lesson           Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  studentName      String
+  signedAt         DateTime @default(now())
+  signatureDataUrl String
+  createdAt        DateTime @default(now())
+}
+
+model SkillCategory {
+  id     String  @id @default(cuid())
+  name   String
+  order  Int
+  skills Skill[]
+}
+
+model Skill {
+  id         String        @id @default(cuid())
+  categoryId String
+  category   SkillCategory @relation(fields: [categoryId], references: [id])
+  code       String        @unique
+  label      String
+  order      Int
+  
+  studentSkills StudentSkill[]
+  lessonSkills  LessonSkill[]
+}
+
+model StudentSkill {
+  id        String      @id @default(cuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  skillId   String
+  skill     Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  level     Int         @default(0)
+  status    SkillStatus @default(NOT_STARTED)
+  updatedAt DateTime    @updatedAt
+
+  @@unique([studentId, skillId])
+}
+
+model LessonSkill {
+  id       String @id @default(cuid())
+  lessonId String
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  skillId  String
+  skill    Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  level    Int    @default(0)
+  comment  String?
+  createdAt DateTime @default(now())
+}
+
+model Exam {
+  id        String      @id @default(cuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  type      ExamType
+  dateAt    DateTime?
+  status    ExamStatus  @default(NOT_SCHEDULED)
+  notes     String?
+
+  @@index([studentId])
+  @@index([status])
+}
+
+model Lead {
+  id                String         @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String         @unique
+  phone             String?
+  source            String         @default("website")
+  status            LeadStatus     @default(NEW)
+  score             Int            @default(0)
+  ownerInstructorId String?
+  ownerInstructor   User?          @relation("InstructorLeads", fields: [ownerInstructorId], references: [id])
+  nextFollowUpAt    DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  activities        LeadActivity[]
+  tasks             Task[]
+
+  @@index([status])
+  @@index([email])
+}
+
+model LeadActivity {
+  id          String           @id @default(cuid())
+  leadId      String
+  lead        Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  actorUserId String?
+  actor       User?            @relation(fields: [actorUserId], references: [id])
+  type        LeadActivityType
+  content     String
+  createdAt   DateTime         @default(now())
+
+  @@index([leadId])
+}
+
+model Task {
+  id               String     @id @default(cuid())
+  title            String
+  description      String?
+  assignedToUserId String?
+  assignedTo       User?      @relation("AssignedTasks", fields: [assignedToUserId], references: [id])
+  dueAt            DateTime?
+  status           TaskStatus @default(TODO)
+  leadId           String?
+  lead             Lead?      @relation(fields: [leadId], references: [id])
+  studentId        String?
+  student          StudentProfile? @relation(fields: [studentId], references: [id])
+  createdAt        DateTime   @default(now())
+
+  @@index([assignedToUserId])
+  @@index([status])
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  valueJson Json
+  updatedAt DateTime @updatedAt
+}
+
+model LessonRequest {
+  id                 String         @id @default(cuid())
+  studentId          String
+  student            StudentProfile @relation(fields: [studentId], references: [id])
+  preferredSlotsJson Json
+  location           String?
+  transmission       Transmission?
+  note               String?
+  status             RequestStatus  @default(PENDING)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+}
+
+model Offer {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  price       Float
+  features    String[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  preRegistrations PreRegistration[]
+}
+
+model PreRegistration {
+  id        String               @id @default(cuid())
+  status    PreRegistrationStatus @default(DRAFT)
+  userId    String
+  user      User                 @relation(fields: [userId], references: [id])
+  offerId   String
+  offer     Offer                @relation(fields: [offerId], references: [id])
+  documents Document[]
+  payments  Payment[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  amount           Float
+  currency         String        @default("EUR")
+  status           PaymentStatus @default(PENDING)
+  stripeSessionId  String?       @unique
+  userId           String
+  user             User          @relation(fields: [userId], references: [id])
+  preRegistrationId String
+  preRegistration   PreRegistration @relation(fields: [preRegistrationId], references: [id])
+  invoice          Invoice?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model Invoice {
+  id        String   @id @default(cuid())
+  number    String   @unique
+  pdfUrl    String?
+  paymentId String   @unique
+  payment   Payment  @relation(fields: [paymentId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id               String         @id @default(cuid())
+  type             String
+  url              String
+  status           DocumentStatus @default(PENDING)
+  rejectionReason  String?
+  preRegistrationId String
+  preRegistration   PreRegistration @relation(fields: [preRegistrationId], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String?
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+model NotificationLog {
+  id        String   @id @default(cuid())
+  type      String
+  recipient String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  status    String
+  createdAt DateTime @default(now())
+}
