@@ -234,7 +234,7 @@
 
   /* Interactive utilities */
   .interactive {
-    @apply transition-all duration-[var(--transition-fast)] ease-[var(--ease-standard)];
+    @apply transition-all duration-fast ease-standard;
   }
 
   .interactive-lift {
@@ -270,7 +270,7 @@
   }
 
   .card-premium {
-    @apply rounded-[var(--radius-lg)] border border-border/50 bg-card p-6 shadow-[var(--elevation-2)] transition-all duration-[var(--transition-normal)] hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[var(--elevation-3)];
+    @apply rounded-lg border border-border/50 bg-card p-6 shadow-elevation-2 transition-all duration-normal hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-elevation-3;
   }
 
   .card-interactive {
@@ -279,24 +279,24 @@
 
   .btn-premium {
     @apply rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground 
-           shadow-[var(--elevation-2)] shadow-primary/20 transition-all duration-[var(--transition-fast)] 
-           hover:-translate-y-0.5 hover:shadow-[var(--elevation-3)] hover:shadow-primary/30 active:translate-y-0 active:scale-[0.98];
+           shadow-elevation-2 shadow-primary/20 transition-all duration-fast 
+           hover:-translate-y-0.5 hover:shadow-elevation-3 hover:shadow-primary/30 active:translate-y-0 active:scale-[0.98];
   }
 
   .btn-warm {
     @apply rounded-full bg-[hsl(var(--accent-warm))] px-6 py-3 font-semibold text-white
-           shadow-[var(--elevation-2)] transition-all duration-[var(--transition-fast)]
-           hover:-translate-y-0.5 hover:bg-[hsl(25_95%_45%)] hover:shadow-[var(--elevation-3)] active:translate-y-0 active:scale-[0.98];
+           shadow-elevation-2 transition-all duration-fast
+           hover:-translate-y-0.5 hover:bg-[hsl(25_95%_45%)] hover:shadow-elevation-3 active:translate-y-0 active:scale-[0.98];
   }
 
   /* Icon button with hover ring effect */
   .icon-btn {
-    @apply relative flex h-10 w-10 items-center justify-center rounded-[var(--radius)] transition-all duration-[var(--transition-fast)];
+    @apply relative flex h-10 w-10 items-center justify-center rounded transition-all duration-fast;
   }
 
   .icon-btn::before {
     content: "";
-    @apply absolute inset-0 rounded-[var(--radius)] opacity-0 ring-2 ring-primary/20 transition-opacity duration-[var(--transition-fast)];
+    @apply absolute inset-0 rounded opacity-0 ring-2 ring-primary/20 transition-opacity duration-fast;
   }
 
   .icon-btn:hover::before {
@@ -305,16 +305,16 @@
 
   /* Badge with subtle animation */
   .badge-interactive {
-    @apply transition-all duration-[var(--transition-fast)] hover:scale-105 hover:shadow-sm;
+    @apply transition-all duration-fast hover:scale-105 hover:shadow-sm;
   }
 
   /* Input with enhanced focus state */
   .input-enhanced {
-    @apply transition-all duration-[var(--transition-fast)] focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.1)] focus:border-primary;
+    @apply transition-all duration-fast focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.1)] focus:border-primary;
   }
 
   /* List item with hover indicator */
   .list-item-interactive {
-    @apply relative pl-4 transition-all duration-[var(--transition-fast)] before:absolute before:left-0 before:top-1/2 before:h-0 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-primary before:transition-all before:duration-[var(--transition-fast)] hover:pl-5 hover:before:h-full;
+    @apply relative pl-4 transition-all duration-fast before:absolute before:left-0 before:top-1/2 before:h-0 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-primary before:transition-all before:duration-fast hover:pl-5 hover:before:h-full;
   }
 }
