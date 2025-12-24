@@ -22,7 +22,7 @@ export const getInstructors = async (req: AuthRequest, res: Response) => {
     const instructors = await prisma.instructorProfile.findMany({
       where: {
         user: {
-          email: { not: "soufiane936s@gmail.com" }
+          role: { not: "ADMIN" }
         }
       },
       include: {

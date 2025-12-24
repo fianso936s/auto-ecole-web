@@ -393,7 +393,7 @@ model Offer {
   slug        String   @unique
   description String
   price       Float
-  features    String[]
+  features    Json
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

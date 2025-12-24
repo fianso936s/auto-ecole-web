@@ -29,7 +29,7 @@ export const getStudents = async (req: AuthRequest, res: Response) => {
         AND: [
           {
             user: {
-              email: { not: "soufiane936s@gmail.com" }
+              role: { not: "ADMIN" }
             }
           },
           query ? {

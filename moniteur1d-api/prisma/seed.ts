@@ -5,6 +5,9 @@ const prisma = new PrismaClient()
 
 async function main() {
   const hashedPassword = await bcrypt.hash('password123', 10)
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@moniteur1d.fr'
+  const adminFirstName = process.env.ADMIN_FIRST_NAME || 'Admin'
+  const adminLastName = process.env.ADMIN_LAST_NAME || 'System'
 
   console.log('Cleaning database...')
   // Clear existing data in reverse order of dependencies
@@ -40,13 +43,13 @@ async function main() {
   // 1. Admin User
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@moniteur1d.fr',
+      email: adminEmail,
       password: hashedPassword,
       role: 'ADMIN',
       profile: {
         create: {
-          firstName: 'Admin',
-          lastName: 'System',
+          firstName: adminFirstName,
+          lastName: adminLastName,
           phone: '0102030405',
         }
       }
