@@ -13,9 +13,9 @@ import { studentSchema, updateStudentSchema } from "../lib/validations/student.s
 
 const router = Router();
 
-// Toutes les routes pour les élèves sont réservées aux ADMINS dans ce contexte
+// Les administrateurs et les moniteurs peuvent gérer les élèves
 router.use(authenticate);
-router.use(requireRole(["ADMIN"]));
+router.use(requireRole(["ADMIN", "INSTRUCTOR"]));
 
 router.get("/", getStudents);
 router.post("/", validate(studentSchema), createStudent);

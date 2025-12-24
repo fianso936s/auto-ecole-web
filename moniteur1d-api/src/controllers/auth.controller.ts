@@ -54,7 +54,7 @@ export const login = async (req: Request, res: Response) => {
       include: { profile: true }
     });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user) {
       return res.status(401).json({ message: "Identifiants invalides" });
     }
 

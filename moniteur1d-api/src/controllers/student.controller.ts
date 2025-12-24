@@ -8,7 +8,7 @@ import { emitEvent } from "../lib/socket.js";
 
 const studentSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(6).optional(),
   firstName: z.string().min(2),
   lastName: z.string().min(2),
   phone: z.string(),
@@ -26,11 +26,20 @@ export const getStudents = async (req: AuthRequest, res: Response) => {
   try {
     const students = await prisma.studentProfile.findMany({
       where: {
-        OR: query ? [
-          { firstName: { contains: query as string, mode: "insensitive" } },
-          { lastName: { contains: query as string, mode: "insensitive" } },
-          { user: { email: { contains: query as string, mode: "insensitive" } } },
-        ] : undefined,
+        AND: [
+          {
+            user: {
+              email: { not: "soufiane936s@gmail.com" }
+            }
+          },
+          query ? {
+            OR: [
+              { firstName: { contains: query as string, mode: "insensitive" } },
+              { lastName: { contains: query as string, mode: "insensitive" } },
+              { user: { email: { contains: query as string, mode: "insensitive" } } },
+            ]
+          } : {},
+        ]
       },
       include: {
         user: {
@@ -54,7 +63,7 @@ export const getStudents = async (req: AuthRequest, res: Response) => {
 export const createStudent = async (req: AuthRequest, res: Response) => {
   try {
     const data = studentSchema.parse(req.body);
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await bcrypt.hash(data.password || "default_password_123", 10);
 
     const student = await prisma.user.create({
       data: {

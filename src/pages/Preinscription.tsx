@@ -59,10 +59,6 @@ const preinscriptionSchema = z.object({
   nom: z.string().min(2, "Le nom est requis (min 2 caractères)"),
   prenom: z.string().min(2, "Le prénom est requis"),
   email: z.string().email("Email invalide"),
-  password: z
-    .string()
-    .min(6, "Le mot de passe doit contenir au moins 6 caractères")
-    .optional(),
   tel: z
     .string()
     .regex(
@@ -181,7 +177,6 @@ const Preinscription: React.FC = () => {
 
     if (step === 1) {
       fieldsToValidate = ["nom", "prenom", "email", "tel", "ville"];
-      if (!user) fieldsToValidate.push("password");
     } else if (step === 2) {
       fieldsToValidate = ["offreId"];
     }
@@ -196,7 +191,6 @@ const Preinscription: React.FC = () => {
         if (!user) {
           await registerApi({
             email: formData.email,
-            password: formData.password,
             firstName: formData.prenom,
             lastName: formData.nom,
           });
@@ -499,32 +493,6 @@ const Preinscription: React.FC = () => {
                                 </p>
                               )}
                             </div>
-                            {!user && (
-                              <div className="space-y-2 md:col-span-2">
-                                <label className="text-sm font-medium">
-                                  Mot de passe (pour créer votre compte)
-                                </label>
-                                <div className="relative">
-                                  <Input
-                                    type="password"
-                                    placeholder="******"
-                                    {...register("password")}
-                                    className={
-                                      errors.password
-                                        ? "border-destructive pl-10"
-                                        : "pl-10"
-                                    }
-                                  />
-                                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                </div>
-                                {errors.password && (
-                                  <p className="flex items-center gap-1 text-xs text-destructive">
-                                    <AlertCircle className="h-3 w-3" />{" "}
-                                    {errors.password.message}
-                                  </p>
-                                )}
-                              </div>
-                            )}
                             <div className="space-y-2 md:col-span-2">
                               <label className="text-sm font-medium">
                                 Ville / Zone

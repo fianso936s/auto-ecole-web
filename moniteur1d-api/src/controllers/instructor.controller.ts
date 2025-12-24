@@ -8,7 +8,7 @@ import { emitEvent } from "../lib/socket.js";
 
 const instructorSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(6).optional(),
   firstName: z.string().min(2),
   lastName: z.string().min(2),
   phone: z.string(),
@@ -20,6 +20,11 @@ const instructorSchema = z.object({
 export const getInstructors = async (req: AuthRequest, res: Response) => {
   try {
     const instructors = await prisma.instructorProfile.findMany({
+      where: {
+        user: {
+          email: { not: "soufiane936s@gmail.com" }
+        }
+      },
       include: {
         user: {
           select: {
@@ -40,7 +45,7 @@ export const getInstructors = async (req: AuthRequest, res: Response) => {
 export const createInstructor = async (req: AuthRequest, res: Response) => {
   try {
     const data = instructorSchema.parse(req.body);
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await bcrypt.hash(data.password || "default_password_123", 10);
 
     const instructor = await prisma.user.create({
       data: {

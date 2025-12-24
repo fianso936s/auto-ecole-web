@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Mail, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import {
@@ -19,7 +19,6 @@ import { login } from "../lib/api";
 
 const loginSchema = z.object({
   email: z.string().email("Email invalide"),
-  password: z.string().min(1, "Le mot de passe est requis"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -27,7 +26,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const from = (location.state as any)?.from?.pathname || "/";
@@ -116,39 +114,6 @@ const Login: React.FC = () => {
                 )}
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium">
-                  Mot de passe
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="pl-10 pr-10"
-                    {...register("password")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="flex items-center gap-1 text-xs text-red-600">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
-
               <Button
                 type="submit"
                 className="w-full"
@@ -165,45 +130,6 @@ const Login: React.FC = () => {
                 )}
               </Button>
             </form>
-
-            <div className="mt-6 space-y-4">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-gray-500 dark:bg-slate-800">
-                    Comptes de test
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2 rounded-lg bg-blue-50 p-4 text-sm dark:bg-blue-900/20">
-                <p className="font-semibold text-blue-900 dark:text-blue-100">
-                  🔐 Comptes de test disponibles :
-                </p>
-                <div className="space-y-2 text-xs text-blue-800 dark:text-blue-200">
-                  <div className="rounded bg-white/50 p-2 dark:bg-blue-800/30">
-                    <p className="font-semibold">👑 Admin</p>
-                    <p className="font-mono">admin@moniteur1d.fr</p>
-                    <p className="font-mono">password123</p>
-                  </div>
-                  <div className="rounded bg-white/50 p-2 dark:bg-blue-800/30">
-                    <p className="font-semibold">👨‍🏫 Moniteur</p>
-                    <p className="font-mono">jean.moniteur@moniteur1d.fr</p>
-                    <p className="font-mono">password123</p>
-                  </div>
-                  <div className="rounded bg-white/50 p-2 dark:bg-blue-800/30">
-                    <p className="font-semibold">🎓 Élève</p>
-                    <p className="font-mono">student1@moniteur1d.fr</p>
-                    <p className="font-mono">password123</p>
-                  </div>
-                </div>
-                <p className="mt-2 text-[10px] text-primary dark:text-primary/80">
-                  💡 Exécutez <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">npm run prisma:seed</code> dans moniteur1d-api pour créer ces comptes
-                </p>
-              </div>
-            </div>
 
             <div className="mt-6 text-center text-sm">
               <Link
