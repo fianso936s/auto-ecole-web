@@ -23,9 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-# Windows
-Thumbs.db
-desktop.ini
-
-# Moniteur1D API (if it's a separate project)
-# moniteur1d-api/
+# Environment variables
+.env
+.env.*
+!.env.example

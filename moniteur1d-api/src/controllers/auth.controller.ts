@@ -19,6 +19,7 @@ export const register = async (req: Request, res: Response) => {
       data: {
         email,
         password: hashedPassword,
+        role: "STUDENT", // 🔒 SÉCURITÉ : On force le rôle STUDENT ici pour empêcher l'auto-élévation de privilèges
         profile: {
           create: {
             firstName,
