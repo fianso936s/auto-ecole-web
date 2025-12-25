@@ -59,6 +59,11 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Identifiants invalides" });
     }
 
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Identifiants invalides" });
+    }
+
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
