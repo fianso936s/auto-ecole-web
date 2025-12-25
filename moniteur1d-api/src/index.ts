@@ -48,7 +48,12 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: [
+    "https://www.moniteur1d.com",
+    "https://moniteur1d.com",
+    "http://localhost:5173",
+    /\.moniteur1d\.com$/
+  ],
   credentials: true
 }));
 app.use(cookieParser());
