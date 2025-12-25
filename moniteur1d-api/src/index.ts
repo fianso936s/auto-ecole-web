@@ -8,6 +8,8 @@ import dotenv from "dotenv";
 import { createServer } from "http";
 import { initSocket } from "./lib/socket.js";
 import { errorHandler } from "./middleware/error.js";
+import prisma from "./lib/prisma.js";
+import bcrypt from "bcrypt";
 import authRoutes from "./routes/auth.routes.js";
 import offerRoutes from "./routes/offer.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
@@ -97,7 +99,45 @@ app.use(errorHandler);
 const httpServer = createServer(app);
 initSocket(httpServer);
 
-httpServer.listen(PORT, () => {
+const ensureAdminCreated = async () => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@moniteur1d.fr";
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminPassword) {
+      console.log("⚠️ ADMIN_PASSWORD non configuré. Création admin automatique ignorée.");
+      return;
+    }
+
+    const adminExists = await prisma.user.findFirst({
+      where: { role: "ADMIN" }
+    });
+
+    if (!adminExists) {
+      console.log("🚀 Tentative de création du compte admin unique...");
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      await prisma.user.create({
+        data: {
+          email: adminEmail,
+          password: hashedPassword,
+          role: "ADMIN",
+          profile: {
+            create: {
+              firstName: "Admin",
+              lastName: "System",
+            }
+          }
+        }
+      });
+      console.log("✅ Compte admin créé avec succès au démarrage.");
+    }
+  } catch (error) {
+    console.error("❌ Erreur lors de la vérification/création de l'admin :", error);
+  }
+};
+
+httpServer.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
+  await ensureAdminCreated();
 });
 
