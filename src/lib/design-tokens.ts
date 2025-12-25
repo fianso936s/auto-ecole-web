@@ -279,8 +279,8 @@ export function hsl(variable: string, alpha?: number): string {
 /**
  * Crée une classe d'ombre avec opacité personnalisée
  */
-export function shadowWithColor(elevation: keyof typeof elevation, color: string, opacity = 0.2): string {
-  return `${elevation} ${color}/${opacity}`;
+export function shadowWithColor(elevationLevel: keyof typeof elevation, color: string, opacity = 0.2): string {
+  return `${elevation[elevationLevel]} ${color}/${opacity}`;
 }
 
 /**

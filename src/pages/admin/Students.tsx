@@ -73,7 +73,7 @@ const AdminStudents: React.FC = () => {
   const fetchStudentDetails = async (id: string) => {
     try {
       const [details, lessons] = await Promise.all([
-        studentsApi.get(id),
+        studentsApi.read(id),
         lessonsApi.list({ studentId: id })
       ]);
       setStudentDetails(details);

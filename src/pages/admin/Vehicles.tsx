@@ -45,7 +45,7 @@ const AdminVehicles: React.FC = () => {
 
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
     try {
-      await vehiclesApi.toggleActive(id, !currentStatus);
+      await vehiclesApi.update(id, { isActive: !currentStatus });
       toast.success("Statut du véhicule mis à jour");
       fetchVehicles();
     } catch (error) {

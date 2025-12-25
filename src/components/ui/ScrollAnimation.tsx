@@ -1,8 +1,9 @@
 import React from "react";
-import { motion, type MotionProps } from "framer-motion";
+import { motion, type MotionProps, type Variants } from "framer-motion";
 
 interface ScrollAnimationProps
-  extends MotionProps, React.HTMLAttributes<HTMLDivElement> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, keyof MotionProps>,
+    MotionProps {
   children: React.ReactNode;
   delay?: number;
   direction?: "up" | "down" | "left" | "right" | "none";
@@ -16,7 +17,7 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({
   distance = 20,
   ...props
 }) => {
-  const variants = {
+  const variants: Variants = {
     hidden: {
       opacity: 0,
       y: direction === "up" ? distance : direction === "down" ? -distance : 0,
@@ -31,7 +32,7 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({
         duration: 0.5,
         ease: [0.4, 0, 0.2, 1],
         delay: delay,
-      },
+      } as any,
     },
   };
 
@@ -54,14 +55,14 @@ export const StaggerContainer: React.FC<{
   delay?: number;
   stagger?: number;
 }> = ({ children, className, delay = 0, stagger = 0.1 }) => {
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
         delayChildren: delay,
         staggerChildren: stagger,
-      },
+      } as any,
     },
   };
 
@@ -78,10 +79,11 @@ export const StaggerContainer: React.FC<{
   );
 };
 
-export const StaggerItem: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const item = {
+export const StaggerItem: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({ children, className }) => {
+  const item: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -89,9 +91,13 @@ export const StaggerItem: React.FC<{ children: React.ReactNode }> = ({
       transition: {
         duration: 0.5,
         ease: [0.4, 0, 0.2, 1],
-      },
+      } as any,
     },
   };
 
-  return <motion.div variants={item}>{children}</motion.div>;
+  return (
+    <motion.div variants={item} className={className}>
+      {children}
+    </motion.div>
+  );
 };

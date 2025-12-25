@@ -66,9 +66,7 @@ const preinscriptionSchema = z.object({
       "Téléphone invalide"
     ),
   ville: z.string().min(2, "La ville est requise"),
-  offreId: z.string({
-    required_error: "Veuillez choisir une offre",
-  }),
+  offreId: z.string().min(1, "Veuillez choisir une offre"),
   docs: z.any().optional(),
 });
 
@@ -153,8 +151,8 @@ const Preinscription: React.FC = () => {
     if (savedData && !user) {
       try {
         const parsed = JSON.parse(savedData);
-        delete parsed.docs;
-        delete parsed.password;
+        delete (parsed as any).docs;
+        delete (parsed as any).password;
         reset(parsed);
       } catch (e) {
         console.error("Erreur lors du chargement des données sauvegardées", e);
@@ -166,8 +164,8 @@ const Preinscription: React.FC = () => {
   useEffect(() => {
     if (!isSuccess && !user) {
       const dataToSave = { ...formData };
-      delete dataToSave.docs;
-      delete dataToSave.password;
+      delete (dataToSave as any).docs;
+      delete (dataToSave as any).password;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
     }
   }, [formData, isSuccess, user]);

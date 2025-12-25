@@ -27,7 +27,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
-!.env.production
+!.env.*.example
 
 # Moniteur1D API (FORCE VISIBILITY)
 !moniteur1d-api/

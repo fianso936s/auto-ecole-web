@@ -35,6 +35,18 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const allowedCorsOrigins: Array<string | RegExp> = [
+  "https://www.moniteur1d.com",
+  "https://moniteur1d.com",
+  "http://localhost:5173",
+  /\.moniteur1d\.com$/,
+];
+
+// Permet de piloter l'origine principale via variable d'env (utile en déploiement)
+if (process.env.FRONTEND_URL) {
+  allowedCorsOrigins.unshift(process.env.FRONTEND_URL);
+}
+
 // Global Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -48,12 +60,7 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(helmet());
 app.use(cors({
-  origin: [
-    "https://www.moniteur1d.com",
-    "https://moniteur1d.com",
-    "http://localhost:5173",
-    /\.moniteur1d\.com$/
-  ],
+  origin: allowedCorsOrigins,
   credentials: true
 }));
 app.use(cookieParser());

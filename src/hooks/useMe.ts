@@ -10,6 +10,8 @@ export interface User {
   profile?: {
     firstName: string;
     lastName: string;
+    phone?: string;
+    address?: string;
   };
 }
 
