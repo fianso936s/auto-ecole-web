@@ -4,10 +4,16 @@ import bcrypt from 'bcrypt'
 const prisma = new PrismaClient()
 
 async function main() {
-  const hashedPassword = await bcrypt.hash('password123', 10)
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@moniteur1d.fr'
+  const adminPassword = process.env.ADMIN_PASSWORD
   const adminFirstName = process.env.ADMIN_FIRST_NAME || 'Admin'
   const adminLastName = process.env.ADMIN_LAST_NAME || 'System'
+
+  if (!adminPassword) {
+    throw new Error("❌ ERREUR : La variable d'environnement ADMIN_PASSWORD n'est pas définie.")
+  }
+
+  const hashedPassword = await bcrypt.hash(adminPassword, 10)
 
   console.log('Cleaning database...')
   // Clear existing data in reverse order of dependencies
