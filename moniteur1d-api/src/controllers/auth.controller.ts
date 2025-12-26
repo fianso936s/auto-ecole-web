@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import prisma from "../lib/prisma.js";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../lib/auth.js";
 import { AuthRequest } from "../middleware/auth.js";
+import { hashPassword, verifyPassword, isArgon2Hash } from "../lib/password.js";
 
 export const register = async (req: Request, res: Response) => {
   const { email, password, firstName, lastName } = req.body;
@@ -28,7 +29,7 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Le mot de passe doit contenir au moins 6 caractères" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hashPassword(password);
 
     const user = await prisma.user.create({
       data: {
@@ -100,7 +101,26 @@ export const login = async (req: Request, res: Response) => {
     }
 
     console.log(`[LOGIN] Comparaison du mot de passe pour ${user.email}`);
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    // Vérifier le mot de passe (support Argon2 et bcrypt pour migration progressive)
+    let isPasswordValid = false;
+    if (isArgon2Hash(user.password)) {
+      isPasswordValid = await verifyPassword(password, user.password);
+    } else {
+      // Ancien format bcrypt - migration progressive
+      isPasswordValid = await bcrypt.compare(password, user.password);
+      
+      // Si le mot de passe est valide et en bcrypt, migrer vers Argon2
+      if (isPasswordValid) {
+        const newHash = await hashPassword(password);
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { password: newHash }
+        });
+        console.log(`[LOGIN] Mot de passe migré vers Argon2 pour ${user.email}`);
+      }
+    }
+    
     console.log(`[LOGIN] Résultat de la comparaison: ${isPasswordValid}`);
     
     if (!isPasswordValid) {

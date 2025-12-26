@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
 import { z } from "zod";
 import { AuthRequest } from "../middleware/auth.js";
-import bcrypt from "bcrypt";
+import { hashPassword } from "../lib/password.js";
 import { logAction } from "../lib/audit.js";
 import { emitEvent } from "../lib/socket.js";
 
@@ -114,7 +114,7 @@ export const convertLead = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Un utilisateur avec cet email existe déjà" });
     }
 
-    const hashedPassword = await bcrypt.hash(password || "permis123", 10);
+    const hashedPassword = await hashPassword(password || "permis123");
 
     const user = await prisma.user.create({
       data: {

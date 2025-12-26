@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import prisma from "../lib/prisma.js";
+import { nameSchema, emailSchema, phoneSchema, messageSchema } from "../lib/validations/common.js";
 
 const contactSchema = z.object({
-  firstName: z.string().min(2, "Le prénom est trop court"),
-  lastName: z.string().min(2, "Le nom est trop court"),
-  email: z.string().email("Email invalide"),
-  phone: z.string().optional(),
-  message: z.string().min(10, "Le message doit faire au moins 10 caractères"),
+  firstName: z.string().pipe(nameSchema),
+  lastName: z.string().pipe(nameSchema),
+  email: z.string().pipe(emailSchema),
+  phone: phoneSchema.optional(),
+  message: z.string().pipe(messageSchema),
   website: z.string().optional(), // Honeypot field
 });
 

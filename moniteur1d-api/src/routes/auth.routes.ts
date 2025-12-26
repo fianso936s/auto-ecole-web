@@ -4,6 +4,7 @@ import { register, login, logout, me, refresh } from "../controllers/auth.contro
 import { authenticate, authorize } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { loginSchema, registerSchema } from "../lib/validations/auth.schema.js";
+import { csrfToken } from "../middleware/csrf.js";
 import prisma from "../lib/prisma.js";
 
 const router = Router();
@@ -15,6 +16,12 @@ const authLimiter = rateLimit({
   message: "Trop de tentatives de connexion, réessayez dans 15 minutes.",
   standardHeaders: true,
   legacyHeaders: false,
+});
+
+// Endpoint pour obtenir le token CSRF (doit être avant les autres routes)
+router.get("/csrf-token", csrfToken, (req, res) => {
+  const token = req.cookies?.["csrf-token"] || req.headers["x-csrf-token"];
+  res.json({ csrfToken: token });
 });
 
 router.post("/register", authLimiter, validate(registerSchema), register);

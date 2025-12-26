@@ -1,17 +1,18 @@
 import { z } from "zod";
+import { nameSchema, emailSchema } from "./common.js";
 
 export const registerSchema = z.object({
   body: z.object({
     email: z.string({
       required_error: "L'email est requis",
-    }).email("Email invalide"),
+    }).pipe(emailSchema),
     password: z.string().optional(),
     firstName: z.string({
       required_error: "Le prénom est requis",
-    }).min(2, "Le prénom est trop court"),
+    }).pipe(nameSchema),
     lastName: z.string({
       required_error: "Le nom est requis",
-    }).min(2, "Le nom est trop court"),
+    }).pipe(nameSchema),
   }),
 });
 
@@ -19,7 +20,7 @@ export const loginSchema = z.object({
   body: z.object({
     email: z.string({
       required_error: "L'email est requis",
-    }).email("Email invalide"),
+    }).pipe(emailSchema),
     password: z.string({
       required_error: "Le mot de passe est requis",
     }).min(1, "Le mot de passe est requis"),

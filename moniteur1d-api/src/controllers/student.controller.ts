@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
-import bcrypt from "bcrypt";
+import { hashPassword } from "../lib/password.js";
 import { logAction } from "../lib/audit.js";
 import { AuthRequest } from "../middleware/auth.js";
 import { emitEvent } from "../lib/socket.js";
@@ -67,7 +67,7 @@ export const createStudent = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Le mot de passe est requis" });
     }
     
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await hashPassword(data.password);
 
     const student = await prisma.user.create({
       data: {

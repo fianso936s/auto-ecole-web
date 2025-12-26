@@ -43,6 +43,37 @@ async function attemptRefresh(): Promise<void> {
   return refreshPromise;
 }
 
+/**
+ * Récupère le token CSRF depuis le cookie ou le récupère depuis l'API
+ */
+async function getCSRFToken(): Promise<string | null> {
+  // Essayer d'abord de récupérer depuis le cookie
+  const cookieToken = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("csrf-token="))
+    ?.split("=")[1];
+
+  if (cookieToken) {
+    return cookieToken;
+  }
+
+  // Sinon, récupérer depuis l'API
+  try {
+    const response = await fetch(`${API_URL}/auth/csrf-token`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.csrfToken || null;
+    }
+  } catch (error) {
+    console.warn("Impossible de récupérer le token CSRF:", error);
+  }
+
+  return null;
+}
+
 export async function fetchJson<T>(
   endpoint: string,
   options: RequestInit = {},
@@ -53,6 +84,26 @@ export async function fetchJson<T>(
   const headers = new Headers(options.headers);
   if (!(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
+  }
+
+  // Ajouter le token CSRF pour les méthodes modifiantes
+  const modifyingMethods = ["POST", "PUT", "PATCH", "DELETE"];
+  if (modifyingMethods.includes(options.method || "")) {
+    const csrfToken = await getCSRFToken();
+    if (csrfToken) {
+      headers.set("X-CSRF-Token", csrfToken);
+      
+      // Ajouter aussi dans le body si c'est une requête JSON
+      if (!(options.body instanceof FormData) && options.body) {
+        try {
+          const bodyData = JSON.parse(options.body as string);
+          bodyData.csrfToken = csrfToken;
+          options.body = JSON.stringify(bodyData);
+        } catch {
+          // Si le body n'est pas du JSON valide, on garde le header seulement
+        }
+      }
+    }
   }
 
   let response: Response;

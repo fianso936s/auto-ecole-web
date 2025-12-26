@@ -9,7 +9,7 @@ import { createServer } from "http";
 import { initSocket } from "./lib/socket.js";
 import { errorHandler } from "./middleware/error.js";
 import prisma from "./lib/prisma.js";
-import bcrypt from "bcrypt";
+import { hashPassword } from "./lib/password.js";
 import authRoutes from "./routes/auth.routes.js";
 import offerRoutes from "./routes/offer.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
@@ -74,6 +74,29 @@ app.use(limiter);
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"], // 'unsafe-inline' nécessaire pour certains frameworks CSS
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'", "data:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  },
+  xssFilter: true,
+  noSniff: true,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  permittedCrossDomainPolicies: false,
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
 }));
 app.use(cors({
   origin: (origin, callback) => {
@@ -95,11 +118,18 @@ app.use(cors({
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  exposedHeaders: ["Content-Type"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token", "csrf-token"],
+  exposedHeaders: ["Content-Type", "X-CSRF-Token"],
 }));
 app.use(cookieParser());
 app.use(hpp() as any);
+
+// Imports des middlewares de sécurité
+import { sanitizeInput } from "./middleware/sanitize.js";
+import { csrfToken, verifyCSRF } from "./middleware/csrf.js";
+
+// Générer un token CSRF pour toutes les requêtes (doit être avant express.json pour les GET)
+app.use(csrfToken);
 
 // Webhook route must come BEFORE express.json()
 app.use("/billing/webhook", express.raw({ type: "application/json" }), (req, res, next) => {
@@ -108,6 +138,12 @@ app.use("/billing/webhook", express.raw({ type: "application/json" }), (req, res
 });
 
 app.use(express.json({ limit: "10kb" })); // Protection against large payloads
+
+// Sanitisation des inputs (après express.json() pour accéder au body)
+app.use(sanitizeInput);
+
+// Vérification CSRF sur toutes les routes modifiantes (après express.json pour accéder au body)
+app.use(verifyCSRF);
 
 // Routes
 app.use("/auth", authRoutes);
@@ -176,7 +212,7 @@ const ensureAdminCreated = async () => {
 
     if (!adminExists) {
       console.log("🚀 Tentative de création du compte admin unique...");
-      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      const hashedPassword = await hashPassword(adminPassword);
       
       if (adminByEmail) {
         // Un utilisateur avec cet email existe mais n'est pas admin

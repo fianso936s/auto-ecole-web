@@ -48,3 +48,4 @@
 
 Les erreurs CORS depuis `https://powderblue-turtle-426494.hostingersite.com` sont maintenant résolues !
 
+
