@@ -51,11 +51,17 @@ export function verifyCSRFToken(sessionId: string, token: string): boolean {
     return false;
   }
 
+  // Vérifier que les tokens ont la même longueur avant la comparaison sécurisée
+  // Cela évite une RangeError si un attaquant envoie un token de longueur différente
+  const storedBuffer = Buffer.from(stored.token);
+  const tokenBuffer = Buffer.from(token);
+  
+  if (storedBuffer.length !== tokenBuffer.length) {
+    return false;
+  }
+
   // Comparaison sécurisée pour éviter les attaques par timing
-  return crypto.timingSafeEqual(
-    Buffer.from(stored.token),
-    Buffer.from(token)
-  );
+  return crypto.timingSafeEqual(storedBuffer, tokenBuffer);
 }
 
 /**
