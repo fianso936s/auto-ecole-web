@@ -81,7 +81,8 @@ export const login = async (req: Request, res: Response) => {
 
   try {
     const normalizedEmail = email.toLowerCase().trim();
-    console.log(`[LOGIN] Tentative de connexion avec email: ${normalizedEmail}`);
+    const origin = req.headers.origin || "unknown";
+    console.log(`[LOGIN] Tentative de connexion avec email: ${normalizedEmail}, origine: ${origin}`);
     
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
@@ -89,42 +90,59 @@ export const login = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      console.log(`[LOGIN] Utilisateur non trouvé pour email: ${normalizedEmail}`);
+      console.log(`[LOGIN] ❌ Utilisateur non trouvé pour email: ${normalizedEmail}`);
       return res.status(401).json({ message: "Identifiants invalides" });
     }
 
-    console.log(`[LOGIN] Utilisateur trouvé: ${user.email}, rôle: ${user.role}, a un mot de passe: ${!!user.password}`);
+    console.log(`[LOGIN] ✅ Utilisateur trouvé: ${user.email}, rôle: ${user.role}, a un mot de passe: ${!!user.password}`);
 
     if (!user.password) {
-      console.log(`[LOGIN] L'utilisateur ${user.email} n'a pas de mot de passe`);
+      console.log(`[LOGIN] ❌ L'utilisateur ${user.email} n'a pas de mot de passe`);
       return res.status(401).json({ message: "Identifiants invalides" });
     }
 
-    console.log(`[LOGIN] Comparaison du mot de passe pour ${user.email}`);
+    const hashFormat = isArgon2Hash(user.password) ? "Argon2" : (user.password.startsWith("$2") ? "bcrypt" : "inconnu");
+    console.log(`[LOGIN] Format du hash: ${hashFormat}, longueur: ${user.password.length}`);
+    console.log(`[LOGIN] Comparaison du mot de passe pour ${user.email}...`);
     
     // Vérifier le mot de passe (support Argon2 et bcrypt pour migration progressive)
     let isPasswordValid = false;
-    if (isArgon2Hash(user.password)) {
-      isPasswordValid = await verifyPassword(password, user.password);
-    } else {
-      // Ancien format bcrypt - migration progressive
-      isPasswordValid = await bcrypt.compare(password, user.password);
-      
-      // Si le mot de passe est valide et en bcrypt, migrer vers Argon2
-      if (isPasswordValid) {
-        const newHash = await hashPassword(password);
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { password: newHash }
-        });
-        console.log(`[LOGIN] Mot de passe migré vers Argon2 pour ${user.email}`);
+    let passwordError: Error | null = null;
+    
+    try {
+      if (isArgon2Hash(user.password)) {
+        isPasswordValid = await verifyPassword(password, user.password);
+        console.log(`[LOGIN] Vérification Argon2: ${isPasswordValid ? "✅" : "❌"}`);
+      } else {
+        // Ancien format bcrypt - migration progressive
+        isPasswordValid = await bcrypt.compare(password, user.password);
+        console.log(`[LOGIN] Vérification bcrypt: ${isPasswordValid ? "✅" : "❌"}`);
+        
+        // Si le mot de passe est valide et en bcrypt, migrer vers Argon2
+        if (isPasswordValid) {
+          const newHash = await hashPassword(password);
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { password: newHash }
+          });
+          console.log(`[LOGIN] ✅ Mot de passe migré vers Argon2 pour ${user.email}`);
+        }
       }
+    } catch (error: any) {
+      passwordError = error;
+      console.error(`[LOGIN] ❌ Erreur lors de la vérification du mot de passe:`, error.message);
     }
     
-    console.log(`[LOGIN] Résultat de la comparaison: ${isPasswordValid}`);
+    if (passwordError) {
+      console.log(`[LOGIN] ❌ Erreur technique lors de la vérification: ${passwordError.message}`);
+      return res.status(500).json({ 
+        message: "Erreur lors de la vérification du mot de passe",
+        ...(process.env.NODE_ENV !== "production" && { error: passwordError.message })
+      });
+    }
     
     if (!isPasswordValid) {
-      console.log(`[LOGIN] Mot de passe invalide pour ${user.email}`);
+      console.log(`[LOGIN] ❌ Mot de passe invalide pour ${user.email}`);
       return res.status(401).json({ message: "Identifiants invalides" });
     }
 

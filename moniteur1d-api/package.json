@@ -30,7 +30,8 @@
     "test:security": "tsx scripts/test-security.ts",
     "fix:full-stack": "tsx scripts/fix-and-test-full-stack.ts",
     "create:admin": "tsx scripts/create-admin-ssh.ts",
-    "test:frontend-api": "tsx scripts/test-frontend-api-connection.ts"
+    "test:frontend-api": "tsx scripts/test-frontend-api-connection.ts",
+    "diagnose:cors-login": "tsx scripts/diagnose-cors-login.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -102,13 +102,17 @@ app.use(cors({
   origin: (origin, callback) => {
     // En développement, permettre les requêtes sans origine (ex: Postman, curl)
     if (!origin && process.env.NODE_ENV !== "production") {
+      console.log(`[CORS] Requête sans origine autorisée (dev)`);
       return callback(null, true);
     }
     
     // Si pas d'origine en production, refuser
     if (!origin) {
+      console.log(`[CORS] ❌ Requête sans origine refusée (production)`);
       return callback(new Error("Not allowed by CORS"));
     }
+    
+    console.log(`[CORS] Requête depuis origine: ${origin}`);
     
     // Vérifier si l'origine est autorisée
     const isAllowed = allowedCorsOrigins.some(allowed => {
@@ -120,8 +124,11 @@ app.use(cors({
     
     if (isAllowed) {
       // Retourner l'origine exacte pour que le header Access-Control-Allow-Origin soit correct
+      console.log(`[CORS] ✅ Origine autorisée: ${origin}`);
       callback(null, origin);
     } else {
+      console.log(`[CORS] ❌ Origine refusée: ${origin}`);
+      console.log(`[CORS] Origines autorisées:`, allowedCorsOrigins);
       callback(new Error("Not allowed by CORS"));
     }
   },
