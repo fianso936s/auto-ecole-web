@@ -25,6 +25,7 @@
     "audit:production": "tsx scripts/audit-production-server.ts",
     "generate:secrets": "tsx scripts/generate-jwt-secrets.ts",
     "test:api-db": "tsx scripts/test-api-db-communication.ts",
+    "test:full-stack": "tsx scripts/test-full-stack.ts",
     "test:security": "tsx scripts/test-security.ts"
   },
   "prisma": {
