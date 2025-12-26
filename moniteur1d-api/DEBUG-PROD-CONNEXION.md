@@ -32,7 +32,7 @@
 ```bash
 # Tester avec différents emails possibles
 npm run test:prod-details -- admin@moniteur1d.com fianso936s@@@
-npm run test:prod-details -- Admin@moniteur1d.fr fianso936s@@@
+npm run test:prod-details -- admin@moniteur1d.com fianso936s@@@
 ```
 
 ### Solution 2: Vérifier le mot de passe
@@ -54,12 +54,12 @@ ADMIN_PASSWORD="fianso936s@@@" npm run prisma:seed
 
 ```bash
 # Test détaillé
-npm run test:prod-details -- admin@moniteur1d.fr fianso936s@@@
+npm run test:prod-details -- admin@moniteur1d.com fianso936s@@@
 
 # Test avec curl (plus de détails)
 curl -X POST "https://api.moniteur1d.com/auth/login" \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@moniteur1d.fr","password":"fianso936s@@@"}' \
+  -d '{"email":"admin@moniteur1d.com","password":"fianso936s@@@"}' \
   -v
 ```
 

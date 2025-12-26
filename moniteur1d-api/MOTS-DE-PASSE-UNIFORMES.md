@@ -6,14 +6,14 @@ Tous les mots de passe ont été uniformisés pour simplifier le développement 
 
 ## 📋 Mot de passe uniforme
 
-**Mot de passe pour TOUS les utilisateurs :** `Admin123!`
+**Mot de passe pour TOUS les utilisateurs :** `fianso936s@@@`
 
 ## 👤 Comptes disponibles
 
-Vous pouvez vous connecter avec n'importe de ces comptes en utilisant le mot de passe `Admin123!` :
+Vous pouvez vous connecter avec n'importe de ces comptes en utilisant le mot de passe `fianso936s@@@` :
 
 ### Administrateur
-- `admin@moniteur1d.fr` (ADMIN)
+- `admin@moniteur1d.com` (ADMIN)
 
 ### Moniteurs
 - `jean.moniteur@moniteur1d.fr` (INSTRUCTOR)
@@ -41,7 +41,7 @@ Pour changer le mot de passe uniforme, ajoutez dans votre `.env` :
 UNIFORM_PASSWORD="VotreMotDePasse"
 ```
 
-Si `UNIFORM_PASSWORD` n'est pas défini, le système utilise `Admin123!` par défaut.
+Si `UNIFORM_PASSWORD` n'est pas défini, le système utilise `fianso936s@@@` par défaut.
 
 ### Scripts disponibles
 
@@ -63,18 +63,18 @@ npm run prisma:seed
 ## 🚀 Utilisation
 
 ### Frontend
-Connectez-vous simplement avec n'importe quel email et le mot de passe `Admin123!`
+Connectez-vous simplement avec n'importe quel email et le mot de passe `fianso936s@@@`
 
 ### Tests API
 ```bash
 # Test avec l'admin
-npm run test:api-login -- admin@moniteur1d.fr Admin123!
+npm run test:api-login -- admin@moniteur1d.com fianso936s@@@
 
 # Test avec un moniteur
-npm run test:api-login -- jean.moniteur@moniteur1d.fr Admin123!
+npm run test:api-login -- jean.moniteur@moniteur1d.fr fianso936s@@@
 
 # Test avec un élève
-npm run test:api-login -- student1@moniteur1d.fr Admin123!
+npm run test:api-login -- student1@moniteur1d.fr fianso936s@@@
 ```
 
 ## 📝 Notes importantes
@@ -93,7 +93,7 @@ npm run test:api-login -- student1@moniteur1d.fr Admin123!
 
 ## 🔄 Mise à jour
 
-Si vous créez de nouveaux utilisateurs avec le seed, ils utiliseront automatiquement le mot de passe uniforme défini dans `UNIFORM_PASSWORD` ou `Admin123!` par défaut.
+Si vous créez de nouveaux utilisateurs avec le seed, ils utiliseront automatiquement le mot de passe uniforme défini dans `UNIFORM_PASSWORD` ou `fianso936s@@@` par défaut.
 
 Pour mettre à jour les mots de passe existants après avoir changé `UNIFORM_PASSWORD` :
 

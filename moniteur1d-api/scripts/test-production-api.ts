@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const PROD_API_URL = 'https://api.moniteur1d.com';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@moniteur1d.fr';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@moniteur1d.com';
 
 interface LoginResponse {
   user?: {

@@ -79,23 +79,36 @@ export const login = async (req: Request, res: Response) => {
   }
 
   try {
+    const normalizedEmail = email.toLowerCase().trim();
+    console.log(`[LOGIN] Tentative de connexion avec email: ${normalizedEmail}`);
+    
     const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
+      where: { email: normalizedEmail },
       include: { profile: true }
     });
 
     if (!user) {
+      console.log(`[LOGIN] Utilisateur non trouvé pour email: ${normalizedEmail}`);
       return res.status(401).json({ message: "Identifiants invalides" });
     }
+
+    console.log(`[LOGIN] Utilisateur trouvé: ${user.email}, rôle: ${user.role}, a un mot de passe: ${!!user.password}`);
 
     if (!user.password) {
+      console.log(`[LOGIN] L'utilisateur ${user.email} n'a pas de mot de passe`);
       return res.status(401).json({ message: "Identifiants invalides" });
     }
 
+    console.log(`[LOGIN] Comparaison du mot de passe pour ${user.email}`);
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log(`[LOGIN] Résultat de la comparaison: ${isPasswordValid}`);
+    
     if (!isPasswordValid) {
+      console.log(`[LOGIN] Mot de passe invalide pour ${user.email}`);
       return res.status(401).json({ message: "Identifiants invalides" });
     }
+
+    console.log(`[LOGIN] Connexion réussie pour ${user.email}`);
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);

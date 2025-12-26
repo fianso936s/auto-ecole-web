@@ -25,12 +25,12 @@ Ce script affichera :
 ### 2. Tester la connexion avec un utilisateur spécifique
 
 ```bash
-npm run test:login -- admin@moniteur1d.fr VotreMotDePasse
+npm run test:login -- admin@moniteur1d.com VotreMotDePasse
 ```
 
 Ou :
 ```powershell
-.\check-db.ps1 admin@moniteur1d.fr VotreMotDePasse
+.\check-db.ps1 admin@moniteur1d.com VotreMotDePasse
 ```
 
 ## 📋 Checklist de débogage
@@ -56,7 +56,7 @@ Ou :
 
 1. **Vérifiez `.env` :**
    ```env
-   ADMIN_EMAIL=admin@moniteur1d.fr
+   ADMIN_EMAIL=admin@moniteur1d.com
    ADMIN_PASSWORD=VotreMotDePasse
    DATABASE_URL=postgresql://...
    JWT_SECRET=...
@@ -64,7 +64,7 @@ Ou :
 
 2. **Testez le mot de passe :**
    ```bash
-   npm run test:login -- admin@moniteur1d.fr VotreMotDePasse
+   npm run test:login -- admin@moniteur1d.com VotreMotDePasse
    ```
 
 3. **Si le test échoue :**
@@ -82,7 +82,7 @@ Ou :
    ```bash
    curl -X POST http://localhost:3001/api/auth/login \
      -H "Content-Type: application/json" \
-     -d '{"email":"admin@moniteur1d.fr","password":"VotreMotDePasse"}'
+     -d '{"email":"fianso936s@@@","password":"VotreMotDePasse"}'
    ```
 
 3. **Vérifiez la réponse :**
@@ -174,7 +174,7 @@ Total: 1 utilisateur(s)
 
 ────────────────────────────────────────────────────────────────────────────────
 👤 Utilisateur ID: clx1234567890
-   Email: admin@moniteur1d.fr
+   Email: admin@moniteur1d.com
    Rôle: ADMIN
    Mot de passe: ✅ Présent
    Longueur hash: 60 caractères
@@ -187,12 +187,12 @@ Total: 1 utilisateur(s)
 
 ✅ 1 administrateur(s) trouvé(s):
 
-   1. admin@moniteur1d.fr
+   1. admin@moniteur1d.com
       Mot de passe: ✅ Présent
 
 🧪 Test de vérification de mot de passe:
 
-   Test avec: admin@moniteur1d.fr
+   Test avec: admin@moniteur1d.com
    Résultat: ✅ Mot de passe valide
 ```
 

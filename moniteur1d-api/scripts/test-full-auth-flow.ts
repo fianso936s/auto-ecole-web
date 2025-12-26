@@ -195,7 +195,7 @@ async function main() {
   
   if (args.length < 2) {
     console.log('Usage: npm run test:auth-flow -- <email> <password>');
-    console.log('Exemple: npm run test:auth-flow -- admin@moniteur1d.fr MonMotDePasse123');
+    console.log('Exemple: npm run test:auth-flow -- admin@moniteur1d.com MonMotDePasse123');
     process.exit(1);
   }
 

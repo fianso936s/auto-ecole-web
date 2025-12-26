@@ -30,19 +30,19 @@ Dans un **autre terminal**, toujours depuis `moniteur1d-api` :
 
 #### Option A: Avec PowerShell (Windows)
 ```powershell
-.\test-api-connection.ps1 admin@moniteur1d.fr VotreMotDePasse
+.\test-api-connection.ps1 admin@moniteur1d.com VotreMotDePasse
 ```
 
 #### Option B: Avec npm
 ```bash
-npm run test:api-login -- admin@moniteur1d.fr VotreMotDePasse
+npm run test:api-login -- admin@moniteur1d.com VotreMotDePasse
 ```
 
 #### Option C: Avec curl (tous systèmes)
 ```bash
 curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d "{\"email\":\"admin@moniteur1d.fr\",\"password\":\"VotreMotDePasse\"}" \
+  -d "{\"email\":\"admin@moniteur1d.com\",\"password\":\"VotreMotDePasse\"}" \
   -v
 ```
 
@@ -54,7 +54,7 @@ curl -X POST http://localhost:3001/api/auth/login \
 4. Body (JSON):
 ```json
 {
-  "email": "admin@moniteur1d.fr",
+  "email": "admin@moniteur1d.com",
   "password": "VotreMotDePasse"
 }
 ```
@@ -76,7 +76,7 @@ Set-Cookie: refreshToken=...; HttpOnly; ...
 {
   "user": {
     "id": "cmjhrts2n0000u73wjc58z3ga",
-    "email": "admin@moniteur1d.fr",
+    "email": "admin@moniteur1d.com",
     "role": "ADMIN",
     "profile": {
       "firstName": "Admin",

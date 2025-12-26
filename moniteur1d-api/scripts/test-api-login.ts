@@ -4,7 +4,7 @@ dotenv.config();
 
 const API_URL = process.env.API_URL || process.env.VITE_API_URL || 'https://api.moniteur1d.com';
 const API_PREFIX = process.env.API_PREFIX || ''; // Les routes sont directement sur /auth, pas /api/auth
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@moniteur1d.fr';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@moniteur1d.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 
 interface LoginResponse {

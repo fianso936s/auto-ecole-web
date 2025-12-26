@@ -60,7 +60,7 @@ Ouvrez la console du navigateur (F12) et regardez les erreurs :
 
 **Erreur 401 "Identifiants invalides":**
 - Les identifiants sont incorrects
-- Solution: Utilisez `admin@moniteur1d.fr` / `soo@maroki1@@cl`
+- Solution: Utilisez `admin@moniteur1d.com` / `fianso936s@@@`
 
 **Erreur "Cannot GET /auth/login":**
 - Tentative d'accès avec GET au lieu de POST
@@ -83,13 +83,13 @@ Ouvrez la console du navigateur (F12) et regardez les erreurs :
 
 ### Test direct du backend
 ```powershell
-$body = @{email="admin@moniteur1d.fr";password="soo@maroki1@@cl"} | ConvertTo-Json
+$body = @{email="admin@moniteur1d.com";password="fianso936s@@@"} | ConvertTo-Json
 Invoke-WebRequest -Uri "http://localhost:3001/auth/login" -Method POST -Body $body -ContentType "application/json"
 ```
 
 ### Test via le proxy (si Vite est démarré)
 ```powershell
-$body = @{email="admin@moniteur1d.fr";password="soo@maroki1@@cl"} | ConvertTo-Json
+$body = @{email="admin@moniteur1d.com";password="fianso936s@@@"} | ConvertTo-Json
 Invoke-WebRequest -Uri "http://localhost:5173/auth/login" -Method POST -Body $body -ContentType "application/json"
 ```
 
@@ -100,7 +100,7 @@ Le backend retourne :
 {
   "user": {
     "id": "...",
-    "email": "admin@moniteur1d.fr",
+    "email": "admin@moniteur1d.com",
     "role": "ADMIN",
     "profile": {
       "firstName": "Admin",
@@ -118,7 +118,7 @@ Les cookies `accessToken` et `refreshToken` sont envoyés automatiquement.
 - [ ] Le frontend est démarré sur `http://localhost:5173`
 - [ ] Le fichier `.env.local` existe avec `VITE_API_URL=http://localhost:3001`
 - [ ] Le serveur Vite a été redémarré après création de `.env.local`
-- [ ] Les identifiants sont corrects (`admin@moniteur1d.fr` / `soo@maroki1@@cl`)
+- [ ] Les identifiants sont corrects (`admin@moniteur1d.com` / `fianso936s@@@`)
 - [ ] La console du navigateur ne montre pas d'erreurs CORS
 - [ ] La requête dans l'onglet Network montre un POST vers `/auth/login`
 

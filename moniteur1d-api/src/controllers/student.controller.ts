@@ -1,23 +1,9 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
-import { z } from "zod";
 import bcrypt from "bcrypt";
 import { logAction } from "../lib/audit.js";
 import { AuthRequest } from "../middleware/auth.js";
 import { emitEvent } from "../lib/socket.js";
-
-const studentSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6).optional(),
-  firstName: z.string().min(2),
-  lastName: z.string().min(2),
-  phone: z.string(),
-  city: z.string(),
-  birthDate: z.string().optional(),
-  address: z.string().optional(),
-  postalCode: z.string().optional(),
-  cpfEligible: z.boolean().optional(),
-});
 
 export const getStudents = async (req: AuthRequest, res: Response) => {
   const { query, status, page = "1" } = req.query;
@@ -62,7 +48,7 @@ export const getStudents = async (req: AuthRequest, res: Response) => {
 
 export const createStudent = async (req: AuthRequest, res: Response) => {
   try {
-    const data = studentSchema.parse(req.body);
+    const data = req.body; // Les données sont déjà validées par le middleware validate()
     const normalizedEmail = data.email.toLowerCase().trim();
     
     // Vérifier si l'email existe déjà
@@ -74,7 +60,12 @@ export const createStudent = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Cet email est déjà utilisé" });
     }
     
-    const hashedPassword = await bcrypt.hash(data.password || "default_password_123", 10);
+    // Le mot de passe est requis par le schéma de validation
+    if (!data.password) {
+      return res.status(400).json({ message: "Le mot de passe est requis" });
+    }
+    
+    const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const student = await prisma.user.create({
       data: {

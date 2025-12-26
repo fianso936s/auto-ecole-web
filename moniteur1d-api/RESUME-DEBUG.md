@@ -5,7 +5,7 @@
 ### Base de données
 - ✅ Connexion à la base de données : **OK**
 - ✅ 13 utilisateurs trouvés :
-  - 1 ADMIN : `admin@moniteur1d.fr`
+  - 1 ADMIN : `admin@moniteur1d.com`
   - 2 INSTRUCTOR : `jean.moniteur@moniteur1d.fr`, `marie.monitrice@moniteur1d.fr`
   - 10 STUDENT : `student1@moniteur1d.fr` à `student10@moniteur1d.fr`
 - ✅ Tous les utilisateurs ont un mot de passe (hash bcrypt de 60 caractères)
@@ -44,7 +44,7 @@ npm run test:api-login
 
 Ou avec PowerShell :
 ```powershell
-.\test-api-connection.ps1 admin@moniteur1d.fr VotreMotDePasse
+.\test-api-connection.ps1 admin@moniteur1d.com VotreMotDePasse
 ```
 
 ### Étape 3: Vérifier les résultats
@@ -94,7 +94,7 @@ Ou avec PowerShell :
 3. Vérifiez les logs du serveur pour des erreurs
 
 ### Si Status 401 (Identifiants invalides)
-1. Vérifiez avec `npm run test:login -- admin@moniteur1d.fr password`
+1. Vérifiez avec `npm run test:login -- admin@moniteur1d.com password`
 2. Vérifiez que `ADMIN_PASSWORD` dans `.env` correspond
 3. Réexécutez `npm run prisma:seed` si nécessaire
 

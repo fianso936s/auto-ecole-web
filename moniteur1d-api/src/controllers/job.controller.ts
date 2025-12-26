@@ -41,7 +41,7 @@ export const runJobs = async (req: Request, res: Response) => {
       }
     });
 
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@moniteur1d.fr";
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@moniteur1d.com";
     for (const lead of pendingLeads) {
       await sendEmail(
         adminEmail,

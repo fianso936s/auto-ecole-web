@@ -32,13 +32,13 @@ Cette commande affichera :
 npm run test:login -- <email> <password>
 
 # Exemple
-npm run test:login -- admin@moniteur1d.fr MonMotDePasse123
+npm run test:login -- admin@moniteur1d.com MonMotDePasse123
 
 # Avec PowerShell
-.\check-db.ps1 admin@moniteur1d.fr MonMotDePasse123
+.\check-db.ps1 admin@moniteur1d.com MonMotDePasse123
 
 # Avec batch
-check-db.bat admin@moniteur1d.fr MonMotDePasse123
+check-db.bat admin@moniteur1d.com MonMotDePasse123
 ```
 
 ## 📋 Ce que le script vérifie
@@ -81,7 +81,7 @@ Total: 3 utilisateur(s)
 
 ────────────────────────────────────────────────────────────────────────────────
 👤 Utilisateur ID: clx1234567890
-   Email: admin@moniteur1d.fr
+   Email: admin@moniteur1d.com
    Rôle: ADMIN
    Mot de passe: ✅ Présent
    Longueur hash: 60 caractères
@@ -94,12 +94,12 @@ Total: 3 utilisateur(s)
 
 ✅ 1 administrateur(s) trouvé(s):
 
-   1. admin@moniteur1d.fr
+   1. admin@moniteur1d.com
       Mot de passe: ✅ Présent
 
 🧪 Test de vérification de mot de passe:
 
-   Test avec: admin@moniteur1d.fr
+   Test avec: admin@moniteur1d.com
    Résultat: ✅ Mot de passe valide
 ```
 

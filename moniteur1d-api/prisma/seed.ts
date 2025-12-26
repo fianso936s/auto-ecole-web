@@ -4,9 +4,9 @@ import bcrypt from 'bcrypt'
 const prisma = new PrismaClient()
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@moniteur1d.fr'
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@moniteur1d.com'
   // Utiliser UNIFORM_PASSWORD si défini, sinon ADMIN_PASSWORD, sinon mot de passe par défaut
-  const adminPassword = process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || 'Admin123!'
+  const adminPassword = process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || 'fianso936s@@@'
   const adminFirstName = process.env.ADMIN_FIRST_NAME || 'Admin'
   const adminLastName = process.env.ADMIN_LAST_NAME || 'System'
 

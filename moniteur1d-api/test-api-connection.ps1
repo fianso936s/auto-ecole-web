@@ -7,7 +7,7 @@ param(
 )
 
 $API_URL = "http://localhost:3001"
-$ADMIN_EMAIL = "admin@moniteur1d.fr"
+$ADMIN_EMAIL = "admin@moniteur1d.com"
 
 Write-Host "🌐 Test de connexion via l'API" -ForegroundColor Cyan
 Write-Host "   URL: $API_URL/api/auth/login" -ForegroundColor Gray
@@ -38,7 +38,7 @@ if (-not $Email) {
 if (-not $Password) {
     Write-Host "❌ Mot de passe requis" -ForegroundColor Red
     Write-Host "Usage: .\test-api-connection.ps1 [email] [password]" -ForegroundColor Yellow
-    Write-Host "Exemple: .\test-api-connection.ps1 admin@moniteur1d.fr VotreMotDePasse" -ForegroundColor Yellow
+    Write-Host "Exemple: .\test-api-connection.ps1 admin@moniteur1d.com VotreMotDePasse" -ForegroundColor Yellow
     exit 1
 }
 
