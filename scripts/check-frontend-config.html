@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification Configuration Frontend</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border-left: 4px solid #2196F3;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnostic Configuration Frontend</h1>
+        
+        <div class="section">
+            <h2>1. Informations du navigateur</h2>
+            <div id="browserInfo"></div>
+        </div>
+
+        <div class="section">
+            <h2>2. Variables d'environnement</h2>
+            <div id="envInfo"></div>
+        </div>
+
+        <div class="section">
+            <h2>3. Résolution de l'URL API</h2>
+            <button onclick="testApiUrlResolution()">Tester la résolution</button>
+            <div id="apiUrlResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>4. Test de connexion Socket.IO</h2>
+            <button onclick="testSocketIO()">Tester Socket.IO</button>
+            <div id="socketResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>5. Test de connexion API</h2>
+            <button onclick="testApiConnection()">Tester la connexion API</button>
+            <div id="apiConnectionResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>6. Solutions recommandées</h2>
+            <div id="solutions"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Afficher les informations du navigateur
+        const browserInfo = {
+            hostname: window.location.hostname,
+            port: window.location.port,
+            origin: window.location.origin,
+            protocol: window.location.protocol,
+            href: window.location.href,
+            isLocalhost: /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/i.test(window.location.hostname),
+            isDev: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        };
+
+        document.getElementById('browserInfo').innerHTML = `
+            <pre>${JSON.stringify(browserInfo, null, 2)}</pre>
+            ${!browserInfo.isLocalhost ? 
+                '<div class="error">⚠️ Le hostname n\'est pas localhost! Le frontend va utiliser l\'URL de production.</div>' : 
+                '<div class="success">✅ Hostname détecté comme localhost</div>'}
+        `;
+
+        // Afficher les variables d'environnement (si disponibles)
+        const envInfo = {
+            VITE_API_URL: import.meta.env?.VITE_API_URL || 'non défini',
+            MODE: import.meta.env?.MODE || 'non défini',
+            DEV: import.meta.env?.DEV !== undefined ? import.meta.env.DEV : 'non défini',
+            PROD: import.meta.env?.PROD !== undefined ? import.meta.env.PROD : 'non défini'
+        };
+
+        document.getElementById('envInfo').innerHTML = `
+            <pre>${JSON.stringify(envInfo, null, 2)}</pre>
+            ${envInfo.VITE_API_URL !== 'non défini' ? 
+                `<div class="info">💡 VITE_API_URL est défini: ${envInfo.VITE_API_URL}</div>` : 
+                '<div class="success">✅ VITE_API_URL n\'est pas défini, le proxy Vite sera utilisé</div>'}
+        `;
+
+        // Fonction pour résoudre l'URL API (copie du code frontend)
+        function resolveApiBaseUrl() {
+            const DEV_DEFAULT = "";
+            const PROD_URL = "https://api.moniteur1d.com";
+            
+            const envUrl = import.meta.env?.VITE_API_URL?.trim();
+            if (envUrl) return envUrl.replace(/\/+$/, "");
+            
+            const isDev = import.meta.env?.DEV;
+            
+            if (typeof window !== "undefined") {
+                const { hostname, port } = window.location;
+                const isLocalhost = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/i.test(hostname) || 
+                                    (hostname === '' && (port === '5173' || port === '5174'));
+                
+                if (!isLocalhost && !isDev) {
+                    return PROD_URL;
+                }
+            }
+            
+            return DEV_DEFAULT;
+        }
+
+        window.testApiUrlResolution = function() {
+            const resultDiv = document.getElementById('apiUrlResult');
+            const apiUrl = resolveApiBaseUrl();
+            
+            let analysis = '';
+            if (apiUrl === '') {
+                analysis = '<div class="success">✅ Utilise le proxy Vite (chemin relatif)</div>';
+            } else if (apiUrl === 'https://api.moniteur1d.com') {
+                analysis = '<div class="error">❌ PROBLÈME: Utilise l\'URL de production!</div>';
+            } else {
+                analysis = `<div class="info">ℹ️ Utilise l\'URL: ${apiUrl}</div>`;
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="info">
+                    <strong>URL API résolue:</strong> ${apiUrl || '(vide - proxy Vite)'}<br>
+                    <strong>Hostname actuel:</strong> ${window.location.hostname}<br>
+                    <strong>Port actuel:</strong> ${window.location.port || '80/443'}<br>
+                    <strong>Mode DEV:</strong> ${import.meta.env?.DEV ? 'Oui' : 'Non'}<br>
+                    <strong>VITE_API_URL:</strong> ${import.meta.env?.VITE_API_URL || 'non défini'}
+                </div>
+                ${analysis}
+            `;
+        };
+
+        window.testSocketIO = async function() {
+            const resultDiv = document.getElementById('socketResult');
+            resultDiv.innerHTML = '<div class="info">Test de Socket.IO...</div>';
+            
+            try {
+                // Simuler la résolution pour Socket.IO
+                const apiUrl = resolveApiBaseUrl();
+                const socketUrl = !apiUrl ? window.location.origin : apiUrl;
+                
+                resultDiv.innerHTML = `
+                    <div class="info">
+                        <strong>URL Socket.IO:</strong> ${socketUrl}<br>
+                        <strong>URL API résolue:</strong> ${apiUrl || '(vide)'}<br>
+                        <strong>URL utilisée pour Socket.IO:</strong> ${socketUrl}
+                    </div>
+                    ${socketUrl.includes('api.moniteur1d.com') ? 
+                        '<div class="error">❌ PROBLÈME: Socket.IO essaie de se connecter à la production!</div>' : 
+                        '<div class="success">✅ Socket.IO utilisera l\'URL locale</div>'}
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Erreur: ${error.message}</div>`;
+            }
+        };
+
+        window.testApiConnection = async function() {
+            const resultDiv = document.getElementById('apiConnectionResult');
+            resultDiv.innerHTML = '<div class="info">Test de connexion API...</div>';
+            
+            try {
+                const apiUrl = resolveApiBaseUrl();
+                const testUrl = apiUrl ? `${apiUrl}/health` : '/health';
+                
+                const response = await fetch(testUrl, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Connexion API réussie!<br>
+                            URL utilisée: ${testUrl}<br>
+                            Réponse: ${JSON.stringify(data)}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ Erreur: ${response.status} ${response.statusText}<br>
+                            URL utilisée: ${testUrl}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Erreur: ${error.message}<br>
+                        Vérifiez que l'API est démarrée sur http://localhost:3001
+                    </div>
+                `;
+            }
+        };
+
+        // Afficher les solutions
+        const apiUrl = resolveApiBaseUrl();
+        let solutions = '';
+        
+        if (apiUrl === 'https://api.moniteur1d.com') {
+            solutions = `
+                <div class="error">
+                    <h3>❌ Problème détecté: Utilisation de l'URL de production</h3>
+                    <p><strong>Solutions:</strong></p>
+                    <ol>
+                        <li><strong>Vérifiez votre URL:</strong> Assurez-vous d'accéder au site via <code>http://localhost:5173</code> et non via un autre domaine</li>
+                        <li><strong>Vérifiez VITE_API_URL:</strong> Si vous avez un fichier .env, assurez-vous qu'il ne contient pas <code>VITE_API_URL=https://api.moniteur1d.com</code></li>
+                        <li><strong>Redémarrez le serveur:</strong> Arrêtez et redémarrez <code>npm run dev</code></li>
+                        <li><strong>Videz le cache:</strong> Appuyez sur Ctrl+F5 pour vider le cache du navigateur</li>
+                    </ol>
+                </div>
+            `;
+        } else {
+            solutions = `
+                <div class="success">
+                    <h3>✅ Configuration correcte</h3>
+                    <p>L'URL API est correctement résolue pour utiliser le proxy Vite en développement.</p>
+                </div>
+            `;
+        }
+        
+        document.getElementById('solutions').innerHTML = solutions;
+
+        // Exécuter automatiquement le test de résolution
+        setTimeout(() => {
+            testApiUrlResolution();
+        }, 500);
+    </script>
+</body>
+</html>
+

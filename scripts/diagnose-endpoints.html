@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Endpoints Frontend → API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnostic Endpoints Frontend → API</h1>
+        
+        <div class="info">
+            <strong>Configuration actuelle:</strong><br>
+            Frontend URL: <span id="frontendUrl"></span><br>
+            API URL résolue: <span id="apiUrl"></span><br>
+            Hostname: <span id="hostname"></span>
+        </div>
+
+        <div class="test-section">
+            <h2>1. Test de résolution de l'URL API</h2>
+            <button onclick="testApiUrlResolution()">Tester la résolution</button>
+            <div id="urlResolutionResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Test du token CSRF</h2>
+            <button onclick="testCSRFToken()">Récupérer le token CSRF</button>
+            <div id="csrfResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Test de connexion</h2>
+            <button onclick="testLogin()">Tester la connexion</button>
+            <div id="loginResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Test des endpoints</h2>
+            <button onclick="testEndpoints()">Tester tous les endpoints</button>
+            <div id="endpointsResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Test complet</h2>
+            <button onclick="runFullTest()">Lancer tous les tests</button>
+            <div id="fullTestResult"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Simuler la fonction resolveApiBaseUrl du frontend
+        function resolveApiBaseUrl() {
+            const DEV_DEFAULT = "";
+            const PROD_URL = "https://api.moniteur1d.com";
+            
+            const envUrl = import.meta.env?.VITE_API_URL?.trim();
+            if (envUrl) return envUrl.replace(/\/+$/, "");
+            
+            if (typeof window !== "undefined") {
+                const { hostname } = window.location;
+                if (!/^(localhost|127\.0\.0\.1)/i.test(hostname)) {
+                    return PROD_URL;
+                }
+            }
+            
+            return DEV_DEFAULT; // "" = utilise le proxy Vite
+        }
+
+        // Afficher la configuration
+        const apiUrl = resolveApiBaseUrl();
+        document.getElementById('frontendUrl').textContent = window.location.origin;
+        document.getElementById('apiUrl').textContent = apiUrl || '(chemin relatif - proxy Vite)';
+        document.getElementById('hostname').textContent = window.location.hostname;
+
+        window.testApiUrlResolution = function() {
+            const resultDiv = document.getElementById('urlResolutionResult');
+            const apiUrl = resolveApiBaseUrl();
+            const fullUrl = apiUrl ? `${apiUrl}/health` : '/health';
+            
+            resultDiv.innerHTML = `
+                <div class="result info">
+                    <strong>URL API résolue:</strong> ${apiUrl || '(vide - utilise proxy)'}<br>
+                    <strong>URL complète pour /health:</strong> ${fullUrl}<br>
+                    <strong>Utilise le proxy Vite:</strong> ${!apiUrl ? '✅ Oui' : '❌ Non (URL absolue)'}
+                </div>
+            `;
+        };
+
+        window.testCSRFToken = async function() {
+            const resultDiv = document.getElementById('csrfResult');
+            resultDiv.innerHTML = '<div class="result">Récupération du token CSRF...</div>';
+            
+            try {
+                const apiUrl = resolveApiBaseUrl();
+                const csrfUrl = apiUrl ? `${apiUrl}/auth/csrf-token` : '/auth/csrf-token';
+                
+                const response = await fetch(csrfUrl, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const token = data.csrfToken || response.headers.get('X-CSRF-Token');
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            ✅ Token CSRF récupéré avec succès<br>
+                            Token: ${token ? token.substring(0, 20) + '...' : 'Non trouvé'}<br>
+                            URL utilisée: ${csrfUrl}
+                        </div>
+                    `;
+                    window.csrfToken = token;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            ❌ Erreur: ${response.status} ${response.statusText}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ Erreur: ${error.message}
+                    </div>
+                `;
+            }
+        };
+
+        window.testLogin = async function() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = '<div class="result">Test de connexion...</div>';
+            
+            try {
+                // Récupérer le token CSRF d'abord
+                const apiUrl = resolveApiBaseUrl();
+                const csrfUrl = apiUrl ? `${apiUrl}/auth/csrf-token` : '/auth/csrf-token';
+                const csrfResponse = await fetch(csrfUrl, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const csrfData = await csrfResponse.json();
+                const csrfToken = csrfData.csrfToken || csrfResponse.headers.get('X-CSRF-Token');
+                
+                const loginUrl = apiUrl ? `${apiUrl}/auth/login` : '/auth/login';
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (csrfToken) {
+                    headers['X-CSRF-Token'] = csrfToken;
+                }
+                
+                const response = await fetch(loginUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'admin@moniteur1d.fr',
+                        password: 'lounes92'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            ✅ Connexion réussie!<br>
+                            Utilisateur: ${data.user?.email}<br>
+                            Rôle: ${data.user?.role}<br>
+                            URL utilisée: ${loginUrl}
+                        </div>
+                    `;
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            ❌ Erreur de connexion: ${response.status}<br>
+                            Message: ${errorData.message || response.statusText}<br>
+                            URL utilisée: ${loginUrl}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ Erreur: ${error.message}<br>
+                        Vérifiez que l'API est démarrée sur http://localhost:3001
+                    </div>
+                `;
+            }
+        };
+
+        window.testEndpoints = async function() {
+            const resultDiv = document.getElementById('endpointsResult');
+            resultDiv.innerHTML = '<div class="result">Test des endpoints...</div>';
+            
+            const apiUrl = resolveApiBaseUrl();
+            const endpoints = [
+                '/health',
+                '/auth/csrf-token',
+                '/auth/login',
+                '/offers'
+            ];
+            
+            let results = '<div class="result">';
+            for (const endpoint of endpoints) {
+                const fullUrl = apiUrl ? `${apiUrl}${endpoint}` : endpoint;
+                try {
+                    const response = await fetch(fullUrl, {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    const status = response.ok ? 'success' : 'warning';
+                    const icon = response.ok ? '✅' : '⚠️';
+                    results += `<div class="result ${status}">${icon} ${endpoint}: ${response.status} (${fullUrl})</div>`;
+                } catch (error) {
+                    results += `<div class="result error">❌ ${endpoint}: Erreur - ${error.message} (${fullUrl})</div>`;
+                }
+            }
+            results += '</div>';
+            resultDiv.innerHTML = results;
+        };
+
+        window.runFullTest = async function() {
+            const resultDiv = document.getElementById('fullTestResult');
+            resultDiv.innerHTML = '<div class="result">Lancement des tests complets...</div>';
+            
+            await testApiUrlResolution();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testCSRFToken();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testLogin();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testEndpoints();
+            
+            resultDiv.innerHTML = '<div class="result success">✅ Tous les tests ont été exécutés. Vérifiez les résultats ci-dessus.</div>';
+        };
+    </script>
+</body>
+</html>
+

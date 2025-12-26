@@ -17,11 +17,23 @@ export const useSocket = () => useContext(SocketContext);
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const API_URL = resolveApiBaseUrl();
+  
+  // Pour Socket.IO, on a besoin d'une URL complète
+  // Si API_URL est vide (proxy Vite), utiliser window.location.origin
+  const getSocketUrl = (): string => {
+    const apiUrl = resolveApiBaseUrl();
+    if (!apiUrl) {
+      // En développement avec proxy Vite, utiliser l'origine du frontend
+      return window.location.origin;
+    }
+    return apiUrl;
+  };
 
   useEffect(() => {
-    const socketInstance = io(API_URL, {
+    const socketUrl = getSocketUrl();
+    const socketInstance = io(socketUrl, {
       withCredentials: true,
+      transports: ['websocket', 'polling'],
     });
 
     socketInstance.on("connect", () => {

@@ -9,7 +9,8 @@
     "build:api": "cd moniteur1d-api && npm install && npx prisma generate && npm run build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\"",
+    "test:frontend-api": "tsx scripts/test-frontend-api-connection.ts"
   },
   "dependencies": {
     "@fullcalendar/daygrid": "^6.1.19",

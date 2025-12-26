@@ -23,6 +23,14 @@ export default defineConfig({
         cookieDomainRewrite: 'localhost',
         ws: true, // Pour WebSocket si nécessaire
       },
+      // Proxy pour Socket.IO
+      '/socket.io': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+        ws: true, // WebSocket pour Socket.IO
+        cookieDomainRewrite: 'localhost',
+      },
     },
   },
 })
