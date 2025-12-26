@@ -11,7 +11,15 @@
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
     "prisma:seed": "prisma db seed",
-    "test:auth": "node test-auth.js"
+    "test:auth": "node test-auth.js",
+    "check:db": "tsx scripts/check-db-access.ts",
+    "test:login": "tsx scripts/check-db-access.ts --test-login",
+    "test:auth-flow": "tsx scripts/test-full-auth-flow.ts",
+    "test:api-login": "tsx scripts/test-api-login.ts",
+    "test:prod-api": "tsx scripts/test-production-api.ts",
+    "test:prod-details": "tsx scripts/test-prod-with-details.ts",
+    "uniformize-passwords": "tsx scripts/uniformize-passwords.ts",
+    "update-passwords": "tsx scripts/update-seed-password.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

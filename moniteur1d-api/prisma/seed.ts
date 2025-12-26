@@ -5,13 +5,12 @@ const prisma = new PrismaClient()
 
 async function main() {
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@moniteur1d.fr'
-  const adminPassword = process.env.ADMIN_PASSWORD
+  // Utiliser UNIFORM_PASSWORD si défini, sinon ADMIN_PASSWORD, sinon mot de passe par défaut
+  const adminPassword = process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || 'Admin123!'
   const adminFirstName = process.env.ADMIN_FIRST_NAME || 'Admin'
   const adminLastName = process.env.ADMIN_LAST_NAME || 'System'
 
-  if (!adminPassword) {
-    throw new Error("❌ ERREUR : La variable d'environnement ADMIN_PASSWORD n'est pas définie.")
-  }
+  console.log(`🔐 Utilisation du mot de passe: ${adminPassword.length > 0 ? '***' + adminPassword.slice(-3) : 'NON DÉFINI'}`)
 
   const hashedPassword = await bcrypt.hash(adminPassword, 10)
 

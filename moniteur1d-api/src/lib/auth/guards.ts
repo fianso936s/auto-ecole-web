@@ -145,7 +145,18 @@ export const requireLessonAccess = (lessonIdParamName: string = "id") => {
       if (!instructorProfile || lesson.instructorId !== instructorProfile.id) {
         return res.status(403).json({ message: "Accès refusé - Vous n'êtes pas le moniteur de cette leçon" });
       }
-    } else     next();
+      return next();
+    } else if (req.user.role === "STUDENT") {
+      const studentProfile = await prisma.studentProfile.findUnique({
+        where: { userId: req.user.id }
+      });
+      if (!studentProfile || lesson.studentId !== studentProfile.id) {
+        return res.status(403).json({ message: "Accès refusé - Cette leçon ne vous appartient pas" });
+      }
+      return next();
+    }
+    
+    return res.status(403).json({ message: "Accès refusé - Rôle non autorisé" });
   };
 };
 
@@ -179,7 +190,37 @@ export const requireExamAccess = (examIdParamName: string = "id") => {
       if (!studentProfile || exam.studentId !== studentProfile.id) {
         return res.status(403).json({ message: "Accès refusé - Cet examen ne vous appartient pas" });
       }
-    } else     next();
+      return next();
+    } else if (req.user.role === "INSTRUCTOR") {
+      const instructorProfile = await prisma.instructorProfile.findUnique({
+        where: { userId: req.user.id }
+      });
+      if (!instructorProfile) {
+        return res.status(403).json({ message: "Accès refusé - Profil moniteur non trouvé" });
+      }
+      
+      // Vérifier si le moniteur a accès à cet élève via une leçon
+      const studentProfile = await prisma.studentProfile.findUnique({
+        where: { id: exam.studentId }
+      });
+      
+      if (studentProfile) {
+        const hasLesson = await prisma.lesson.findFirst({
+          where: {
+            instructorId: instructorProfile.id,
+            studentId: studentProfile.id
+          }
+        });
+        
+        if (!hasLesson) {
+          return res.status(403).json({ message: "Accès refusé - Cet élève ne vous est pas assigné" });
+        }
+      }
+      
+      return next();
+    }
+    
+    return res.status(403).json({ message: "Accès refusé - Rôle non autorisé" });
   };
 };
 
@@ -235,9 +276,11 @@ export const requireRequestAccess = (requestIdParamName: string = "id") => {
       if (!hasLesson) {
         return res.status(403).json({ message: "Accès refusé - Cet élève ne vous est pas assigné" });
       }
+      return next();
     }
-
-    next();
+    
+    // Si aucun rôle correspondant, refuser l'accès
+    return res.status(403).json({ message: "Accès refusé - Rôle non autorisé" });
   };
 };
 

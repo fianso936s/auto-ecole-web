@@ -147,7 +147,8 @@ initSocket(httpServer);
 const ensureAdminCreated = async () => {
   try {
     const adminEmail = process.env.ADMIN_EMAIL || "admin@moniteur1d.fr";
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    // Utiliser UNIFORM_PASSWORD si défini, sinon ADMIN_PASSWORD, sinon mot de passe par défaut
+    const adminPassword = process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || "Admin123!";
 
     if (!adminPassword) {
       console.log("⚠️ ADMIN_PASSWORD non configuré. Création admin automatique ignorée.");

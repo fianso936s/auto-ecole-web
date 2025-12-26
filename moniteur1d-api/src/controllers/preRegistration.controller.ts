@@ -73,6 +73,10 @@ export const getPreRegistration = async (req: AuthRequest, res: Response) => {
     }
 
     // Authorization check
+    if (!req.user) {
+      return res.status(401).json({ message: "Non authentifié" });
+    }
+    
     if (req.user.role !== "ADMIN" && preRegistration.userId !== req.user.id) {
       return res.status(403).json({ message: "Accès refusé" });
     }
