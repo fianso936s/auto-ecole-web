@@ -104,14 +104,23 @@ app.use(cors({
     if (!origin && process.env.NODE_ENV !== "production") {
       return callback(null, true);
     }
+    
+    // Si pas d'origine en production, refuser
+    if (!origin) {
+      return callback(new Error("Not allowed by CORS"));
+    }
+    
     // Vérifier si l'origine est autorisée
-    if (!origin || allowedCorsOrigins.some(allowed => {
+    const isAllowed = allowedCorsOrigins.some(allowed => {
       if (typeof allowed === "string") {
         return allowed === origin;
       }
       return allowed.test(origin);
-    })) {
-      callback(null, true);
+    });
+    
+    if (isAllowed) {
+      // Retourner l'origine exacte pour que le header Access-Control-Allow-Origin soit correct
+      callback(null, origin);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
