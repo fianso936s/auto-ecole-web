@@ -29,7 +29,8 @@
     "test:prod": "tsx scripts/test-production-only.ts",
     "test:security": "tsx scripts/test-security.ts",
     "fix:full-stack": "tsx scripts/fix-and-test-full-stack.ts",
-    "create:admin": "tsx scripts/create-admin-ssh.ts"
+    "create:admin": "tsx scripts/create-admin-ssh.ts",
+    "test:frontend-api": "tsx scripts/test-frontend-api-connection.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
