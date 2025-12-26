@@ -39,14 +39,14 @@ export const resolveApiBaseUrl = (): string => {
 
 ### Test direct du backend
 ```powershell
-$body = @{email="admin@moniteur1d.com";password="fianso936s@@@"} | ConvertTo-Json
+$body = @{email="admin@moniteur1d.com";password="lounes92"} | ConvertTo-Json
 Invoke-WebRequest -Uri "http://localhost:3001/auth/login" -Method POST -Body $body -ContentType "application/json"
 ```
 
 ### Test via le proxy Vite
 Si le serveur Vite est démarré sur `http://localhost:5173` :
 ```powershell
-$body = @{email="admin@moniteur1d.com";password="fianso936s@@@"} | ConvertTo-Json
+$body = @{email="admin@moniteur1d.com";password="lounes92"} | ConvertTo-Json
 Invoke-WebRequest -Uri "http://localhost:5173/auth/login" -Method POST -Body $body -ContentType "application/json"
 ```
 

@@ -26,7 +26,6 @@ export const submitContact = async (req: Request, res: Response) => {
         firstName: validatedData.firstName,
         lastName: validatedData.lastName,
         phone: validatedData.phone,
-        message: validatedData.message,
         status: "NEW",
         updatedAt: new Date(),
       },
@@ -35,9 +34,17 @@ export const submitContact = async (req: Request, res: Response) => {
         firstName: validatedData.firstName,
         lastName: validatedData.lastName,
         phone: validatedData.phone,
-        message: validatedData.message,
         source: "website",
         status: "NEW",
+      },
+    });
+
+    // Créer une activité pour stocker le message
+    await prisma.leadActivity.create({
+      data: {
+        leadId: lead.id,
+        type: "NOTE",
+        content: validatedData.message,
       },
     });
 

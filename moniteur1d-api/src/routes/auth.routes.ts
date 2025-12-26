@@ -1,7 +1,7 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import { register, login, logout, me, refresh } from "../controllers/auth.controller.js";
-import { authenticate } from "../middleware/auth.js";
+import { authenticate, authorize } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { loginSchema, registerSchema } from "../lib/validations/auth.schema.js";
 import prisma from "../lib/prisma.js";

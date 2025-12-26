@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { logAction } from "../lib/audit.js";
 import { AuthRequest } from "../middleware/auth.js";
 import { emitEvent } from "../lib/socket.js";
+import { z } from "zod";
+import { studentSchema } from "../lib/validations/student.schema.js";
 
 export const getStudents = async (req: AuthRequest, res: Response) => {
   const { query, status, page = "1" } = req.query;
@@ -135,23 +137,25 @@ export const updateStudent = async (req: AuthRequest, res: Response) => {
   const updateSchema = studentSchema.partial();
 
   try {
-    const data = updateSchema.parse(req.body);
+    const validated = updateSchema.parse({ body: req.body });
+    const bodyData = validated.body;
+    
+    const updateData: any = {};
+    if (bodyData?.firstName !== undefined) updateData.firstName = bodyData.firstName;
+    if (bodyData?.lastName !== undefined) updateData.lastName = bodyData.lastName;
+    if (bodyData?.phone !== undefined) updateData.phone = bodyData.phone;
+    if (bodyData?.city !== undefined) updateData.city = bodyData.city;
+    if (bodyData?.birthDate !== undefined) updateData.birthDate = new Date(bodyData.birthDate);
+    if (bodyData?.address !== undefined) updateData.address = bodyData.address;
+    if (bodyData?.postalCode !== undefined) updateData.postalCode = bodyData.postalCode;
+    if (bodyData?.cpfEligible !== undefined) updateData.cpfEligible = bodyData.cpfEligible;
     
     const student = await prisma.studentProfile.update({
       where: { id },
-      data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone,
-        city: data.city,
-        birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
-        address: data.address,
-        postalCode: data.postalCode,
-        cpfEligible: data.cpfEligible,
-      },
+      data: updateData,
     });
 
-    await logAction("UPDATE", "Student", student.id, req.user?.id, data);
+    await logAction("UPDATE", "Student", student.id, req.user?.id, updateData);
     emitEvent("student:update", student);
     res.json(student);
   } catch (error) {

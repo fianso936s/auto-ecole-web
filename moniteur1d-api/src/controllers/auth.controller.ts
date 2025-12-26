@@ -113,17 +113,24 @@ export const login = async (req: Request, res: Response) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
+    // Configuration des cookies pour cross-domain (api.moniteur1d.com <-> moniteur1d.com)
+    // En production avec domaines différents, utiliser SameSite=None avec Secure=true
+    const isCrossDomain = process.env.NODE_ENV === "production" && 
+                          process.env.FRONTEND_URL && 
+                          process.env.FRONTEND_URL.includes('moniteur1d.com') &&
+                          !process.env.FRONTEND_URL.includes('api.');
+    
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      sameSite: isCrossDomain ? "none" : (process.env.NODE_ENV === "production" ? "strict" : "lax"),
       maxAge: 15 * 60 * 1000 // 15 mins
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      sameSite: isCrossDomain ? "none" : (process.env.NODE_ENV === "production" ? "strict" : "lax"),
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -208,10 +215,16 @@ export const refresh = async (req: Request, res: Response) => {
 
     const newAccessToken = generateAccessToken(user);
 
+    // Configuration des cookies pour cross-domain
+    const isCrossDomain = process.env.NODE_ENV === "production" && 
+                          process.env.FRONTEND_URL && 
+                          process.env.FRONTEND_URL.includes('moniteur1d.com') &&
+                          !process.env.FRONTEND_URL.includes('api.');
+    
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      sameSite: isCrossDomain ? "none" : (process.env.NODE_ENV === "production" ? "strict" : "lax"),
       maxAge: 15 * 60 * 1000
     });
 

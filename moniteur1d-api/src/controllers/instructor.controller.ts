@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { logAction } from "../lib/audit.js";
 import { AuthRequest } from "../middleware/auth.js";
 import { emitEvent } from "../lib/socket.js";
+import { z } from "zod";
+import { instructorSchema } from "../lib/validations/instructor.schema.js";
 
 export const getInstructors = async (req: AuthRequest, res: Response) => {
   try {
@@ -117,21 +119,23 @@ export const updateInstructor = async (req: AuthRequest, res: Response) => {
   const updateSchema = instructorSchema.partial();
 
   try {
-    const data = updateSchema.parse(req.body);
+    const validated = updateSchema.parse({ body: req.body });
+    const bodyData = validated.body;
+    
+    const updateData: any = {};
+    if (bodyData?.firstName !== undefined) updateData.firstName = bodyData.firstName;
+    if (bodyData?.lastName !== undefined) updateData.lastName = bodyData.lastName;
+    if (bodyData?.phone !== undefined) updateData.phone = bodyData.phone;
+    if (bodyData?.licenseNumber !== undefined) updateData.licenseNumber = bodyData.licenseNumber;
+    if (bodyData?.bio !== undefined) updateData.bio = bodyData.bio;
+    if (bodyData?.isActive !== undefined) updateData.isActive = bodyData.isActive;
     
     const instructor = await prisma.instructorProfile.update({
       where: { id },
-      data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone,
-        licenseNumber: data.licenseNumber,
-        bio: data.bio,
-        isActive: data.isActive,
-      },
+      data: updateData,
     });
 
-    await logAction("UPDATE", "Instructor", instructor.id, req.user?.id, data);
+    await logAction("UPDATE", "Instructor", instructor.id, req.user?.id, updateData);
     emitEvent("instructor:update", instructor);
     res.json(instructor);
   } catch (error) {

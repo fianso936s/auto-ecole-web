@@ -82,7 +82,7 @@ Ou :
    ```bash
    curl -X POST http://localhost:3001/api/auth/login \
      -H "Content-Type: application/json" \
-     -d '{"email":"fianso936s@@@","password":"VotreMotDePasse"}'
+     -d '{"email":"lounes92","password":"VotreMotDePasse"}'
    ```
 
 3. **Vérifiez la réponse :**

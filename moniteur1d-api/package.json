@@ -19,7 +19,11 @@
     "test:prod-api": "tsx scripts/test-production-api.ts",
     "test:prod-details": "tsx scripts/test-prod-with-details.ts",
     "uniformize-passwords": "tsx scripts/uniformize-passwords.ts",
-    "update-passwords": "tsx scripts/update-seed-password.ts"
+    "update-passwords": "tsx scripts/update-seed-password.ts",
+    "audit:api": "tsx scripts/audit-api-complete.ts",
+    "audit:api:report": "tsx scripts/audit-api-complete.ts",
+    "audit:production": "tsx scripts/audit-production-server.ts",
+    "generate:secrets": "tsx scripts/generate-jwt-secrets.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

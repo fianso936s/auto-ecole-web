@@ -5,7 +5,7 @@
 - ✅ API accessible sur `https://api.moniteur1d.com`
 - ✅ Serveur répond (Status 200 sur `/health`)
 - ❌ Connexion échoue avec Status 401 "Identifiants invalides"
-- ❌ Mot de passe testé : `fianso936s@@@` ne fonctionne pas
+- ❌ Mot de passe testé : `lounes92` ne fonctionne pas
 
 ## Causes possibles
 
@@ -31,8 +31,8 @@
 ### Solution 1: Vérifier l'email exact
 ```bash
 # Tester avec différents emails possibles
-npm run test:prod-details -- admin@moniteur1d.com fianso936s@@@
-npm run test:prod-details -- admin@moniteur1d.com fianso936s@@@
+npm run test:prod-details -- admin@moniteur1d.com lounes92
+npm run test:prod-details -- admin@moniteur1d.com lounes92
 ```
 
 ### Solution 2: Vérifier le mot de passe
@@ -43,7 +43,7 @@ npm run test:prod-details -- admin@moniteur1d.com fianso936s@@@
 ```bash
 # Se connecter au serveur de production
 # Exécuter le seed avec le bon mot de passe
-ADMIN_PASSWORD="fianso936s@@@" npm run prisma:seed
+ADMIN_PASSWORD="lounes92" npm run prisma:seed
 ```
 
 ### Solution 4: Vérifier les logs du serveur
@@ -54,12 +54,12 @@ ADMIN_PASSWORD="fianso936s@@@" npm run prisma:seed
 
 ```bash
 # Test détaillé
-npm run test:prod-details -- admin@moniteur1d.com fianso936s@@@
+npm run test:prod-details -- admin@moniteur1d.com lounes92
 
 # Test avec curl (plus de détails)
 curl -X POST "https://api.moniteur1d.com/auth/login" \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@moniteur1d.com","password":"fianso936s@@@"}' \
+  -d '{"email":"admin@moniteur1d.com","password":"lounes92"}' \
   -v
 ```
 

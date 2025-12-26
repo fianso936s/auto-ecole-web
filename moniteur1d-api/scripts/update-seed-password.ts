@@ -7,7 +7,7 @@ dotenv.config();
 const prisma = new PrismaClient();
 
 // Mot de passe uniforme
-const UNIFORM_PASSWORD = process.env.UNIFORM_PASSWORD || 'fianso936s@@@';
+const UNIFORM_PASSWORD = process.env.UNIFORM_PASSWORD || 'lounes92';
 
 async function updateSeedPassword() {
   console.log('🔄 Mise à jour du mot de passe pour tous les utilisateurs créés par le seed');

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { resolveApiBaseUrl } from "../lib/api/apiUrl";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -16,9 +17,10 @@ export const useSocket = () => useContext(SocketContext);
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const API_URL = resolveApiBaseUrl();
 
   useEffect(() => {
-    const socketInstance = io(import.meta.env.VITE_API_URL || "http://localhost:3001", {
+    const socketInstance = io(API_URL, {
       withCredentials: true,
     });
 

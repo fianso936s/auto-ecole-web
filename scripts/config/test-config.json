@@ -1,0 +1,62 @@
+{
+  "api": {
+    "baseUrl": "http://localhost:3001",
+    "timeout": 30000
+  },
+  "auth": {
+    "testEmail": "admin@moniteur1d.com",
+    "testPassword": "lounes92",
+    "testUser": {
+      "email": "test@example.com",
+      "password": "Test123!@#",
+      "firstName": "Test",
+      "lastName": "User"
+    }
+  },
+  "mockData": {
+    "student": {
+      "firstName": "Test",
+      "lastName": "Student",
+      "email": "student@test.com",
+      "phone": "1234567890",
+      "city": "Paris",
+      "postalCode": "75001"
+    },
+    "instructor": {
+      "firstName": "Test",
+      "lastName": "Instructor",
+      "email": "instructor@test.com",
+      "phone": "1234567890"
+    },
+    "vehicle": {
+      "brand": "Test",
+      "model": "Model",
+      "licensePlate": "TEST-123",
+      "year": 2020
+    },
+    "lesson": {
+      "instructorId": "test-instructor-id",
+      "studentId": "test-student-id",
+      "vehicleId": "test-vehicle-id",
+      "startTime": "2025-01-01T10:00:00Z",
+      "duration": 60
+    },
+    "availability": {
+      "instructorId": "test-instructor-id",
+      "startTime": "2025-01-01T09:00:00Z",
+      "endTime": "2025-01-01T17:00:00Z"
+    },
+    "contact": {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message for contact form"
+    }
+  },
+  "testSettings": {
+    "skipAuth": false,
+    "skipDestructive": true,
+    "maxRetries": 3,
+    "retryDelay": 1000
+  }
+}
+

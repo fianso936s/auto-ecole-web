@@ -48,11 +48,17 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
       // Générer un nouveau accessToken
       const newAccessToken = generateAccessToken(user);
       
+      // Configuration des cookies pour cross-domain (api.moniteur1d.com <-> moniteur1d.com)
+      const isCrossDomain = process.env.NODE_ENV === "production" && 
+                            process.env.FRONTEND_URL && 
+                            process.env.FRONTEND_URL.includes('moniteur1d.com') &&
+                            !process.env.FRONTEND_URL.includes('api.');
+      
       // Définir le nouveau cookie
       res.cookie("accessToken", newAccessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+        sameSite: isCrossDomain ? "none" : (process.env.NODE_ENV === "production" ? "strict" : "lax"),
         maxAge: 15 * 60 * 1000 // 15 mins
       });
 

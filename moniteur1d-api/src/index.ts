@@ -41,11 +41,13 @@ app.set('trust proxy', true);
 const allowedCorsOrigins: Array<string | RegExp> = [
   "https://www.moniteur1d.com",
   "https://moniteur1d.com",
+  "https://powderblue-turtle-426494.hostingersite.com", // Domaine Hostinger temporaire
   "http://localhost:5173",
   "http://localhost:5174", // Port alternatif Vite
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174",
   /\.moniteur1d\.com$/,
+  /\.hostingersite\.com$/, // Autoriser tous les domaines Hostinger
 ];
 
 // Permet de piloter l'origine principale via variable d'env (utile en déploiement)
@@ -148,7 +150,7 @@ const ensureAdminCreated = async () => {
   try {
     const adminEmail = process.env.ADMIN_EMAIL || "admin@moniteur1d.com";
     // Utiliser UNIFORM_PASSWORD si défini, sinon ADMIN_PASSWORD, sinon mot de passe par défaut
-    const adminPassword = process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || "fianso936s@@@";
+    const adminPassword = process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || "lounes92";
 
     if (!adminPassword) {
       console.log("⚠️ ADMIN_PASSWORD non configuré. Création admin automatique ignorée.");
