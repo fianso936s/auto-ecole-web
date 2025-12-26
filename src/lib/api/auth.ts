@@ -18,3 +18,9 @@ export const authApi = {
     }),
 };
 
+// Export direct pour compatibilité
+export const login = authApi.login;
+export const me = authApi.me;
+export const register = authApi.register;
+export const logout = authApi.logout;
+

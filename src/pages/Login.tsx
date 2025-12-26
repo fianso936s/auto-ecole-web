@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Mail, Loader2, AlertCircle } from "lucide-react";
+import { Mail, Lock, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import {
@@ -19,6 +19,7 @@ import { login } from "../lib/api";
 
 const loginSchema = z.object({
   email: z.string().email("Email invalide"),
+  password: z.string().min(1, "Le mot de passe est requis"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -110,6 +111,28 @@ const Login: React.FC = () => {
                   <p className="flex items-center gap-1 text-xs text-red-600">
                     <AlertCircle className="h-3 w-3" />
                     {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Mot de passe
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10"
+                    {...register("password")}
+                  />
+                </div>
+                {errors.password && (
+                  <p className="flex items-center gap-1 text-xs text-red-600">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.password.message}
                   </p>
                 )}
               </div>
