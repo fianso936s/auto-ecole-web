@@ -32,7 +32,7 @@ export const register = async (req: Request, res: Response) => {
 
     const user = await prisma.user.create({
       data: {
-        email,
+        email: normalizedEmail, // Sauvegarder l'email normalisé pour éviter les conflits
         password: hashedPassword,
         role: "STUDENT", // 🔒 SÉCURITÉ : On force le rôle STUDENT ici pour empêcher l'auto-élévation de privilèges
         profile: {

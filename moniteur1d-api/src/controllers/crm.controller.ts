@@ -37,9 +37,9 @@ export const getLeads = async (req: AuthRequest, res: Response) => {
         status: status as any,
         ownerInstructorId: owner as string,
         OR: q ? [
-          { firstName: { contains: q as string, mode: "insensitive" } },
-          { lastName: { contains: q as string, mode: "insensitive" } },
-          { email: { contains: q as string, mode: "insensitive" } },
+          { firstName: { contains: q as string } },
+          { lastName: { contains: q as string } },
+          { email: { contains: q as string } },
         ] : undefined,
       },
       include: {
@@ -103,11 +103,22 @@ export const convertLead = async (req: AuthRequest, res: Response) => {
     const lead = await prisma.lead.findUnique({ where: { id } });
     if (!lead) return res.status(404).json({ message: "Lead non trouvé" });
 
+    const normalizedEmail = lead.email.toLowerCase().trim();
+    
+    // Vérifier si un utilisateur avec cet email existe déjà
+    const existingUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail }
+    });
+    
+    if (existingUser) {
+      return res.status(400).json({ message: "Un utilisateur avec cet email existe déjà" });
+    }
+
     const hashedPassword = await bcrypt.hash(password || "permis123", 10);
 
     const user = await prisma.user.create({
       data: {
-        email: lead.email,
+        email: normalizedEmail, // Sauvegarder l'email normalisé
         password: hashedPassword,
         role: "STUDENT",
         studentProfile: {

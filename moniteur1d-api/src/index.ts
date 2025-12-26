@@ -154,27 +154,60 @@ const ensureAdminCreated = async () => {
       return;
     }
 
+    const normalizedAdminEmail = adminEmail.toLowerCase().trim();
+    
+    // Vérifier d'abord si un admin avec cet email existe déjà
+    const adminByEmail = await prisma.user.findUnique({
+      where: { email: normalizedAdminEmail }
+    });
+    
+    // Vérifier aussi s'il existe un admin (peu importe l'email)
     const adminExists = await prisma.user.findFirst({
       where: { role: "ADMIN" }
     });
 
+    if (adminByEmail && adminByEmail.role === "ADMIN") {
+      console.log("✅ Compte admin existe déjà avec cet email.");
+      return;
+    }
+
     if (!adminExists) {
       console.log("🚀 Tentative de création du compte admin unique...");
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
-      await prisma.user.create({
-        data: {
-          email: adminEmail,
-          password: hashedPassword,
-          role: "ADMIN",
-          profile: {
-            create: {
-              firstName: "Admin",
-              lastName: "System",
+      
+      if (adminByEmail) {
+        // Un utilisateur avec cet email existe mais n'est pas admin
+        console.log("⚠️ Un utilisateur avec cet email existe déjà. Mise à jour du rôle en ADMIN...");
+        await prisma.user.update({
+          where: { id: adminByEmail.id },
+          data: { role: "ADMIN" }
+        });
+        console.log("✅ Rôle ADMIN attribué à l'utilisateur existant.");
+      } else {
+        // Aucun utilisateur avec cet email, créer un nouvel admin
+        await prisma.user.create({
+          data: {
+            email: normalizedAdminEmail, // Sauvegarder l'email normalisé
+            password: hashedPassword,
+            role: "ADMIN",
+            profile: {
+              create: {
+                firstName: "Admin",
+                lastName: "System",
+              }
             }
           }
-        }
+        });
+        console.log("✅ Compte admin créé avec succès au démarrage.");
+      }
+    } else if (adminByEmail && adminByEmail.role !== "ADMIN") {
+      // Un admin existe mais pas avec cet email, et un utilisateur avec cet email existe mais n'est pas admin
+      console.log("⚠️ Un admin existe déjà mais avec un autre email. L'utilisateur avec cet email sera promu ADMIN.");
+      await prisma.user.update({
+        where: { id: adminByEmail.id },
+        data: { role: "ADMIN" }
       });
-      console.log("✅ Compte admin créé avec succès au démarrage.");
+      console.log("✅ Rôle ADMIN attribué à l'utilisateur existant.");
     }
   } catch (error) {
     console.error("❌ Erreur lors de la vérification/création de l'admin :", error);

@@ -34,9 +34,9 @@ export const getStudents = async (req: AuthRequest, res: Response) => {
           },
           query ? {
             OR: [
-              { firstName: { contains: query as string, mode: "insensitive" } },
-              { lastName: { contains: query as string, mode: "insensitive" } },
-              { user: { email: { contains: query as string, mode: "insensitive" } } },
+              { firstName: { contains: query as string } },
+              { lastName: { contains: query as string } },
+              { user: { email: { contains: query as string } } },
             ]
           } : {},
         ]
@@ -63,11 +63,22 @@ export const getStudents = async (req: AuthRequest, res: Response) => {
 export const createStudent = async (req: AuthRequest, res: Response) => {
   try {
     const data = studentSchema.parse(req.body);
+    const normalizedEmail = data.email.toLowerCase().trim();
+    
+    // Vérifier si l'email existe déjà
+    const existingUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail }
+    });
+    
+    if (existingUser) {
+      return res.status(400).json({ message: "Cet email est déjà utilisé" });
+    }
+    
     const hashedPassword = await bcrypt.hash(data.password || "default_password_123", 10);
 
     const student = await prisma.user.create({
       data: {
-        email: data.email,
+        email: normalizedEmail, // Sauvegarder l'email normalisé
         password: hashedPassword,
         role: "STUDENT",
         studentProfile: {

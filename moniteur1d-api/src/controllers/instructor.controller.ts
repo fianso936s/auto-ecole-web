@@ -45,11 +45,22 @@ export const getInstructors = async (req: AuthRequest, res: Response) => {
 export const createInstructor = async (req: AuthRequest, res: Response) => {
   try {
     const data = instructorSchema.parse(req.body);
+    const normalizedEmail = data.email.toLowerCase().trim();
+    
+    // Vérifier si l'email existe déjà
+    const existingUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail }
+    });
+    
+    if (existingUser) {
+      return res.status(400).json({ message: "Cet email est déjà utilisé" });
+    }
+    
     const hashedPassword = await bcrypt.hash(data.password || "default_password_123", 10);
 
     const instructor = await prisma.user.create({
       data: {
-        email: data.email,
+        email: normalizedEmail, // Sauvegarder l'email normalisé
         password: hashedPassword,
         role: "INSTRUCTOR",
         instructorProfile: {
