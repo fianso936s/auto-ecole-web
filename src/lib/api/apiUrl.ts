@@ -16,8 +16,8 @@ export const resolveApiBaseUrl = (): string => {
     }
   }
 
-  // 3. En développement, utiliser le proxy Vite (chemin relatif)
-  // Le proxy redirige /api vers http://localhost:3001
-  return DEV_DEFAULT;
+  // 3. En développement, forcer l'URL directe pour éviter les problèmes de proxy
+  // Si VITE_API_URL n'est pas défini, utiliser l'URL directe du backend
+  return "http://localhost:3001";
 };
 
