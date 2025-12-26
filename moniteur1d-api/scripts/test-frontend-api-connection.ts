@@ -5,7 +5,7 @@ dotenv.config();
 // Configuration
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const API_URL = process.env.API_URL || process.env.VITE_API_URL || 'http://localhost:3001';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@moniteur1d.fr';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@moniteur1d.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.UNIFORM_PASSWORD || 'lounes92';
 
 interface TestResult {
