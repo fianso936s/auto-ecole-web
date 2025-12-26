@@ -1,4 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+import { resolveApiBaseUrl } from "./apiUrl";
+
+const API_URL = resolveApiBaseUrl();
+
+// Variable pour éviter les boucles infinies de refresh
+let isRefreshing = false;
+let refreshPromise: Promise<void> | null = null;
 
 export class ApiError extends Error {
   constructor(
@@ -11,9 +17,36 @@ export class ApiError extends Error {
   }
 }
 
+async function attemptRefresh(): Promise<void> {
+  // Si un refresh est déjà en cours, attendre qu'il se termine
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch(`${API_URL}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Refresh failed");
+      }
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 export async function fetchJson<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retryOn401: boolean = true
 ): Promise<T> {
   const url = `${API_URL}${endpoint}`;
 
@@ -48,6 +81,22 @@ export async function fetchJson<T>(
   }
 
   const data = await response.json().catch(() => ({}));
+
+  // Si 401 et que ce n'est pas déjà une tentative de refresh, essayer de rafraîchir
+  if (!response.ok && response.status === 401 && retryOn401 && endpoint !== "/auth/refresh") {
+    try {
+      await attemptRefresh();
+      // Réessayer la requête originale après refresh
+      return fetchJson<T>(endpoint, options, false); // false pour éviter les boucles
+    } catch (refreshError) {
+      // Si le refresh échoue, lancer l'erreur originale
+      throw new ApiError(
+        response.status,
+        data.message || "Session expirée. Veuillez vous reconnecter.",
+        data
+      );
+    }
+  }
 
   if (!response.ok) {
     // 409 conflict => message spécifique

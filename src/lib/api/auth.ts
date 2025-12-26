@@ -16,6 +16,10 @@ export const authApi = {
     fetchJson<any>("/auth/logout", {
       method: "POST",
     }),
+  refresh: () =>
+    fetchJson<any>("/auth/refresh", {
+      method: "POST",
+    }),
 };
 
 // Export direct pour compatibilité
@@ -23,4 +27,5 @@ export const login = authApi.login;
 export const me = authApi.me;
 export const register = authApi.register;
 export const logout = authApi.logout;
+export const refresh = authApi.refresh;
 

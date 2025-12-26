@@ -25,6 +25,7 @@ export const login = authApi.login;
 export const register = authApi.register;
 export const logout = authApi.logout;
 export const getMe = authApi.me;
+export const refresh = authApi.refresh;
 export const getOffers = offersApi.list;
 export const getOffer = offersApi.get;
 export const contact = contactApi.send;

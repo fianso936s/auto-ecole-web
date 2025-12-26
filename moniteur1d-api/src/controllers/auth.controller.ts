@@ -7,10 +7,25 @@ import { AuthRequest } from "../middleware/auth.js";
 export const register = async (req: Request, res: Response) => {
   const { email, password, firstName, lastName } = req.body;
 
+  // Validation basique
+  if (!email || !password || !firstName || !lastName) {
+    return res.status(400).json({ 
+      message: "Tous les champs sont requis",
+      errors: [
+        { field: !email ? "email" : !password ? "password" : !firstName ? "firstName" : "lastName", message: "Ce champ est requis" }
+      ]
+    });
+  }
+
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const normalizedEmail = email.toLowerCase().trim();
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existingUser) {
       return res.status(400).json({ message: "Cet email est déjà utilisé" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Le mot de passe doit contenir au moins 6 caractères" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -41,21 +56,39 @@ export const register = async (req: Request, res: Response) => {
     });
 
     res.status(201).json({ message: "Compte créé avec succès" });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la création du compte" });
+  } catch (error: any) {
+    console.error("Erreur lors de la création du compte:", error);
+    res.status(500).json({ 
+      message: "Erreur lors de la création du compte",
+      ...(process.env.NODE_ENV !== "production" && { error: error.message })
+    });
   }
 };
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
+  // Validation basique
+  if (!email || !password) {
+    return res.status(400).json({ 
+      message: "Email et mot de passe sont requis",
+      errors: [
+        { field: !email ? "email" : "password", message: "Ce champ est requis" }
+      ]
+    });
+  }
+
   try {
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase().trim() },
       include: { profile: true }
     });
 
     if (!user) {
+      return res.status(401).json({ message: "Identifiants invalides" });
+    }
+
+    if (!user.password) {
       return res.status(401).json({ message: "Identifiants invalides" });
     }
 
@@ -99,8 +132,12 @@ export const login = async (req: Request, res: Response) => {
         profile: user.profile
       }
     });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la connexion" });
+  } catch (error: any) {
+    console.error("Erreur lors de la connexion:", error);
+    res.status(500).json({ 
+      message: "Erreur lors de la connexion",
+      ...(process.env.NODE_ENV !== "production" && { error: error.message })
+    });
   }
 };
 
@@ -129,21 +166,32 @@ export const me = async (req: AuthRequest, res: Response) => {
         profile: user.profile
       }
     });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur serveur" });
+  } catch (error: any) {
+    console.error("Erreur lors de la récupération de l'utilisateur:", error);
+    res.status(500).json({ 
+      message: "Erreur serveur",
+      ...(process.env.NODE_ENV !== "production" && { error: error.message })
+    });
   }
 };
 
 export const refresh = async (req: Request, res: Response) => {
   const token = req.cookies.refreshToken;
 
-  if (!token) return res.status(401).json({ message: "Non authentifié" });
+  if (!token) {
+    return res.status(401).json({ message: "Non authentifié" });
+  }
 
   try {
     const decoded = verifyRefreshToken(token);
-    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+    const user = await prisma.user.findUnique({ 
+      where: { id: decoded.id },
+      select: { id: true, email: true, role: true }
+    });
 
-    if (!user) return res.status(401).json({ message: "Utilisateur non trouvé" });
+    if (!user) {
+      return res.status(401).json({ message: "Utilisateur non trouvé" });
+    }
 
     const newAccessToken = generateAccessToken(user);
 
@@ -155,8 +203,12 @@ export const refresh = async (req: Request, res: Response) => {
     });
 
     res.json({ message: "Token rafraîchi" });
-  } catch (error) {
-    res.status(401).json({ message: "Token invalide" });
+  } catch (error: any) {
+    console.error("Erreur lors du refresh du token:", error);
+    res.status(401).json({ 
+      message: "Token invalide ou expiré",
+      ...(process.env.NODE_ENV !== "production" && { error: error.message })
+    });
   }
 };
 

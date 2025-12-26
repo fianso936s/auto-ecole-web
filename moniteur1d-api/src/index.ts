@@ -35,16 +35,27 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy (Nginx reverse proxy)
+app.set('trust proxy', true);
+
 const allowedCorsOrigins: Array<string | RegExp> = [
   "https://www.moniteur1d.com",
   "https://moniteur1d.com",
   "http://localhost:5173",
+  "http://localhost:5174", // Port alternatif Vite
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
   /\.moniteur1d\.com$/,
 ];
 
 // Permet de piloter l'origine principale via variable d'env (utile en déploiement)
 if (process.env.FRONTEND_URL) {
-  allowedCorsOrigins.unshift(process.env.FRONTEND_URL);
+  const frontendUrls = process.env.FRONTEND_URL.split(",").map(url => url.trim());
+  frontendUrls.forEach(url => {
+    if (url && !allowedCorsOrigins.includes(url)) {
+      allowedCorsOrigins.unshift(url);
+    }
+  });
 }
 
 // Global Rate limiting
@@ -58,10 +69,32 @@ const limiter = rateLimit({
 
 // Middlewares
 app.use(limiter);
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
+}));
 app.use(cors({
-  origin: allowedCorsOrigins,
-  credentials: true
+  origin: (origin, callback) => {
+    // En développement, permettre les requêtes sans origine (ex: Postman, curl)
+    if (!origin && process.env.NODE_ENV !== "production") {
+      return callback(null, true);
+    }
+    // Vérifier si l'origine est autorisée
+    if (!origin || allowedCorsOrigins.some(allowed => {
+      if (typeof allowed === "string") {
+        return allowed === origin;
+      }
+      return allowed.test(origin);
+    })) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["Content-Type"],
 }));
 app.use(cookieParser());
 app.use(hpp() as any);

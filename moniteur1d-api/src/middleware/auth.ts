@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { verifyAccessToken } from "../lib/auth.js";
+import { verifyAccessToken, verifyRefreshToken, generateAccessToken } from "../lib/auth.js";
+import prisma from "../lib/prisma.js";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -9,20 +10,68 @@ export interface AuthRequest extends Request {
   };
 }
 
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const token = req.cookies.accessToken;
+export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const accessToken = req.cookies.accessToken;
+  const refreshToken = req.cookies.refreshToken;
 
-  if (!token) {
+  // Si pas de token du tout, retourner 401
+  if (!accessToken && !refreshToken) {
     return res.status(401).json({ message: "Non authentifié" });
   }
 
-  try {
-    const decoded = verifyAccessToken(token);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: "Token invalide ou expiré" });
+  // Essayer de vérifier l'accessToken d'abord
+  if (accessToken) {
+    try {
+      const decoded = verifyAccessToken(accessToken);
+      req.user = decoded;
+      return next();
+    } catch (error) {
+      // AccessToken invalide ou expiré, continuer pour vérifier refreshToken
+    }
   }
+
+  // Si accessToken invalide/expiré, vérifier refreshToken
+  if (refreshToken) {
+    try {
+      const decoded = verifyRefreshToken(refreshToken);
+      
+      // Récupérer l'utilisateur depuis la base de données pour obtenir email et role
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: { id: true, email: true, role: true }
+      });
+
+      if (!user) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      // Générer un nouveau accessToken
+      const newAccessToken = generateAccessToken(user);
+      
+      // Définir le nouveau cookie
+      res.cookie("accessToken", newAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+        maxAge: 15 * 60 * 1000 // 15 mins
+      });
+
+      // Définir l'utilisateur dans la requête
+      req.user = {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      };
+
+      return next();
+    } catch (error) {
+      // RefreshToken aussi invalide
+      return res.status(401).json({ message: "Session expirée. Veuillez vous reconnecter." });
+    }
+  }
+
+  // Aucun token valide
+  return res.status(401).json({ message: "Non authentifié" });
 };
 
 export const authorize = (roles: string[]) => {
