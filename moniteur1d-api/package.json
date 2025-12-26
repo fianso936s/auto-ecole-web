@@ -23,7 +23,9 @@
     "audit:api": "tsx scripts/audit-api-complete.ts",
     "audit:api:report": "tsx scripts/audit-api-complete.ts",
     "audit:production": "tsx scripts/audit-production-server.ts",
-    "generate:secrets": "tsx scripts/generate-jwt-secrets.ts"
+    "generate:secrets": "tsx scripts/generate-jwt-secrets.ts",
+    "test:api-db": "tsx scripts/test-api-db-communication.ts",
+    "test:security": "tsx scripts/test-security.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -34,9 +36,12 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.957.0",
     "@prisma/client": "^6.1.0",
+    "@types/dompurify": "^3.0.5",
+    "argon2": "^0.44.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dompurify": "^3.3.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-rate-limit": "^7.2.0",
@@ -44,6 +49,7 @@
     "hpp": "^0.2.3",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
+    "node-fetch": "^2.7.0",
     "pdfkit": "^0.17.2",
     "resend": "^6.6.0",
     "socket.io": "^4.8.3",
