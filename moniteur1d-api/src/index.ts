@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
+import { sanitizeInput } from "./middleware/sanitize.js";
+import { csrfToken, verifyCSRF } from "./middleware/csrf.js";
 import rateLimit from "express-rate-limit";
 import hpp from "hpp";
 import dotenv from "dotenv";
@@ -36,7 +38,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Trust proxy (Nginx reverse proxy)
-app.set('trust proxy', true);
+app.set("trust proxy", true);
 
 const allowedCorsOrigins: Array<string | RegExp> = [
   "https://www.moniteur1d.com",
@@ -52,8 +54,10 @@ const allowedCorsOrigins: Array<string | RegExp> = [
 
 // Permet de piloter l'origine principale via variable d'env (utile en déploiement)
 if (process.env.FRONTEND_URL) {
-  const frontendUrls = process.env.FRONTEND_URL.split(",").map(url => url.trim());
-  frontendUrls.forEach(url => {
+  const frontendUrls = process.env.FRONTEND_URL.split(",").map((url) =>
+    url.trim()
+  );
+  frontendUrls.forEach((url) => {
     if (url && !allowedCorsOrigins.includes(url)) {
       allowedCorsOrigins.unshift(url);
     }
@@ -64,94 +68,106 @@ if (process.env.FRONTEND_URL) {
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: "Trop de requêtes effectuées depuis cette adresse IP, réessayez plus tard.",
+  message:
+    "Trop de requêtes effectuées depuis cette adresse IP, réessayez plus tard.",
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 // Middlewares
 app.use(limiter);
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false,
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"], // 'unsafe-inline' nécessaire pour certains frameworks CSS
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'", "data:"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
-      upgradeInsecureRequests: [],
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"], // 'unsafe-inline' nécessaire pour certains frameworks CSS
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'", "data:"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
     },
-  },
-  xssFilter: true,
-  noSniff: true,
-  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
-  permittedCrossDomainPolicies: false,
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true,
-  },
-}));
-app.use(cors({
-  origin: (origin, callback) => {
-    // En développement, permettre les requêtes sans origine (ex: Postman, curl)
-    if (!origin && process.env.NODE_ENV !== "production") {
-      console.log(`[CORS] Requête sans origine autorisée (dev)`);
-      return callback(null, true);
-    }
-    
-    // Si pas d'origine en production, refuser
-    if (!origin) {
-      console.log(`[CORS] ❌ Requête sans origine refusée (production)`);
-      return callback(new Error("Not allowed by CORS"));
-    }
-    
-    console.log(`[CORS] Requête depuis origine: ${origin}`);
-    
-    // Vérifier si l'origine est autorisée
-    const isAllowed = allowedCorsOrigins.some(allowed => {
-      if (typeof allowed === "string") {
-        return allowed === origin;
+    xssFilter: true,
+    noSniff: true,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    permittedCrossDomainPolicies: false,
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+  })
+);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // En développement, permettre les requêtes sans origine (ex: Postman, curl)
+      if (!origin && process.env.NODE_ENV !== "production") {
+        console.log(`[CORS] Requête sans origine autorisée (dev)`);
+        return callback(null, true);
       }
-      return allowed.test(origin);
-    });
-    
-    if (isAllowed) {
-      // Retourner l'origine exacte pour que le header Access-Control-Allow-Origin soit correct
-      console.log(`[CORS] ✅ Origine autorisée: ${origin}`);
-      callback(null, origin);
-    } else {
-      console.log(`[CORS] ❌ Origine refusée: ${origin}`);
-      console.log(`[CORS] Origines autorisées:`, allowedCorsOrigins);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token", "csrf-token"],
-  exposedHeaders: ["Content-Type", "X-CSRF-Token"],
-}));
+
+      // Si pas d'origine en production, refuser
+      if (!origin) {
+        console.log(`[CORS] ❌ Requête sans origine refusée (production)`);
+        return callback(new Error("Not allowed by CORS"));
+      }
+
+      console.log(`[CORS] Requête depuis origine: ${origin}`);
+
+      // Vérifier si l'origine est autorisée
+      const isAllowed = allowedCorsOrigins.some((allowed) => {
+        if (typeof allowed === "string") {
+          return allowed === origin;
+        }
+        return allowed.test(origin);
+      });
+
+      if (isAllowed) {
+        // Retourner l'origine exacte pour que le header Access-Control-Allow-Origin soit correct
+        console.log(`[CORS] ✅ Origine autorisée: ${origin}`);
+        callback(null, origin);
+      } else {
+        console.log(`[CORS] ❌ Origine refusée: ${origin}`);
+        console.log(`[CORS] Origines autorisées:`, allowedCorsOrigins);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-CSRF-Token",
+      "csrf-token",
+    ],
+    exposedHeaders: ["Content-Type", "X-CSRF-Token"],
+  })
+);
 app.use(cookieParser());
 app.use(hpp() as any);
 
-// Imports des middlewares de sécurité
-import { sanitizeInput } from "./middleware/sanitize.js";
-import { csrfToken, verifyCSRF } from "./middleware/csrf.js";
+// Middlewares imported at top of file
 
 // Générer un token CSRF pour toutes les requêtes (doit être avant express.json pour les GET)
 app.use(csrfToken);
 
 // Webhook route must come BEFORE express.json()
-app.use("/billing/webhook", express.raw({ type: "application/json" }), (req, res, next) => {
-  // Pass to billing routes specifically
-  next();
-});
+app.use(
+  "/billing/webhook",
+  express.raw({ type: "application/json" }),
+  (req, res, next) => {
+    // Pass to billing routes specifically
+    next();
+  }
+);
 
 app.use(express.json({ limit: "10kb" })); // Protection against large payloads
 
@@ -202,23 +218,26 @@ const ensureAdminCreated = async () => {
   try {
     const adminEmail = process.env.ADMIN_EMAIL || "admin@moniteur1d.com";
     // Utiliser UNIFORM_PASSWORD si défini, sinon ADMIN_PASSWORD, sinon mot de passe par défaut
-    const adminPassword = process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || "lounes92";
+    const adminPassword =
+      process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || "lounes92";
 
     if (!adminPassword) {
-      console.log("⚠️ ADMIN_PASSWORD non configuré. Création admin automatique ignorée.");
+      console.log(
+        "⚠️ ADMIN_PASSWORD non configuré. Création admin automatique ignorée."
+      );
       return;
     }
 
     const normalizedAdminEmail = adminEmail.toLowerCase().trim();
-    
+
     // Vérifier d'abord si un admin avec cet email existe déjà
     const adminByEmail = await prisma.user.findUnique({
-      where: { email: normalizedAdminEmail }
+      where: { email: normalizedAdminEmail },
     });
-    
+
     // Vérifier aussi s'il existe un admin (peu importe l'email)
     const adminExists = await prisma.user.findFirst({
-      where: { role: "ADMIN" }
+      where: { role: "ADMIN" },
     });
 
     if (adminByEmail && adminByEmail.role === "ADMIN") {
@@ -229,13 +248,15 @@ const ensureAdminCreated = async () => {
     if (!adminExists) {
       console.log("🚀 Tentative de création du compte admin unique...");
       const hashedPassword = await hashPassword(adminPassword);
-      
+
       if (adminByEmail) {
         // Un utilisateur avec cet email existe mais n'est pas admin
-        console.log("⚠️ Un utilisateur avec cet email existe déjà. Mise à jour du rôle en ADMIN...");
+        console.log(
+          "⚠️ Un utilisateur avec cet email existe déjà. Mise à jour du rôle en ADMIN..."
+        );
         await prisma.user.update({
           where: { id: adminByEmail.id },
-          data: { role: "ADMIN" }
+          data: { role: "ADMIN" },
         });
         console.log("✅ Rôle ADMIN attribué à l'utilisateur existant.");
       } else {
@@ -249,23 +270,28 @@ const ensureAdminCreated = async () => {
               create: {
                 firstName: "Admin",
                 lastName: "System",
-              }
-            }
-          }
+              },
+            },
+          },
         });
         console.log("✅ Compte admin créé avec succès au démarrage.");
       }
     } else if (adminByEmail && adminByEmail.role !== "ADMIN") {
       // Un admin existe mais pas avec cet email, et un utilisateur avec cet email existe mais n'est pas admin
-      console.log("⚠️ Un admin existe déjà mais avec un autre email. L'utilisateur avec cet email sera promu ADMIN.");
+      console.log(
+        "⚠️ Un admin existe déjà mais avec un autre email. L'utilisateur avec cet email sera promu ADMIN."
+      );
       await prisma.user.update({
         where: { id: adminByEmail.id },
-        data: { role: "ADMIN" }
+        data: { role: "ADMIN" },
       });
       console.log("✅ Rôle ADMIN attribué à l'utilisateur existant.");
     }
   } catch (error) {
-    console.error("❌ Erreur lors de la vérification/création de l'admin :", error);
+    console.error(
+      "❌ Erreur lors de la vérification/création de l'admin :",
+      error
+    );
   }
 };
 
@@ -273,4 +299,3 @@ httpServer.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
   await ensureAdminCreated();
 });
-
