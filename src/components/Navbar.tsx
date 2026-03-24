@@ -1,232 +1,137 @@
-import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, Car } from "lucide-react";
-import { Button } from "./ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "./ui/sheet";
-import ThemeToggle from "./ThemeToggle";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useMe } from "../hooks/useMe";
-import { logout } from "../lib/api";
-import { toast } from "sonner";
 
-const navLinks = [
-  { name: "Offres", href: "/offres" },
-  { name: "Tarifs", href: "/tarifs" },
-  { name: "Financement", href: "/financement" },
-  { name: "Avis", href: "/avis" },
-  { name: "Zones", href: "/zones" },
-  { name: "Contact", href: "/contact" },
+const routeLinks = [
+  { name: "Accueil", href: "/" },
+  { name: "Galerie", href: "/galerie" },
+  { name: "Soins", href: "/soins" },
 ];
-
-// Logo Component with Icon
-const Logo = ({ className = "" }: { className?: string }) => (
-  <div className={cn("flex items-center gap-2", className)}>
-    <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-hover shadow-elevation-1">
-      <Car className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
-      <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-accent-warm" />
-    </div>
-    <span className="font-display text-xl font-black tracking-tight text-foreground">
-      Moniteur<span className="text-primary">1D</span>
-    </span>
-  </div>
-);
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, loading } = useMe();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname === path;
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast.success("Déconnexion réussie");
-      navigate("/");
-      window.location.reload();
-    } catch (error: any) {
-      toast.error("Erreur lors de la déconnexion");
-    }
-  };
-
-  const getDashboardLink = () => {
-    if (!user) return null;
-    switch (user.role) {
-      case "ADMIN":
-        return "/admin";
-      case "INSTRUCTOR":
-        return "/coach";
-      case "STUDENT":
-        return "/app";
-      default:
-        return null;
+  const scrollToContact = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsOpen(false);
+    const footer = document.querySelector("footer");
+    if (footer) {
+      footer.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   return (
     <nav
-      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 shadow-elevation-1 backdrop-blur-lg transition-all duration-300"
+      className={cn(
+        "fixed top-0 z-50 w-full transition-all duration-500",
+        scrolled ? "glass shadow-elevation-2" : "bg-transparent"
+      )}
       aria-label="Navigation principale"
     >
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-12">
         {/* Logo */}
-        <Link
-          to="/"
-          className="group"
-          aria-label="Moniteur1D - Accueil"
-        >
-          <Logo className="transition-transform duration-200 group-hover:scale-[1.02]" />
+        <Link to="/" className="group" aria-label="bayaNail - Accueil">
+          <span className="font-display text-2xl tracking-wide text-charcoal transition-colors group-hover:text-rose-dark">
+            baya<span className="italic text-or-discret">Nail</span>
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex lg:items-center lg:space-x-6">
-          {navLinks.map((link) => (
+        <div className="hidden items-center gap-10 lg:flex">
+          {routeLinks.map((link) => (
             <Link
               key={link.name}
               to={link.href}
-              aria-current={isActive(link.href) ? "page" : undefined}
               className={cn(
-                "group relative py-2 text-sm font-semibold transition-all hover:text-primary",
-                isActive(link.href) ? "text-primary" : "text-muted-foreground"
+                "font-heading text-[0.8rem] font-medium uppercase tracking-[0.2em] transition-colors duration-300",
+                isActive(link.href)
+                  ? "text-charcoal"
+                  : "text-gris-moyen hover:text-charcoal"
               )}
             >
               {link.name}
-              <span
-                className={cn(
-                  "absolute bottom-0 left-0 h-0.5 w-full origin-left bg-primary transition-transform duration-300",
-                  isActive(link.href)
-                    ? "scale-x-100"
-                    : "scale-x-0 group-hover:scale-x-100"
-                )}
-              />
             </Link>
           ))}
+          <button
+            onClick={scrollToContact}
+            className="font-heading text-[0.8rem] font-medium uppercase tracking-[0.2em] text-gris-moyen transition-colors duration-300 hover:text-charcoal"
+          >
+            Contact
+          </button>
         </div>
 
-        {/* Desktop CTAs & Theme Toggle - Simplified to 2 CTAs max */}
-        <div className="hidden lg:flex lg:items-center lg:space-x-3">
-          <ThemeToggle />
-          {user ? (
-            <>
-              <Button variant="outline" size="sm" asChild>
-                <Link to={getDashboardLink() || "/"}>Mon espace</Link>
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
-                Déconnexion
-              </Button>
-            </>
+        {/* CTA Desktop */}
+        <div className="hidden lg:block">
+          <Link to="/reservation" className="btn-premium text-xs">
+            Réserver
+          </Link>
+        </div>
+
+        {/* Mobile Toggle */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex h-10 w-10 items-center justify-center lg:hidden"
+          aria-label="Menu"
+        >
+          {isOpen ? (
+            <X className="h-6 w-6 text-charcoal" />
           ) : (
-            <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/login">Connexion</Link>
-              </Button>
-              <Button variant="primary" size="sm" asChild>
-                <Link to="/preinscription">S'inscrire</Link>
-              </Button>
-            </>
+            <Menu className="h-6 w-6 text-charcoal" />
           )}
-        </div>
+        </button>
+      </div>
 
-        {/* Mobile Navigation (Burger Menu) */}
-        <div className="flex items-center space-x-2 lg:hidden">
-          <ThemeToggle />
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 border border-border/50 hover:bg-primary/10"
-              >
-                <Menu className="h-6 w-6 text-foreground" />
-                <span className="sr-only">Menu toggle</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="flex h-full w-full flex-col border-l border-border/40 bg-background/95 p-6 backdrop-blur-xl sm:max-w-xs"
+      {/* Mobile Menu */}
+      <div
+        className={cn(
+          "fixed inset-0 top-20 z-40 flex flex-col bg-creme transition-all duration-500 lg:hidden",
+          isOpen
+            ? "pointer-events-auto translate-y-0 opacity-100"
+            : "pointer-events-none -translate-y-4 opacity-0"
+        )}
+      >
+        <div className="flex flex-col items-center gap-8 pt-16">
+          {routeLinks.map((link) => (
+            <Link
+              key={link.name}
+              to={link.href}
+              onClick={() => setIsOpen(false)}
+              className={cn(
+                "font-heading text-sm font-medium uppercase tracking-[0.25em] transition-colors",
+                isActive(link.href) ? "text-charcoal" : "text-gris-moyen"
+              )}
             >
-              <SheetHeader className="mb-8 text-left">
-                <Logo />
-              </SheetHeader>
-
-              <nav
-                className="flex flex-col space-y-2"
-                aria-label="Navigation mobile"
-              >
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    to={link.href}
-                    onClick={() => setIsOpen(false)}
-                    aria-current={isActive(link.href) ? "page" : undefined}
-                    className={cn(
-                      "rounded-lg px-3 py-3 text-base font-medium transition-all",
-                      isActive(link.href)
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    )}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-              </nav>
-
-              <div className="mt-auto flex flex-col space-y-3 border-t border-border/50 pt-6">
-                {user ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full"
-                      asChild
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Link to={getDashboardLink() || "/"}>Mon espace</Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="lg"
-                      className="w-full"
-                      onClick={() => {
-                        setIsOpen(false);
-                        handleLogout();
-                      }}
-                    >
-                      Déconnexion
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full"
-                      asChild
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Link to="/login">Connexion</Link>
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      className="w-full"
-                      asChild
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Link to="/preinscription">S'inscrire</Link>
-                    </Button>
-                  </>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+              {link.name}
+            </Link>
+          ))}
+          <button
+            onClick={scrollToContact}
+            className="font-heading text-sm font-medium uppercase tracking-[0.25em] text-gris-moyen transition-colors"
+          >
+            Contact
+          </button>
+          <Link
+            to="/reservation"
+            onClick={() => setIsOpen(false)}
+            className="btn-premium mt-4"
+          >
+            Réserver
+          </Link>
         </div>
       </div>
     </nav>

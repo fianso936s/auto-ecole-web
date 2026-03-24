@@ -1,372 +1,195 @@
-import React, { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Check, Calculator, Info, TrendingDown, Loader2 } from "lucide-react";
+import React from "react";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import {
-  ScrollAnimation,
-  StaggerContainer,
-  StaggerItem,
-} from "../components/ui/ScrollAnimation";
-import { OFFRES as MOCK_OFFRES } from "../data/mockData";
-import { getOffers } from "../lib/api";
+
+const soinCategories = [
+  {
+    number: "01",
+    title: "Classic Care",
+    items: [
+      {
+        name: "Manucure",
+        description:
+          "Limage, soin des cuticules et pose de vernis classique. Finition soignée.",
+        price: "25€",
+      },
+      {
+        name: "Pédicure",
+        description:
+          "Soin complet des pieds : gommage, cuticules et vernis pour des pieds sublimés.",
+        price: "35€",
+      },
+      {
+        name: "Manucure Express",
+        description: "Limage et vernis express en 20 minutes. Idéal pause déjeuner.",
+        price: "20€",
+      },
+    ],
+  },
+  {
+    number: "02",
+    title: "Advanced Techniques",
+    items: [
+      {
+        name: "Pose Semi-Permanent",
+        description:
+          "Vernis gel longue tenue jusqu'à 3 semaines. Large choix de couleurs tendance.",
+        price: "35€",
+      },
+      {
+        name: "Dépose + Repose",
+        description:
+          "Dépose soigneuse et repose semi-permanent. Vos ongles restent en bonne santé.",
+        price: "45€",
+      },
+      {
+        name: "Gel Extensions",
+        description:
+          "Capsules gel, construction soignée, design sur-mesure. Tenue optimale.",
+        price: "à partir de 55€",
+      },
+      {
+        name: "Nail Art Custom",
+        description:
+          "French, milky, chrome, 3D, strass — votre design unique réalisé sur-mesure.",
+        price: "dès 5€/ongle",
+      },
+    ],
+  },
+  {
+    number: "03",
+    title: "Wellness Rituals",
+    items: [
+      {
+        name: "Soin Mains Complet",
+        description:
+          "Gommage, masque hydratant, massage relaxant. Vos mains retrouvent douceur et éclat.",
+        price: "25€",
+      },
+      {
+        name: "Soin Paraffine",
+        description:
+          "Bain de paraffine chaude pour hydrater en profondeur. Sensation de velours.",
+        price: "15€",
+      },
+    ],
+  },
+];
 
 const Tarifs: React.FC = () => {
-  const [hours, setHours] = useState<number>(20);
-  const [hasCode, setHasCode] = useState<boolean>(false);
-  const [isAccelerated, setIsAccelerated] = useState<boolean>(false);
-  const [total, setTotal] = useState<number>(0);
-  const [offres, setOffres] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const HOUR_PRICE = 55;
-  const CODE_PRICE = 150;
-  const ACCELERATED_FEE = 300;
-  const ADMIN_FEE = 80;
-
-  useEffect(() => {
-    const fetchOffres = async () => {
-      try {
-        const data = await getOffers();
-        const combined = data.map((apiOffre: any) => {
-          const mock = MOCK_OFFRES.find(
-            (m) => m.id === apiOffre.slug || m.title === apiOffre.name
-          );
-          return {
-            ...apiOffre,
-            title: apiOffre.name,
-            highlight: mock?.highlight || false,
-            priceDetail: mock?.priceDetail || "",
-            displayPrice:
-              typeof apiOffre.price === "number"
-                ? `${apiOffre.price}€`
-                : apiOffre.price,
-          };
-        });
-        setOffres(combined.length > 0 ? combined : MOCK_OFFRES);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des offres:", error);
-        setOffres(MOCK_OFFRES);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOffres();
-  }, []);
-
-  useEffect(() => {
-    let price = hours * HOUR_PRICE + ADMIN_FEE;
-    if (!hasCode) price += CODE_PRICE;
-    if (isAccelerated) price += ACCELERATED_FEE;
-    setTotal(price);
-  }, [hours, hasCode, isAccelerated]);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center px-4 pb-20 pt-32">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-[var(--bg-main)] px-4 pb-20 pt-32">
-      <div className="container mx-auto">
-        <ScrollAnimation className="mb-16 text-center">
-          <h1 className="mb-6 text-4xl font-bold text-foreground md:text-5xl">
-            Nos <span className="text-primary">Tarifs</span> Transparents
-          </h1>
-          <p className="mx-auto max-w-3xl text-lg leading-relaxed text-muted-foreground">
-            Pas de frais cachés. Nous croyons en une tarification claire et
-            juste pour tous nos élèves.
-          </p>
-        </ScrollAnimation>
+    <div className="min-h-screen pt-28">
+      {/* Header */}
+      <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-12">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            <p className="mb-3 font-heading text-xs font-medium uppercase tracking-[0.3em] text-or-discret">
+              Curated Selection
+            </p>
+            <h1 className="font-display text-charcoal">
+              Menu des Soins
+            </h1>
+            <p className="mt-6 max-w-md font-body text-lg leading-relaxed text-gris-moyen">
+              Une collection de soins experts et d'expressions artistiques
+              conçus pour sublimer vos ongles et révéler votre style.
+            </p>
+          </motion.div>
 
-        {/* Section Packs Recap */}
-        <ScrollAnimation className="mb-20">
-          <div className="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-            <div>
-              <h2 className="flex items-center gap-3 text-3xl font-bold text-foreground">
-                <div className="rounded-lg bg-green-500/10 p-2">
-                  <TrendingDown className="h-6 w-6 text-green-500" />
-                </div>
-                Nos Packs Tout-Compris
-              </h2>
-              <p className="mt-2 text-muted-foreground">
-                La solution la plus économique pour votre permis
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="relative overflow-hidden rounded-xl"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1604654894610-df63bc536371?w=700&q=80"
+              alt="Signature pose"
+              className="aspect-[4/3] w-full object-cover"
+              loading="eager"
+            />
+            <div className="absolute bottom-4 left-4 rounded-lg bg-white/90 px-4 py-2 backdrop-blur-sm">
+              <p className="font-display text-sm italic text-charcoal">
+                The Signature Glow
+              </p>
+              <p className="font-body text-xs text-gris-moyen">
+                Notre soin iconique
               </p>
             </div>
-            <Button
-              variant="outline"
-              asChild
-              className="border-primary/20 text-primary hover:bg-primary/5"
-            >
-              <Link to="/offres">Comparer toutes les offres</Link>
-            </Button>
-          </div>
+          </motion.div>
+        </div>
+      </section>
 
-          <div className="flex flex-wrap justify-center gap-6">
-            {offres.map((offre) => (
-              <Card
-                key={offre.id || offre.slug}
-                className={`group w-full max-w-sm border-2 transition-all duration-300 hover:-translate-y-1 sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] ${
-                  offre.highlight
-                    ? "border-primary bg-primary/[0.02] shadow-xl shadow-primary/10"
-                    : "border-border/50 bg-card shadow-sm hover:border-primary/30"
-                }`}
-              >
-                <CardContent className="p-6">
-                  <div className="flex h-full flex-col">
-                    <div className="mb-4">
-                      <h3 className="line-clamp-1 text-lg font-bold text-foreground transition-colors group-hover:text-primary">
-                        {offre.title || offre.name}
-                      </h3>
-                      {offre.priceDetail && (
-                        <p className="mt-1 text-xs font-bold uppercase tracking-wider text-primary">
-                          {offre.priceDetail}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="mt-auto flex items-center justify-between border-t border-border/50 pt-4">
-                      <div className="text-2xl font-black text-foreground">
-                        {offre.displayPrice || offre.price}
-                      </div>
-                      <Button
-                        size="sm"
-                        variant={offre.highlight ? "primary" : "outline"}
-                        asChild
-                        className="h-8 px-4 text-xs font-bold uppercase tracking-tighter"
-                      >
-                        <Link
-                          to={
-                            offre.id === "pack-sur-mesure" ||
-                            offre.slug === "pack-sur-mesure"
-                              ? "/contact"
-                              : "/preinscription"
-                          }
-                        >
-                          {offre.id === "pack-sur-mesure" ||
-                          offre.slug === "pack-sur-mesure"
-                            ? "Devis"
-                            : "Choisir"}
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </ScrollAnimation>
-
-        {/* Tableau des prix unitaires */}
-        <StaggerContainer
-          className="mb-20 flex flex-wrap justify-center gap-6"
-          delay={0.1}
-        >
-          {[
-            { label: "Heure de conduite", price: "55€", detail: "À l'unité" },
-            {
-              label: "Pack Code",
-              price: "150€",
-              detail: "Accès 6 mois + livre",
-            },
-            {
-              label: "Frais de dossier",
-              price: "80€",
-              detail: "Inscription ANTS",
-            },
-            {
-              label: "Accompagnement examen",
-              price: "55€",
-              detail: "Le jour J",
-            },
-          ].map((item, i) => (
-            <StaggerItem key={i} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-sm">
-              <Card className="flex h-full flex-col border border-border/50 bg-card text-center shadow-sm transition-shadow hover:shadow-md">
-                <CardHeader className="flex-grow">
-                  <CardTitle className="flex min-h-[3rem] items-center justify-center text-center text-lg font-medium text-muted-foreground">
-                    {item.label}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pb-8">
-                  <p className="text-3xl font-bold text-foreground">
-                    {item.price}
-                  </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {item.detail}
-                  </p>
-                </CardContent>
-              </Card>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
-
-        {/* Simulateur */}
-        <ScrollAnimation
-          id="simulateur"
-          className="mx-auto max-w-4xl scroll-mt-32"
-        >
-          <Card className="overflow-hidden border-2 border-primary/20 bg-card shadow-xl">
-            <div className="flex items-center gap-4 bg-primary p-6 text-white">
-              <Calculator className="h-8 w-8" />
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  Simulateur de Budget
-                </h2>
-                <p className="text-sm text-primary-foreground/80">
-                  Estimez le coût de votre formation en quelques clics
-                </p>
-              </div>
+      {/* Services List */}
+      <section className="mx-auto max-w-4xl px-6 pb-20 lg:px-12">
+        {soinCategories.map((category, catIndex) => (
+          <div
+            key={category.number}
+            className="mb-16"
+          >
+            <div className="mb-8 flex items-baseline gap-4">
+              <span className="font-display text-sm text-or-discret">
+                {category.number}
+              </span>
+              <h2 className="font-display text-2xl tracking-wide text-charcoal md:text-3xl">
+                {category.title}
+              </h2>
             </div>
-            <CardContent className="p-8">
-              <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
-                <div className="space-y-8">
-                  <div className="space-y-4">
-                    <Label
-                      htmlFor="hours"
-                      className="text-base font-semibold text-foreground"
-                    >
-                      Nombre d'heures estimé
-                    </Label>
-                    <div className="flex items-center gap-4">
-                      <Input
-                        id="hours"
-                        type="range"
-                        min="20"
-                        max="50"
-                        step="1"
-                        value={hours}
-                        onChange={(e) => setHours(parseInt(e.target.value))}
-                        className="h-2 flex-grow cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
-                      />
-                      <span className="w-12 text-xl font-bold text-primary">
-                        {hours}h
-                      </span>
-                    </div>
-                    <p className="text-xs italic text-muted-foreground">
-                      20h est le minimum légal obligatoire.
-                    </p>
-                  </div>
 
-                  <div className="space-y-4">
-                    <Label className="text-base font-semibold text-foreground">
-                      Options additionnelles
-                    </Label>
-                    <div className="space-y-3">
-                      <label className="group flex cursor-pointer items-center gap-3">
-                        <div
-                          className={`flex h-6 w-6 items-center justify-center rounded border transition-colors ${hasCode ? "border-primary bg-primary" : "border-border group-hover:border-primary/50"}`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={hasCode}
-                            onChange={() => setHasCode(!hasCode)}
-                            className="hidden"
-                          />
-                          {hasCode && <Check className="h-4 w-4 text-white" />}
-                        </div>
-                        <span className="text-foreground/80">
-                          J'ai déjà mon code de la route
-                        </span>
-                      </label>
-                      <label className="group flex cursor-pointer items-center gap-3">
-                        <div
-                          className={`flex h-6 w-6 items-center justify-center rounded border transition-colors ${isAccelerated ? "border-primary bg-primary" : "border-border group-hover:border-primary/50"}`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isAccelerated}
-                            onChange={() => setIsAccelerated(!isAccelerated)}
-                            className="hidden"
-                          />
-                          {isAccelerated && (
-                            <Check className="h-4 w-4 text-white" />
-                          )}
-                        </div>
-                        <span className="text-foreground/80">
-                          Formation accélérée (+300€)
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col justify-between rounded-2xl border border-border/50 bg-muted/50 p-8 shadow-inner">
-                  <div>
-                    <h3 className="mb-6 text-center text-lg font-bold uppercase tracking-wider text-foreground/80">
-                      Votre Devis Estimatif
+            <div className="space-y-0">
+              {category.items.map((item, i) => (
+                <div
+                  key={item.name}
+                  className={`flex items-start justify-between gap-8 py-6 ${
+                    i < category.items.length - 1
+                      ? "border-b border-gris-chaud"
+                      : ""
+                  }`}
+                >
+                  <div className="flex-1">
+                    <h3 className="font-heading text-base font-semibold text-charcoal">
+                      {item.name}
                     </h3>
-                    <ul className="mb-8 space-y-4">
-                      <li className="flex justify-between border-b border-border/50 pb-2 text-muted-foreground">
-                        <span>
-                          Conduite ({hours}h x {HOUR_PRICE}€)
-                        </span>
-                        <span className="font-medium text-foreground">
-                          {hours * HOUR_PRICE}€
-                        </span>
-                      </li>
-                      <li className="flex justify-between border-b border-border/50 pb-2 text-muted-foreground">
-                        <span>Frais de dossier</span>
-                        <span className="font-medium text-foreground">
-                          {ADMIN_FEE}€
-                        </span>
-                      </li>
-                      {!hasCode && (
-                        <li className="flex justify-between border-b border-border/50 pb-2 text-muted-foreground">
-                          <span>Pack Code complet</span>
-                          <span className="font-medium text-foreground">
-                            {CODE_PRICE}€
-                          </span>
-                        </li>
-                      )}
-                      {isAccelerated && (
-                        <li className="flex justify-between border-b border-border/50 pb-2 text-muted-foreground">
-                          <span>Option Accéléré</span>
-                          <span className="font-medium text-foreground">
-                            {ACCELERATED_FEE}€
-                          </span>
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                  <div className="pt-6">
-                    <div className="mb-8 flex items-end justify-between">
-                      <span className="text-xl font-bold text-foreground">
-                        Total TTC
-                      </span>
-                      <span className="text-4xl font-black text-primary">
-                        {total}€
-                      </span>
-                    </div>
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      className="w-full shadow-lg shadow-primary/20"
-                      asChild
-                    >
-                      <Link to="/preinscription">S'inscrire maintenant</Link>
-                    </Button>
-                    <p className="mt-4 text-center text-[10px] font-medium uppercase text-muted-foreground">
-                      * Estimation basée sur vos sélections. Un bilan de
-                      compétences est requis pour un devis définitif.
+                    <p className="mt-1 font-body text-sm leading-relaxed text-gris-moyen">
+                      {item.description}
                     </p>
                   </div>
+                  <span className="shrink-0 font-display text-lg text-charcoal">
+                    {item.price}
+                  </span>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </ScrollAnimation>
-      </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Quote */}
+      <section className="bg-rose-light py-20">
+        <div className="mx-auto max-w-3xl px-6 text-center lg:px-12">
+          <blockquote>
+            <p className="font-display text-xl italic leading-relaxed text-charcoal md:text-2xl">
+              "La beauté est un dialogue intime entre soi et l'artisan. Nous
+              sommes simplement le médium de votre expression."
+            </p>
+            <p className="mt-6 font-heading text-xs font-medium uppercase tracking-[0.2em] text-gris-moyen">
+              — L'équipe bayaNail
+            </p>
+          </blockquote>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-creme py-16">
+        <div className="mx-auto max-w-7xl px-6 text-center lg:px-12">
+          <Link to="/reservation" className="btn-premium">
+            Réserver un soin
+          </Link>
+        </div>
+      </section>
     </div>
   );
 };

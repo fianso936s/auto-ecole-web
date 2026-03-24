@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     container: {
@@ -26,22 +25,17 @@ export default {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
         },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-          warm: "hsl(var(--accent-warm))",
-        },
-        success: {
-          DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -51,6 +45,15 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // bayaNail specific
+        "rose-nude": "#D4A0A0",
+        "rose-light": "#F5E6E8",
+        "rose-dark": "#B87878",
+        charcoal: "#2C2C2C",
+        "or-discret": "#C9A96E",
+        creme: "#FDF8F5",
+        "gris-chaud": "#F0EDE9",
+        "gris-moyen": "#7A7A7A",
       },
       borderRadius: {
         sm: "var(--radius-sm)",
@@ -61,8 +64,9 @@ export default {
         "2xl": "var(--radius-2xl)",
       },
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
-        display: ["Sora", "sans-serif"],
+        display: ["Playfair Display", "Georgia", "serif"],
+        heading: ["Montserrat", "system-ui", "sans-serif"],
+        body: ["Lato", "system-ui", "sans-serif"],
       },
       boxShadow: {
         "elevation-1": "var(--elevation-1)",
@@ -80,17 +84,13 @@ export default {
         bounce: "var(--ease-bounce)",
       },
       keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
+        "fade-in-up": {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
         },
         "fade-in": {
-          from: { opacity: "0", transform: "translateY(10px)" },
-          to: { opacity: "1", transform: "translateY(0)" },
+          from: { opacity: "0" },
+          to: { opacity: "1" },
         },
         "scale-in": {
           from: { opacity: "0", transform: "scale(0.95)" },
@@ -98,10 +98,9 @@ export default {
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.3s var(--ease-standard)",
-        "scale-in": "scale-in 0.2s var(--ease-bounce)",
+        "fade-in-up": "fade-in-up 0.6s var(--ease-standard) forwards",
+        "fade-in": "fade-in 0.4s var(--ease-standard) forwards",
+        "scale-in": "scale-in 0.3s var(--ease-bounce)",
       },
     },
   },
