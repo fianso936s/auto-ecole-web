@@ -6,12 +6,12 @@ import path from 'path'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // https://vite.dev/config/
-export default defineConfig({
-  base: '/bayaNail/',
+export default defineConfig(({ mode }) => ({
+  base: mode === 'production' ? '/bayaNail/' : '/',
   plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-})
+}))
