@@ -3,7 +3,8 @@ import {
   Plus, Search, Filter, MoreHorizontal, Phone, Mail, ArrowUpRight,
   Trash2, Edit3, X, Check,
 } from "lucide-react";
-import { useCrmData, Prospect } from "../../contexts/CrmDataContext";
+import { useCrmData } from "../../contexts/CrmDataContext";
+import type { Prospect } from "../../contexts/CrmDataContext";
 
 const STATUS_CONFIG = {
   nouveau: { label: "Nouveau", color: "bg-blue-100 text-blue-700" },

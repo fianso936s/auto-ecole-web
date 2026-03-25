@@ -3,7 +3,8 @@ import {
   Plus, Search, MoreHorizontal, Phone, Mail, Calendar, DollarSign,
   Trash2, Edit3, X, Check, Eye, ChevronDown, ChevronUp,
 } from "lucide-react";
-import { useCrmData, Client, Appointment } from "../../contexts/CrmDataContext";
+import { useCrmData } from "../../contexts/CrmDataContext";
+import type { Client, Appointment } from "../../contexts/CrmDataContext";
 
 const SERVICES = [
   "Milky & Jelly Nails", "Cat Eye Magnétique", "Blooming Gel Japonais",
