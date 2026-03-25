@@ -10,6 +10,7 @@ import {
   X,
   Sparkles,
   CalendarDays,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useCrmData } from "../contexts/CrmDataContext";
@@ -21,6 +22,7 @@ const navItems = [
   { to: "/admin/prospects", icon: UserPlus, label: "Prospects", end: false, badge: false },
   { to: "/admin/clients", icon: Users, label: "Clients", end: false, badge: false },
   { to: "/admin/comptes", icon: Shield, label: "Comptes", end: false, badge: false },
+  { to: "/admin/settings", icon: Settings, label: "Paramètres", end: false, badge: false },
 ];
 
 const AdminLayout: React.FC = () => {

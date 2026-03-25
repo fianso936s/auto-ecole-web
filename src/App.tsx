@@ -16,6 +16,7 @@ import Prospects from "./pages/admin/Prospects";
 import Clients from "./pages/admin/Clients";
 import Comptes from "./pages/admin/Comptes";
 import Agenda from "./pages/admin/Agenda";
+import Settings from "./pages/admin/Settings";
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
               <Route path="prospects" element={<Prospects />} />
               <Route path="clients" element={<Clients />} />
               <Route path="comptes" element={<Comptes />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

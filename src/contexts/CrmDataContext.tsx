@@ -614,6 +614,22 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         });
       }
     }
+
+    // Fire-and-forget email notification
+    fetch("/api/send-notification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        clientName: `${data.firstName} ${data.lastName}`,
+        email: data.email,
+        phone: data.phone,
+        service: data.service,
+        date: data.date,
+        time: data.time,
+        artisan: data.artisan,
+        amount: data.amount,
+      }),
+    }).catch(() => {});
   }, [clients]);
 
   // ─── Stats ────────────────────────────────────────
