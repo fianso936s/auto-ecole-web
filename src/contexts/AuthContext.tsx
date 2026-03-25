@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { supabase } from "../lib/supabase";
+import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 
 export interface User {
   id: string;
@@ -9,99 +11,159 @@ export interface User {
   createdBy?: string;
 }
 
-interface StoredUser extends User {
-  password: string;
-}
-
 interface AuthContextType {
   user: User | null;
   users: User[];
-  login: (email: string, password: string) => boolean;
-  logout: () => void;
-  createAccount: (data: { email: string; password: string; name: string; role: "admin" | "prospect" }) => boolean;
-  deleteAccount: (id: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  createAccount: (data: { email: string; password: string; name: string; role: "admin" | "prospect" }) => Promise<boolean>;
+  deleteAccount: (id: string) => Promise<boolean>;
   isAuthenticated: boolean;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const DEFAULT_ADMIN: StoredUser = {
-  id: "admin-001",
-  email: "admin@bayanail.com",
-  password: "admin123",
-  name: "Baya Admin",
-  role: "admin",
-  createdAt: new Date().toISOString(),
-};
-
-function getStoredUsers(): StoredUser[] {
-  const data = localStorage.getItem("bayanail_users");
-  if (!data) {
-    localStorage.setItem("bayanail_users", JSON.stringify([DEFAULT_ADMIN]));
-    return [DEFAULT_ADMIN];
-  }
-  return JSON.parse(data);
+function mapProfile(profile: { id: string; name: string; role: string; created_at: string; created_by?: string | null }): User {
+  return {
+    id: profile.id,
+    name: profile.name,
+    role: profile.role as "admin" | "prospect",
+    email: "", // will be filled from auth.users or profiles join
+    createdAt: profile.created_at,
+    createdBy: profile.created_by || undefined,
+  };
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const session = localStorage.getItem("bayanail_session");
-    return session ? JSON.parse(session) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [storedUsers, setStoredUsers] = useState<StoredUser[]>(getStoredUsers);
+  // Build user object from Supabase session + profile
+  const buildUser = useCallback(async (supabaseUser: SupabaseUser): Promise<User | null> => {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", supabaseUser.id)
+      .single();
 
+    if (!profile) return null;
+
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || "",
+      name: profile.name,
+      role: profile.role as "admin" | "prospect",
+      createdAt: profile.created_at,
+      createdBy: profile.created_by || undefined,
+    };
+  }, []);
+
+  // Load all users (profiles) for the Comptes page
+  const fetchUsers = useCallback(async () => {
+    const { data: profiles } = await supabase.from("profiles").select("*");
+    if (!profiles) return;
+
+    // We need emails too — fetch from auth admin or just use profile data
+    // Since we can't list auth.users from client-side, we store emails when known
+    // For now, map profiles and leave email from session data
+    const mapped: User[] = profiles.map((p) => ({
+      ...mapProfile(p),
+      email: "", // email not available from profiles table
+    }));
+    setUsers(mapped);
+  }, []);
+
+  // Initialize: check existing session
   useEffect(() => {
-    localStorage.setItem("bayanail_users", JSON.stringify(storedUsers));
-  }, [storedUsers]);
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const u = await buildUser(session.user);
+        setUser(u);
+      }
+      await fetchUsers();
+      setLoading(false);
+    };
+    init();
 
-  const login = useCallback((email: string, password: string): boolean => {
-    const found = storedUsers.find((u) => u.email === email && u.password === password);
-    if (found) {
-      const { password: _, ...safeUser } = found;
-      setUser(safeUser);
-      localStorage.setItem("bayanail_session", JSON.stringify(safeUser));
-      return true;
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (session?.user) {
+          const u = await buildUser(session.user);
+          setUser(u);
+        } else {
+          setUser(null);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [buildUser, fetchUsers]);
+
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      console.error("Login error:", error.message);
+      return false;
     }
-    return false;
-  }, [storedUsers]);
+    return true;
+  }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("bayanail_session");
   }, []);
 
   const createAccount = useCallback(
-    (data: { email: string; password: string; name: string; role: "admin" | "prospect" }): boolean => {
-      if (storedUsers.some((u) => u.email === data.email)) return false;
-      const newUser: StoredUser = {
-        id: `user-${Date.now()}`,
+    async (data: { email: string; password: string; name: string; role: "admin" | "prospect" }): Promise<boolean> => {
+      // Use Supabase Auth signup — the trigger handle_new_user() creates the profile
+      const { error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
-        name: data.name,
-        role: data.role,
-        createdAt: new Date().toISOString(),
-        createdBy: user?.id,
-      };
-      setStoredUsers((prev) => [...prev, newUser]);
+        options: {
+          data: {
+            name: data.name,
+            role: data.role,
+          },
+        },
+      });
+
+      if (error) {
+        console.error("Create account error:", error.message);
+        return false;
+      }
+
+      // Refresh users list
+      await fetchUsers();
       return true;
     },
-    [storedUsers, user]
+    [fetchUsers]
   );
 
   const deleteAccount = useCallback(
-    (id: string): boolean => {
+    async (id: string): Promise<boolean> => {
       if (id === user?.id) return false;
-      setStoredUsers((prev) => prev.filter((u) => u.id !== id));
+
+      // Delete profile (auth.users deletion requires service_role, handled server-side)
+      const { error } = await supabase.from("profiles").delete().eq("id", id);
+      if (error) {
+        console.error("Delete account error:", error.message);
+        return false;
+      }
+
+      await fetchUsers();
       return true;
     },
-    [user]
+    [user, fetchUsers]
   );
 
-  const users: User[] = storedUsers.map(({ password: _, ...u }) => u);
-
   return (
-    <AuthContext.Provider value={{ user, users, login, logout, createAccount, deleteAccount, isAuthenticated: !!user }}>
+    <AuthContext.Provider
+      value={{ user, users, login, logout, createAccount, deleteAccount, isAuthenticated: !!user, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

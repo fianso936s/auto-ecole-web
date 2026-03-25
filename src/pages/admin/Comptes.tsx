@@ -15,7 +15,7 @@ const Comptes: React.FC = () => {
     role: "admin" as "admin" | "prospect",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -25,7 +25,7 @@ const Comptes: React.FC = () => {
       return;
     }
 
-    const ok = createAccount(form);
+    const ok = await createAccount(form);
     if (ok) {
       setSuccess(`Compte ${form.role} créé pour ${form.email}`);
       setForm({ name: "", email: "", password: "", role: "admin" });
@@ -36,9 +36,9 @@ const Comptes: React.FC = () => {
     }
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (confirm(`Supprimer le compte de ${name} ?`)) {
-      deleteAccount(id);
+      await deleteAccount(id);
     }
   };
 

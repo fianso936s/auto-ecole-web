@@ -58,12 +58,12 @@ const Clients: React.FC = () => {
     setMenuOpen(null);
   };
 
-  const handleClientSubmit = (e: React.FormEvent) => {
+  const handleClientSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingId) {
-      updateClient(editingId, clientForm);
+      await updateClient(editingId, clientForm);
     } else {
-      addClient(clientForm);
+      await addClient(clientForm);
     }
     setShowClientForm(false);
     setEditingId(null);
@@ -76,22 +76,22 @@ const Clients: React.FC = () => {
     setMenuOpen(null);
   };
 
-  const handleAptSubmit = (e: React.FormEvent) => {
+  const handleAptSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedClient) {
-      addAppointment(selectedClient, aptForm);
+      await addAppointment(selectedClient, aptForm);
     }
     setShowAptForm(false);
     setSelectedClient(null);
   };
 
-  const markAptDone = (clientId: string, aptId: string) => {
-    updateAppointment(clientId, aptId, { status: "termine" });
+  const markAptDone = async (clientId: string, aptId: string) => {
+    await updateAppointment(clientId, aptId, { status: "termine" });
   };
 
-  const handleDeleteClient = (id: string) => {
+  const handleDeleteClient = async (id: string) => {
     if (confirm("Supprimer ce client et tout son historique ?")) {
-      deleteClient(id);
+      await deleteClient(id);
       setMenuOpen(null);
     }
   };

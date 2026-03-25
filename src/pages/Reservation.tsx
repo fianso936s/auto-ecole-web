@@ -93,14 +93,17 @@ const Reservation: React.FC = () => {
     return false;
   };
 
-  const handleSubmit = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
     if (!service || !selectedTime || !selectedArtisan) return;
+    setIsSubmitting(true);
 
     const nameParts = name.trim().split(/\s+/);
     const firstName = nameParts[0] || name;
     const lastName = nameParts.slice(1).join(" ") || "";
 
-    createWebBooking({
+    await createWebBooking({
       firstName,
       lastName,
       email,
@@ -112,6 +115,7 @@ const Reservation: React.FC = () => {
       artisan: selectedArtisan,
     });
 
+    setIsSubmitting(false);
     setSubmitted(true);
   };
 
@@ -447,10 +451,10 @@ const Reservation: React.FC = () => {
               ) : (
                 <button
                   onClick={handleSubmit}
-                  disabled={!canNext()}
-                  className={`btn-gold ${!canNext() ? "opacity-50" : ""}`}
+                  disabled={!canNext() || isSubmitting}
+                  className={`btn-gold ${!canNext() || isSubmitting ? "opacity-50" : ""}`}
                 >
-                  Confirmer la réservation
+                  {isSubmitting ? "Envoi en cours..." : "Confirmer la réservation"}
                 </button>
               )}
             </div>

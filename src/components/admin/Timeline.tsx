@@ -26,10 +26,10 @@ const Timeline: React.FC<TimelineProps> = ({ entityType, entityId }) => {
   const [noteType, setNoteType] = useState<"call" | "email" | "note">("note");
   const [noteContent, setNoteContent] = useState("");
 
-  const handleAddNote = (e: React.FormEvent) => {
+  const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!noteContent.trim()) return;
-    addTimelineEntry({
+    await addTimelineEntry({
       entityType,
       entityId,
       type: noteType,

@@ -67,28 +67,28 @@ const Prospects: React.FC = () => {
     setMenuOpen(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingId) {
-      updateProspect(editingId, form);
+      await updateProspect(editingId, form);
     } else {
-      addProspect(form);
+      await addProspect(form);
     }
     setShowForm(false);
     setForm(emptyForm);
     setEditingId(null);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Supprimer ce prospect ?")) {
-      deleteProspect(id);
+      await deleteProspect(id);
       setMenuOpen(null);
     }
   };
 
-  const handleConvert = (id: string) => {
+  const handleConvert = async (id: string) => {
     if (confirm("Convertir ce prospect en client ?")) {
-      convertProspect(id);
+      await convertProspect(id);
       setMenuOpen(null);
     }
   };

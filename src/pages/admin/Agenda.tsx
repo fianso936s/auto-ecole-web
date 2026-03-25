@@ -71,10 +71,10 @@ const Agenda: React.FC = () => {
     setShowCreateModal(true);
   };
 
-  const handleCreateSubmit = (e: React.FormEvent) => {
+  const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!createForm.clientId) return;
-    addAppointment(createForm.clientId, {
+    await addAppointment(createForm.clientId, {
       service: createForm.service,
       date: createDate,
       time: createTime,
@@ -219,8 +219,8 @@ const Agenda: React.FC = () => {
             <div className="mt-6 flex flex-wrap gap-2">
               {selectedApt.confirmed === false && (
                 <button
-                  onClick={() => {
-                    confirmBooking(selectedApt.clientId, selectedApt.id);
+                  onClick={async () => {
+                    await confirmBooking(selectedApt.clientId, selectedApt.id);
                     setSelectedApt(null);
                   }}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600"
@@ -231,8 +231,8 @@ const Agenda: React.FC = () => {
               {selectedApt.status === "planifie" && (
                 <>
                   <button
-                    onClick={() => {
-                      updateAppointment(selectedApt.clientId, selectedApt.id, { status: "termine" });
+                    onClick={async () => {
+                      await updateAppointment(selectedApt.clientId, selectedApt.id, { status: "termine" });
                       setSelectedApt(null);
                     }}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
@@ -240,8 +240,8 @@ const Agenda: React.FC = () => {
                     <Check className="h-4 w-4" /> Terminé
                   </button>
                   <button
-                    onClick={() => {
-                      updateAppointment(selectedApt.clientId, selectedApt.id, { status: "annule" });
+                    onClick={async () => {
+                      await updateAppointment(selectedApt.clientId, selectedApt.id, { status: "annule" });
                       setSelectedApt(null);
                     }}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-gray-400 px-4 py-2 text-sm font-medium text-white hover:bg-gray-500"

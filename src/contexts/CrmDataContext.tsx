@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { supabase } from "../lib/supabase";
 
+// ─── Interfaces ───────────────────────────────────
 export interface Prospect {
   id: string;
   firstName: string;
@@ -60,119 +62,32 @@ interface CrmDataContextType {
   prospects: Prospect[];
   clients: Client[];
   timeline: TimelineEntry[];
-  addProspect: (p: Omit<Prospect, "id" | "createdAt">) => void;
-  updateProspect: (id: string, p: Partial<Prospect>) => void;
-  deleteProspect: (id: string) => void;
-  convertProspect: (id: string) => void;
-  addClient: (c: Omit<Client, "id" | "createdAt" | "appointments" | "totalSpent" | "visitCount">) => void;
-  updateClient: (id: string, c: Partial<Client>) => void;
-  deleteClient: (id: string) => void;
-  addAppointment: (clientId: string, apt: Omit<Appointment, "id" | "clientId">) => void;
-  updateAppointment: (clientId: string, aptId: string, data: Partial<Appointment>) => void;
+  loading: boolean;
+  addProspect: (p: Omit<Prospect, "id" | "createdAt">) => Promise<void>;
+  updateProspect: (id: string, p: Partial<Prospect>) => Promise<void>;
+  deleteProspect: (id: string) => Promise<void>;
+  convertProspect: (id: string) => Promise<void>;
+  addClient: (c: Omit<Client, "id" | "createdAt" | "appointments" | "totalSpent" | "visitCount">) => Promise<void>;
+  updateClient: (id: string, c: Partial<Client>) => Promise<void>;
+  deleteClient: (id: string) => Promise<void>;
+  addAppointment: (clientId: string, apt: Omit<Appointment, "id" | "clientId">) => Promise<void>;
+  updateAppointment: (clientId: string, aptId: string, data: Partial<Appointment>) => Promise<void>;
   getMonthlyRevenue: () => { month: string; revenue: number; clients: number }[];
   getStats: () => { totalRevenue: number; totalClients: number; totalProspects: number; conversionRate: number; avgSpend: number; appointmentsThisMonth: number };
-  addTimelineEntry: (entry: Omit<TimelineEntry, "id" | "createdAt">) => void;
+  addTimelineEntry: (entry: Omit<TimelineEntry, "id" | "createdAt">) => Promise<void>;
   getTimelineForEntity: (entityType: string, entityId: string) => TimelineEntry[];
   getAllAppointments: () => AppointmentWithClient[];
   findClientByEmail: (email: string) => Client | undefined;
   findProspectByEmail: (email: string) => Prospect | undefined;
   getUnconfirmedBookingsCount: () => number;
-  confirmBooking: (clientId: string, aptId: string) => void;
+  confirmBooking: (clientId: string, aptId: string) => Promise<void>;
   createWebBooking: (data: {
     firstName: string; lastName: string; email: string; phone: string;
     service: string; date: string; time: string; amount: number; artisan: string;
-  }) => void;
+  }) => Promise<void>;
 }
 
 const CrmDataContext = createContext<CrmDataContextType | null>(null);
-
-// Demo data
-const DEMO_PROSPECTS: Prospect[] = [
-  { id: "p1", firstName: "Amira", lastName: "Benali", email: "amira@email.com", phone: "06 12 34 56 78", source: "instagram", status: "nouveau", notes: "Intéressée par glazed donut", createdAt: "2026-03-20T10:00:00Z" },
-  { id: "p2", firstName: "Fatima", lastName: "Ouali", email: "fatima@email.com", phone: "06 98 76 54 32", source: "site", status: "contacte", notes: "A demandé les tarifs cat eye", createdAt: "2026-03-18T14:00:00Z", lastContact: "2026-03-22T11:00:00Z" },
-  { id: "p3", firstName: "Léa", lastName: "Dupont", email: "lea@email.com", phone: "07 11 22 33 44", source: "bouche-a-oreille", status: "rdv_pris", notes: "RDV le 28 mars", createdAt: "2026-03-15T09:00:00Z", lastContact: "2026-03-24T16:00:00Z" },
-  { id: "p4", firstName: "Nadia", lastName: "Khelifi", email: "nadia@email.com", phone: "06 55 44 33 22", source: "google", status: "perdu", notes: "Trop loin, préfère un salon plus proche", createdAt: "2026-03-10T12:00:00Z" },
-  { id: "p5", firstName: "Chloé", lastName: "Martin", email: "chloe@email.com", phone: "07 66 77 88 99", source: "instagram", status: "nouveau", notes: "Story vue, a DM pour infos", createdAt: "2026-03-24T18:00:00Z" },
-];
-
-const DEMO_CLIENTS: Client[] = [
-  {
-    id: "c1", firstName: "Sarah", lastName: "Mansouri", email: "sarah.m@email.com", phone: "06 10 20 30 40",
-    totalSpent: 385, visitCount: 8, lastVisit: "2026-03-20", nextAppointment: "2026-04-03",
-    preferredService: "Glazed Donut", notes: "Cliente fidèle, adore les finitions nacrées", createdAt: "2025-09-15T10:00:00Z",
-    appointments: [
-      { id: "a1", clientId: "c1", service: "Glazed Donut", date: "2026-03-20", time: "14:00", amount: 45, status: "termine", confirmed: true },
-      { id: "a2", clientId: "c1", service: "French Revisitée", date: "2026-02-15", time: "10:30", amount: 50, status: "termine", confirmed: true },
-      { id: "a3", clientId: "c1", service: "Glazed Donut", date: "2026-01-10", time: "11:00", amount: 45, status: "termine", confirmed: true },
-      { id: "a4", clientId: "c1", service: "Chrome Nacré", date: "2025-12-05", time: "15:00", amount: 55, status: "termine", confirmed: true },
-      { id: "a5", clientId: "c1", service: "Milky Nails", date: "2025-11-01", time: "09:30", amount: 40, status: "termine", confirmed: true },
-      { id: "a6", clientId: "c1", service: "Glazed Donut", date: "2025-10-15", time: "14:30", amount: 45, status: "termine", confirmed: true },
-      { id: "a7", clientId: "c1", service: "Cat Eye", date: "2025-10-01", time: "16:00", amount: 50, status: "termine", confirmed: true },
-      { id: "a8", clientId: "c1", service: "Milky Nails", date: "2025-09-15", time: "10:00", amount: 55, status: "termine", confirmed: true },
-      { id: "a-future1", clientId: "c1", service: "Glazed Donut", date: "2026-04-03", time: "14:00", artisan: "ines", amount: 45, status: "planifie", confirmed: true },
-    ],
-  },
-  {
-    id: "c2", firstName: "Inès", lastName: "Boudjema", email: "ines.b@email.com", phone: "07 20 30 40 50",
-    totalSpent: 210, visitCount: 5, lastVisit: "2026-03-18", preferredService: "Cat Eye Magnétique",
-    notes: "Aime les couleurs sombres", createdAt: "2025-11-20T14:00:00Z",
-    appointments: [
-      { id: "a9", clientId: "c2", service: "Cat Eye Magnétique", date: "2026-03-18", time: "11:00", amount: 48, status: "termine", confirmed: true },
-      { id: "a10", clientId: "c2", service: "Cat Eye Magnétique", date: "2026-02-10", time: "15:30", amount: 48, status: "termine", confirmed: true },
-      { id: "a11", clientId: "c2", service: "Blooming Gel", date: "2026-01-05", time: "10:00", amount: 55, status: "termine", confirmed: true },
-      { id: "a12", clientId: "c2", service: "Chrome Nacré", date: "2025-12-10", time: "14:00", amount: 30, status: "termine", confirmed: true },
-      { id: "a13", clientId: "c2", service: "Cat Eye Magnétique", date: "2025-11-20", time: "16:30", amount: 29, status: "termine", confirmed: true },
-    ],
-  },
-  {
-    id: "c3", firstName: "Maya", lastName: "Toure", email: "maya.t@email.com", phone: "06 30 40 50 60",
-    totalSpent: 155, visitCount: 3, lastVisit: "2026-03-22", preferredService: "Blooming Gel Japonais",
-    notes: "Adore les motifs floraux", createdAt: "2026-01-10T09:00:00Z",
-    appointments: [
-      { id: "a14", clientId: "c3", service: "Blooming Gel Japonais", date: "2026-03-22", time: "09:30", amount: 60, status: "termine", confirmed: true },
-      { id: "a15", clientId: "c3", service: "Milky Nails", date: "2026-02-20", time: "14:30", amount: 40, status: "termine", confirmed: true },
-      { id: "a16", clientId: "c3", service: "Blooming Gel Japonais", date: "2026-01-10", time: "11:00", amount: 55, status: "termine", confirmed: true },
-    ],
-  },
-  {
-    id: "c4", firstName: "Yasmine", lastName: "Hadj", email: "yasmine@email.com", phone: "07 40 50 60 70",
-    totalSpent: 95, visitCount: 2, lastVisit: "2026-03-05", preferredService: "Milky & Jelly Nails",
-    notes: "Nouvelle cliente, très satisfaite", createdAt: "2026-02-10T11:00:00Z",
-    appointments: [
-      { id: "a17", clientId: "c4", service: "Milky Nails", date: "2026-03-05", time: "10:30", amount: 45, status: "termine", confirmed: true },
-      { id: "a18", clientId: "c4", service: "Milky Nails", date: "2026-02-10", time: "15:00", amount: 50, status: "termine", confirmed: true },
-    ],
-  },
-  {
-    id: "c5", firstName: "Camille", lastName: "Roy", email: "camille.r@email.com", phone: "06 50 60 70 80",
-    totalSpent: 310, visitCount: 6, lastVisit: "2026-03-15", nextAppointment: "2026-04-01",
-    preferredService: "French Revisitée", notes: "Préfère les RDV en matinée", createdAt: "2025-10-05T10:00:00Z",
-    appointments: [
-      { id: "a19", clientId: "c5", service: "French Revisitée", date: "2026-03-15", time: "10:00", amount: 55, status: "termine", confirmed: true },
-      { id: "a20", clientId: "c5", service: "3D Nail Art", date: "2026-02-08", time: "09:30", amount: 65, status: "termine", confirmed: true },
-      { id: "a21", clientId: "c5", service: "French Revisitée", date: "2026-01-12", time: "11:00", amount: 50, status: "termine", confirmed: true },
-      { id: "a22", clientId: "c5", service: "Glazed Donut", date: "2025-12-01", time: "14:00", amount: 45, status: "termine", confirmed: true },
-      { id: "a23", clientId: "c5", service: "French Revisitée", date: "2025-11-05", time: "10:30", amount: 50, status: "termine", confirmed: true },
-      { id: "a24", clientId: "c5", service: "Milky Nails", date: "2025-10-05", time: "15:00", amount: 45, status: "termine", confirmed: true },
-      { id: "a-future2", clientId: "c5", service: "French Revisitée", date: "2026-04-01", time: "10:00", artisan: "sofia", amount: 55, status: "planifie", confirmed: true },
-    ],
-  },
-];
-
-const DEMO_TIMELINE: TimelineEntry[] = [
-  { id: "t1", entityType: "prospect", entityId: "p1", type: "note", content: "Nouveau prospect via Instagram, intéressée par le glazed donut", author: "Système", createdAt: "2026-03-20T10:00:00Z" },
-  { id: "t2", entityType: "prospect", entityId: "p2", type: "call", content: "Appelée pour donner les tarifs cat eye. Intéressée, à relancer.", author: "Baya", createdAt: "2026-03-22T11:00:00Z" },
-  { id: "t3", entityType: "prospect", entityId: "p2", type: "status_change", content: "Statut changé de nouveau → contacté", author: "Système", createdAt: "2026-03-22T11:05:00Z" },
-  { id: "t4", entityType: "prospect", entityId: "p3", type: "rdv", content: "RDV pris pour le 28 mars - Blooming Gel", author: "Baya", createdAt: "2026-03-24T16:00:00Z" },
-  { id: "t5", entityType: "prospect", entityId: "p3", type: "status_change", content: "Statut changé de contacté → rdv_pris", author: "Système", createdAt: "2026-03-24T16:01:00Z" },
-  { id: "t6", entityType: "client", entityId: "c1", type: "rdv", content: "RDV Glazed Donut - 45€ terminé", author: "Système", createdAt: "2026-03-20T16:00:00Z" },
-  { id: "t7", entityType: "client", entityId: "c1", type: "note", content: "Très contente du résultat, a recommandé à une amie", author: "Baya", createdAt: "2026-03-20T16:30:00Z" },
-  { id: "t8", entityType: "client", entityId: "c2", type: "rdv", content: "RDV Cat Eye Magnétique - 48€ terminé", author: "Système", createdAt: "2026-03-18T13:00:00Z" },
-  { id: "t9", entityType: "client", entityId: "c3", type: "rdv", content: "RDV Blooming Gel Japonais - 60€ terminé", author: "Système", createdAt: "2026-03-22T11:30:00Z" },
-  { id: "t10", entityType: "prospect", entityId: "p5", type: "email", content: "DM Instagram reçu, envoi du catalogue par email", author: "Baya", createdAt: "2026-03-24T18:30:00Z" },
-  { id: "t11", entityType: "prospect", entityId: "p4", type: "status_change", content: "Statut changé de contacté → perdu", author: "Système", createdAt: "2026-03-12T10:00:00Z" },
-  { id: "t12", entityType: "prospect", entityId: "p4", type: "note", content: "Habite trop loin, préfère un salon plus proche de chez elle", author: "Baya", createdAt: "2026-03-12T10:05:00Z" },
-];
 
 const STATUS_LABELS: Record<string, string> = {
   nouveau: "nouveau",
@@ -182,34 +97,116 @@ const STATUS_LABELS: Record<string, string> = {
   perdu: "perdu",
 };
 
+// ─── Supabase row mappers ───────────────────────────
+function mapProspectRow(row: Record<string, unknown>): Prospect {
+  return {
+    id: row.id as string,
+    firstName: row.first_name as string,
+    lastName: row.last_name as string,
+    email: row.email as string,
+    phone: row.phone as string,
+    source: row.source as Prospect["source"],
+    status: row.status as Prospect["status"],
+    notes: (row.notes as string) || "",
+    createdAt: row.created_at as string,
+    lastContact: (row.last_contact as string) || undefined,
+  };
+}
+
+function mapAppointmentRow(row: Record<string, unknown>): Appointment {
+  return {
+    id: row.id as string,
+    clientId: row.client_id as string,
+    service: row.service as string,
+    date: row.date as string,
+    amount: Number(row.amount),
+    status: row.status as Appointment["status"],
+    time: (row.time as string) || undefined,
+    artisan: (row.artisan as string) || undefined,
+    confirmed: row.confirmed as boolean | undefined,
+  };
+}
+
+function mapClientRow(row: Record<string, unknown>, appointments: Appointment[]): Client {
+  const clientApts = appointments.filter((a) => a.clientId === (row.id as string));
+  const completedApts = clientApts.filter((a) => a.status === "termine");
+  const totalSpent = completedApts.reduce((sum, a) => sum + a.amount, 0);
+  const visitCount = completedApts.length;
+  const lastVisit = completedApts.sort((a, b) => b.date.localeCompare(a.date))[0]?.date;
+  const nextApt = clientApts
+    .filter((a) => a.status === "planifie")
+    .sort((a, b) => a.date.localeCompare(b.date))[0]?.date;
+
+  return {
+    id: row.id as string,
+    firstName: row.first_name as string,
+    lastName: row.last_name as string,
+    email: row.email as string,
+    phone: row.phone as string,
+    preferredService: (row.preferred_service as string) || "",
+    notes: (row.notes as string) || "",
+    createdAt: row.created_at as string,
+    totalSpent,
+    visitCount,
+    lastVisit,
+    nextAppointment: nextApt,
+    appointments: clientApts,
+  };
+}
+
+function mapTimelineRow(row: Record<string, unknown>): TimelineEntry {
+  return {
+    id: row.id as string,
+    entityType: row.entity_type as TimelineEntry["entityType"],
+    entityId: row.entity_id as string,
+    type: row.type as TimelineEntry["type"],
+    content: row.content as string,
+    author: row.author as string,
+    createdAt: row.created_at as string,
+  };
+}
+
+// ─── Provider ───────────────────────────────────────
 export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [prospects, setProspects] = useState<Prospect[]>(() => {
-    const d = localStorage.getItem("bayanail_prospects");
-    return d ? JSON.parse(d) : DEMO_PROSPECTS;
-  });
+  const [prospects, setProspects] = useState<Prospect[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [clients, setClients] = useState<Client[]>(() => {
-    const d = localStorage.getItem("bayanail_clients");
-    return d ? JSON.parse(d) : DEMO_CLIENTS;
-  });
+  // ─── Fetch all data from Supabase ─────────────────
+  const fetchAll = useCallback(async () => {
+    const [prospectsRes, clientsRes, appointmentsRes, timelineRes] = await Promise.all([
+      supabase.from("prospects").select("*").order("created_at", { ascending: false }),
+      supabase.from("clients").select("*").order("created_at", { ascending: false }),
+      supabase.from("appointments").select("*").order("date", { ascending: true }),
+      supabase.from("timeline_entries").select("*").order("created_at", { ascending: false }),
+    ]);
 
-  const [timeline, setTimeline] = useState<TimelineEntry[]>(() => {
-    const d = localStorage.getItem("bayanail_timeline");
-    return d ? JSON.parse(d) : DEMO_TIMELINE;
-  });
+    const allAppointments = (appointmentsRes.data || []).map(mapAppointmentRow);
 
-  useEffect(() => { localStorage.setItem("bayanail_prospects", JSON.stringify(prospects)); }, [prospects]);
-  useEffect(() => { localStorage.setItem("bayanail_clients", JSON.stringify(clients)); }, [clients]);
-  useEffect(() => { localStorage.setItem("bayanail_timeline", JSON.stringify(timeline)); }, [timeline]);
+    setProspects((prospectsRes.data || []).map(mapProspectRow));
+    setClients((clientsRes.data || []).map((row) => mapClientRow(row, allAppointments)));
+    setTimeline((timelineRes.data || []).map(mapTimelineRow));
+    setLoading(false);
+  }, []);
 
-  // Timeline methods
-  const addTimelineEntry = useCallback((entry: Omit<TimelineEntry, "id" | "createdAt">) => {
-    const newEntry: TimelineEntry = {
-      ...entry,
-      id: `t-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-      createdAt: new Date().toISOString(),
-    };
-    setTimeline((prev) => [...prev, newEntry]);
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
+
+  // ─── Timeline ─────────────────────────────────────
+  const addTimelineEntry = useCallback(async (entry: Omit<TimelineEntry, "id" | "createdAt">) => {
+    const { data, error } = await supabase.from("timeline_entries").insert({
+      entity_type: entry.entityType,
+      entity_id: entry.entityId,
+      type: entry.type,
+      content: entry.content,
+      author: entry.author,
+    }).select().single();
+
+    if (!error && data) {
+      setTimeline((prev) => [mapTimelineRow(data), ...prev]);
+    }
   }, []);
 
   const getTimelineForEntity = useCallback((entityType: string, entityId: string) => {
@@ -218,150 +215,241 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [timeline]);
 
-  // Prospect methods
-  const addProspect = useCallback((p: Omit<Prospect, "id" | "createdAt">) => {
-    const id = `p-${Date.now()}`;
-    setProspects((prev) => [...prev, { ...p, id, createdAt: new Date().toISOString() }]);
-    // Auto-log timeline
-    const newEntry: TimelineEntry = {
-      id: `t-${Date.now()}`,
-      entityType: "prospect",
-      entityId: id,
-      type: "note",
-      content: `Nouveau prospect ajouté (source: ${p.source})`,
-      author: "Système",
-      createdAt: new Date().toISOString(),
-    };
-    setTimeline((prev) => [...prev, newEntry]);
-  }, []);
+  // ─── Prospects ────────────────────────────────────
+  const addProspect = useCallback(async (p: Omit<Prospect, "id" | "createdAt">) => {
+    const { data, error } = await supabase.from("prospects").insert({
+      first_name: p.firstName,
+      last_name: p.lastName,
+      email: p.email,
+      phone: p.phone,
+      source: p.source,
+      status: p.status,
+      notes: p.notes,
+      last_contact: p.lastContact || null,
+    }).select().single();
 
-  const updateProspect = useCallback((id: string, data: Partial<Prospect>) => {
-    setProspects((prev) => {
-      const old = prev.find((p) => p.id === id);
+    if (!error && data) {
+      const newProspect = mapProspectRow(data);
+      setProspects((prev) => [newProspect, ...prev]);
+
+      // Auto-log timeline
+      await addTimelineEntry({
+        entityType: "prospect",
+        entityId: newProspect.id,
+        type: "note",
+        content: `Nouveau prospect ajouté (source: ${p.source})`,
+        author: "Système",
+      });
+    }
+  }, [addTimelineEntry]);
+
+  const updateProspect = useCallback(async (id: string, data: Partial<Prospect>) => {
+    const old = prospects.find((p) => p.id === id);
+
+    const updateData: Record<string, unknown> = {};
+    if (data.firstName !== undefined) updateData.first_name = data.firstName;
+    if (data.lastName !== undefined) updateData.last_name = data.lastName;
+    if (data.email !== undefined) updateData.email = data.email;
+    if (data.phone !== undefined) updateData.phone = data.phone;
+    if (data.source !== undefined) updateData.source = data.source;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.notes !== undefined) updateData.notes = data.notes;
+    if (data.lastContact !== undefined) updateData.last_contact = data.lastContact;
+
+    const { error } = await supabase.from("prospects").update(updateData).eq("id", id);
+
+    if (!error) {
+      setProspects((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
+
+      // Auto-log status change
       if (old && data.status && data.status !== old.status) {
-        // Auto-log status change
-        const entry: TimelineEntry = {
-          id: `t-${Date.now()}`,
+        await addTimelineEntry({
           entityType: "prospect",
           entityId: id,
           type: "status_change",
           content: `Statut changé de ${STATUS_LABELS[old.status] || old.status} → ${STATUS_LABELS[data.status] || data.status}`,
           author: "Système",
-          createdAt: new Date().toISOString(),
-        };
-        setTimeline((prev) => [...prev, entry]);
+        });
       }
-      return prev.map((p) => (p.id === id ? { ...p, ...data } : p));
-    });
+    }
+  }, [prospects, addTimelineEntry]);
+
+  const deleteProspect = useCallback(async (id: string) => {
+    const { error } = await supabase.from("prospects").delete().eq("id", id);
+    if (!error) {
+      setProspects((prev) => prev.filter((p) => p.id !== id));
+    }
   }, []);
 
-  const deleteProspect = useCallback((id: string) => {
-    setProspects((prev) => prev.filter((p) => p.id !== id));
-  }, []);
-
-  const convertProspect = useCallback((id: string) => {
+  const convertProspect = useCallback(async (id: string) => {
     const prospect = prospects.find((p) => p.id === id);
     if (!prospect) return;
-    const clientId = `c-${Date.now()}`;
-    const newClient: Client = {
-      id: clientId,
-      firstName: prospect.firstName,
-      lastName: prospect.lastName,
+
+    // Create client in Supabase
+    const { data: clientData, error: clientError } = await supabase.from("clients").insert({
+      first_name: prospect.firstName,
+      last_name: prospect.lastName,
       email: prospect.email,
       phone: prospect.phone,
-      totalSpent: 0,
-      visitCount: 0,
-      preferredService: "",
+      preferred_service: "",
       notes: prospect.notes,
-      createdAt: new Date().toISOString(),
-      appointments: [],
-    };
-    setClients((prev) => [...prev, newClient]);
+    }).select().single();
+
+    if (clientError || !clientData) return;
+
+    const clientId = clientData.id as string;
+
+    // Update prospect status
+    await supabase.from("prospects").update({ status: "converti" }).eq("id", id);
     setProspects((prev) => prev.map((p) => (p.id === id ? { ...p, status: "converti" as const } : p)));
-    // Auto-log conversion on both
-    const now = new Date().toISOString();
-    setTimeline((prev) => [
-      ...prev,
-      { id: `t-${Date.now()}-a`, entityType: "prospect" as const, entityId: id, type: "conversion" as const, content: `Prospect converti en client`, author: "Système", createdAt: now },
-      { id: `t-${Date.now()}-b`, entityType: "client" as const, entityId: clientId, type: "conversion" as const, content: `Client créé depuis le prospect ${prospect.firstName} ${prospect.lastName}`, author: "Système", createdAt: now },
-    ]);
-  }, [prospects]);
 
-  // Client methods
-  const addClient = useCallback((c: Omit<Client, "id" | "createdAt" | "appointments" | "totalSpent" | "visitCount">) => {
-    setClients((prev) => [...prev, { ...c, id: `c-${Date.now()}`, createdAt: new Date().toISOString(), appointments: [], totalSpent: 0, visitCount: 0 }]);
-  }, []);
+    // Add client to local state
+    const newClient = mapClientRow(clientData, []);
+    setClients((prev) => [newClient, ...prev]);
 
-  const updateClient = useCallback((id: string, data: Partial<Client>) => {
-    setClients((prev) => prev.map((c) => (c.id === id ? { ...c, ...data } : c)));
-  }, []);
-
-  const deleteClient = useCallback((id: string) => {
-    setClients((prev) => prev.filter((c) => c.id !== id));
-  }, []);
-
-  const addAppointment = useCallback((clientId: string, apt: Omit<Appointment, "id" | "clientId">) => {
-    const aptId = `a-${Date.now()}`;
-    setClients((prev) =>
-      prev.map((c) => {
-        if (c.id !== clientId) return c;
-        const newApt: Appointment = { ...apt, id: aptId, clientId };
-        const updated = { ...c, appointments: [...c.appointments, newApt] };
-        if (apt.status === "termine") {
-          updated.totalSpent = c.totalSpent + apt.amount;
-          updated.visitCount = c.visitCount + 1;
-          updated.lastVisit = apt.date;
-        }
-        if (apt.status === "planifie") {
-          updated.nextAppointment = apt.date;
-        }
-        return updated;
-      })
-    );
-    // Auto-log timeline
-    const client = clients.find((c) => c.id === clientId);
-    const entry: TimelineEntry = {
-      id: `t-${Date.now()}`,
+    // Auto-log conversion timeline
+    await addTimelineEntry({
+      entityType: "prospect",
+      entityId: id,
+      type: "conversion",
+      content: "Prospect converti en client",
+      author: "Système",
+    });
+    await addTimelineEntry({
       entityType: "client",
       entityId: clientId,
-      type: "rdv",
-      content: `RDV ${apt.service} - ${apt.amount}€ (${apt.status === "termine" ? "terminé" : apt.status === "planifie" ? "planifié" : "annulé"})${apt.date ? ` le ${apt.date}` : ""}${apt.time ? ` à ${apt.time}` : ""}`,
+      type: "conversion",
+      content: `Client créé depuis le prospect ${prospect.firstName} ${prospect.lastName}`,
       author: "Système",
-      createdAt: new Date().toISOString(),
-    };
-    setTimeline((prev) => [...prev, entry]);
-  }, [clients]);
+    });
+  }, [prospects, addTimelineEntry]);
 
-  const updateAppointment = useCallback((clientId: string, aptId: string, data: Partial<Appointment>) => {
-    setClients((prev) =>
-      prev.map((c) => {
-        if (c.id !== clientId) return c;
-        const oldApt = c.appointments.find((a) => a.id === aptId);
-        const updatedApts = c.appointments.map((a) => (a.id === aptId ? { ...a, ...data } : a));
-        const totalSpent = updatedApts.filter((a) => a.status === "termine").reduce((sum, a) => sum + a.amount, 0);
-        const visitCount = updatedApts.filter((a) => a.status === "termine").length;
+  // ─── Clients ──────────────────────────────────────
+  const addClient = useCallback(async (c: Omit<Client, "id" | "createdAt" | "appointments" | "totalSpent" | "visitCount">) => {
+    const { data, error } = await supabase.from("clients").insert({
+      first_name: c.firstName,
+      last_name: c.lastName,
+      email: c.email,
+      phone: c.phone,
+      preferred_service: c.preferredService,
+      notes: c.notes,
+    }).select().single();
 
-        // Auto-log status change
-        if (oldApt && data.status && data.status !== oldApt.status) {
-          const statusLabel = data.status === "termine" ? "terminé" : data.status === "annule" ? "annulé" : "planifié";
-          const entry: TimelineEntry = {
-            id: `t-${Date.now()}`,
-            entityType: "client",
-            entityId: clientId,
-            type: "rdv",
-            content: `RDV ${oldApt.service} marqué comme ${statusLabel}`,
-            author: "Système",
-            createdAt: new Date().toISOString(),
-          };
-          setTimeline((prev) => [...prev, entry]);
-        }
-
-        return { ...c, appointments: updatedApts, totalSpent, visitCount };
-      })
-    );
+    if (!error && data) {
+      const newClient = mapClientRow(data, []);
+      setClients((prev) => [newClient, ...prev]);
+    }
   }, []);
 
-  // Lookup helpers
+  const updateClient = useCallback(async (id: string, data: Partial<Client>) => {
+    const updateData: Record<string, unknown> = {};
+    if (data.firstName !== undefined) updateData.first_name = data.firstName;
+    if (data.lastName !== undefined) updateData.last_name = data.lastName;
+    if (data.email !== undefined) updateData.email = data.email;
+    if (data.phone !== undefined) updateData.phone = data.phone;
+    if (data.preferredService !== undefined) updateData.preferred_service = data.preferredService;
+    if (data.notes !== undefined) updateData.notes = data.notes;
+
+    const { error } = await supabase.from("clients").update(updateData).eq("id", id);
+
+    if (!error) {
+      setClients((prev) => prev.map((c) => (c.id === id ? { ...c, ...data } : c)));
+    }
+  }, []);
+
+  const deleteClient = useCallback(async (id: string) => {
+    const { error } = await supabase.from("clients").delete().eq("id", id);
+    if (!error) {
+      setClients((prev) => prev.filter((c) => c.id !== id));
+    }
+  }, []);
+
+  // ─── Appointments ─────────────────────────────────
+  const addAppointment = useCallback(async (clientId: string, apt: Omit<Appointment, "id" | "clientId">) => {
+    const { data, error } = await supabase.from("appointments").insert({
+      client_id: clientId,
+      service: apt.service,
+      date: apt.date,
+      time: apt.time || null,
+      amount: apt.amount,
+      status: apt.status,
+      artisan: apt.artisan || null,
+      confirmed: apt.confirmed !== undefined ? apt.confirmed : true,
+    }).select().single();
+
+    if (!error && data) {
+      const newApt = mapAppointmentRow(data);
+      setClients((prev) =>
+        prev.map((c) => {
+          if (c.id !== clientId) return c;
+          const updatedApts = [...c.appointments, newApt];
+          const completedApts = updatedApts.filter((a) => a.status === "termine");
+          return {
+            ...c,
+            appointments: updatedApts,
+            totalSpent: completedApts.reduce((s, a) => s + a.amount, 0),
+            visitCount: completedApts.length,
+            lastVisit: completedApts.sort((a, b) => b.date.localeCompare(a.date))[0]?.date || c.lastVisit,
+            nextAppointment: apt.status === "planifie" ? apt.date : c.nextAppointment,
+          };
+        })
+      );
+
+      // Auto-log timeline
+      await addTimelineEntry({
+        entityType: "client",
+        entityId: clientId,
+        type: "rdv",
+        content: `RDV ${apt.service} - ${apt.amount}€ (${apt.status === "termine" ? "terminé" : apt.status === "planifie" ? "planifié" : "annulé"})${apt.date ? ` le ${apt.date}` : ""}${apt.time ? ` à ${apt.time}` : ""}`,
+        author: "Système",
+      });
+    }
+  }, [addTimelineEntry]);
+
+  const updateAppointment = useCallback(async (clientId: string, aptId: string, data: Partial<Appointment>) => {
+    const updateData: Record<string, unknown> = {};
+    if (data.service !== undefined) updateData.service = data.service;
+    if (data.date !== undefined) updateData.date = data.date;
+    if (data.time !== undefined) updateData.time = data.time;
+    if (data.amount !== undefined) updateData.amount = data.amount;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.artisan !== undefined) updateData.artisan = data.artisan;
+    if (data.confirmed !== undefined) updateData.confirmed = data.confirmed;
+
+    const { error } = await supabase.from("appointments").update(updateData).eq("id", aptId);
+
+    if (!error) {
+      setClients((prev) =>
+        prev.map((c) => {
+          if (c.id !== clientId) return c;
+          const oldApt = c.appointments.find((a) => a.id === aptId);
+          const updatedApts = c.appointments.map((a) => (a.id === aptId ? { ...a, ...data } : a));
+          const completedApts = updatedApts.filter((a) => a.status === "termine");
+
+          // Auto-log status change
+          if (oldApt && data.status && data.status !== oldApt.status) {
+            const statusLabel = data.status === "termine" ? "terminé" : data.status === "annule" ? "annulé" : "planifié";
+            addTimelineEntry({
+              entityType: "client",
+              entityId: clientId,
+              type: "rdv",
+              content: `RDV ${oldApt.service} marqué comme ${statusLabel}`,
+              author: "Système",
+            });
+          }
+
+          return {
+            ...c,
+            appointments: updatedApts,
+            totalSpent: completedApts.reduce((s, a) => s + a.amount, 0),
+            visitCount: completedApts.length,
+          };
+        })
+      );
+    }
+  }, [addTimelineEntry]);
+
+  // ─── Lookup helpers ───────────────────────────────
   const findClientByEmail = useCallback((email: string) => {
     return clients.find((c) => c.email.toLowerCase() === email.toLowerCase());
   }, [clients]);
@@ -370,7 +458,7 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return prospects.find((p) => p.email.toLowerCase() === email.toLowerCase());
   }, [prospects]);
 
-  // Agenda helpers
+  // ─── Agenda helpers ───────────────────────────────
   const getAllAppointments = useCallback((): AppointmentWithClient[] => {
     const result: AppointmentWithClient[] = [];
     clients.forEach((c) => {
@@ -395,96 +483,140 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return count;
   }, [clients]);
 
-  const confirmBooking = useCallback((clientId: string, aptId: string) => {
-    setClients((prev) =>
-      prev.map((c) => {
-        if (c.id !== clientId) return c;
-        return {
-          ...c,
-          appointments: c.appointments.map((a) =>
-            a.id === aptId ? { ...a, confirmed: true } : a
-          ),
-        };
-      })
-    );
-    const entry: TimelineEntry = {
-      id: `t-${Date.now()}`,
-      entityType: "client",
-      entityId: clientId,
-      type: "rdv",
-      content: "Réservation en ligne confirmée par l'admin",
-      author: "Système",
-      createdAt: new Date().toISOString(),
-    };
-    setTimeline((prev) => [...prev, entry]);
-  }, []);
+  const confirmBooking = useCallback(async (clientId: string, aptId: string) => {
+    const { error } = await supabase.from("appointments").update({ confirmed: true }).eq("id", aptId);
 
-  // Web booking: creates prospect + client + appointment in one go
-  const createWebBooking = useCallback((data: {
+    if (!error) {
+      setClients((prev) =>
+        prev.map((c) => {
+          if (c.id !== clientId) return c;
+          return {
+            ...c,
+            appointments: c.appointments.map((a) =>
+              a.id === aptId ? { ...a, confirmed: true } : a
+            ),
+          };
+        })
+      );
+
+      await addTimelineEntry({
+        entityType: "client",
+        entityId: clientId,
+        type: "rdv",
+        content: "Réservation en ligne confirmée par l'admin",
+        author: "Système",
+      });
+    }
+  }, [addTimelineEntry]);
+
+  // ─── Web booking (public, no auth needed) ─────────
+  const createWebBooking = useCallback(async (data: {
     firstName: string; lastName: string; email: string; phone: string;
     service: string; date: string; time: string; amount: number; artisan: string;
   }) => {
+    // Check if client exists
     const existingClient = clients.find((c) => c.email.toLowerCase() === data.email.toLowerCase());
 
     if (existingClient) {
-      // Existing client → just add appointment
-      const aptId = `a-web-${Date.now()}`;
-      setClients((prev) =>
-        prev.map((c) => {
-          if (c.id !== existingClient.id) return c;
-          const newApt = {
-            id: aptId, clientId: c.id, service: data.service, date: data.date,
-            time: data.time, amount: data.amount, status: "planifie" as const,
-            artisan: data.artisan, confirmed: false,
-          };
-          return { ...c, appointments: [...c.appointments, newApt], nextAppointment: data.date };
-        })
-      );
-      const entry: TimelineEntry = {
-        id: `t-${Date.now()}`, entityType: "client", entityId: existingClient.id,
-        type: "rdv", content: `Réservation en ligne: ${data.service} le ${data.date} à ${data.time} (en attente de confirmation)`,
-        author: "Site web", createdAt: new Date().toISOString(),
-      };
-      setTimeline((prev) => [...prev, entry]);
+      // Add appointment to existing client
+      const { data: aptData, error: aptError } = await supabase.from("appointments").insert({
+        client_id: existingClient.id,
+        service: data.service,
+        date: data.date,
+        time: data.time,
+        amount: data.amount,
+        status: "planifie",
+        artisan: data.artisan,
+        confirmed: false,
+      }).select().single();
+
+      if (!aptError && aptData) {
+        const newApt = mapAppointmentRow(aptData);
+        setClients((prev) =>
+          prev.map((c) => {
+            if (c.id !== existingClient.id) return c;
+            return { ...c, appointments: [...c.appointments, newApt], nextAppointment: data.date };
+          })
+        );
+
+        // Timeline
+        await supabase.from("timeline_entries").insert({
+          entity_type: "client",
+          entity_id: existingClient.id,
+          type: "rdv",
+          content: `Réservation en ligne: ${data.service} le ${data.date} à ${data.time} (en attente de confirmation)`,
+          author: "Site web",
+        });
+      }
     } else {
       // New visitor → create prospect + client + appointment
-      const prospectId = `p-web-${Date.now()}`;
-      const clientId = `c-web-${Date.now()}`;
-      const aptId = `a-web-${Date.now()}`;
-      const now = new Date().toISOString();
 
-      // Create prospect
-      setProspects((prev) => [...prev, {
-        id: prospectId, firstName: data.firstName, lastName: data.lastName,
-        email: data.email, phone: data.phone, source: "site" as const,
-        status: "rdv_pris" as const,
+      // 1. Create prospect
+      const { data: prospectData } = await supabase.from("prospects").insert({
+        first_name: data.firstName,
+        last_name: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        source: "site",
+        status: "rdv_pris",
         notes: `Réservation en ligne: ${data.service} le ${data.date} à ${data.time}`,
-        createdAt: now,
-      }]);
+      }).select().single();
 
-      // Create client with appointment
-      setClients((prev) => [...prev, {
-        id: clientId, firstName: data.firstName, lastName: data.lastName,
-        email: data.email, phone: data.phone, totalSpent: 0, visitCount: 0,
-        preferredService: data.service, notes: "Créé via réservation en ligne",
-        createdAt: now, nextAppointment: data.date,
-        appointments: [{
-          id: aptId, clientId, service: data.service, date: data.date,
-          time: data.time, amount: data.amount, status: "planifie" as const,
-          artisan: data.artisan, confirmed: false,
-        }],
-      }]);
+      // 2. Create client
+      const { data: clientData } = await supabase.from("clients").insert({
+        first_name: data.firstName,
+        last_name: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        preferred_service: data.service,
+        notes: "Créé via réservation en ligne",
+      }).select().single();
 
-      // Timeline entries
-      setTimeline((prev) => [
-        ...prev,
-        { id: `t-${Date.now()}-a`, entityType: "prospect" as const, entityId: prospectId, type: "note" as const, content: `Nouveau prospect via réservation en ligne`, author: "Site web", createdAt: now },
-        { id: `t-${Date.now()}-b`, entityType: "client" as const, entityId: clientId, type: "rdv" as const, content: `Réservation en ligne: ${data.service} le ${data.date} à ${data.time} (en attente de confirmation)`, author: "Site web", createdAt: now },
-      ]);
+      if (clientData) {
+        const clientId = clientData.id as string;
+
+        // 3. Create appointment
+        const { data: aptData } = await supabase.from("appointments").insert({
+          client_id: clientId,
+          service: data.service,
+          date: data.date,
+          time: data.time,
+          amount: data.amount,
+          status: "planifie",
+          artisan: data.artisan,
+          confirmed: false,
+        }).select().single();
+
+        // Update local state
+        if (prospectData) {
+          setProspects((prev) => [mapProspectRow(prospectData), ...prev]);
+        }
+        const newApt = aptData ? mapAppointmentRow(aptData) : null;
+        const newClient = mapClientRow(clientData, newApt ? [newApt] : []);
+        setClients((prev) => [newClient, ...prev]);
+
+        // Timeline entries
+        if (prospectData) {
+          await supabase.from("timeline_entries").insert({
+            entity_type: "prospect",
+            entity_id: prospectData.id,
+            type: "note",
+            content: "Nouveau prospect via réservation en ligne",
+            author: "Site web",
+          });
+        }
+        await supabase.from("timeline_entries").insert({
+          entity_type: "client",
+          entity_id: clientId,
+          type: "rdv",
+          content: `Réservation en ligne: ${data.service} le ${data.date} à ${data.time} (en attente de confirmation)`,
+          author: "Site web",
+        });
+      }
     }
   }, [clients]);
 
-  // Stats
+  // ─── Stats ────────────────────────────────────────
   const getMonthlyRevenue = useCallback(() => {
     const months: Record<string, { revenue: number; clients: Set<string> }> = {};
     const monthNames = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"];
@@ -535,7 +667,7 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   return (
     <CrmDataContext.Provider
       value={{
-        prospects, clients, timeline,
+        prospects, clients, timeline, loading,
         addProspect, updateProspect, deleteProspect, convertProspect,
         addClient, updateClient, deleteClient,
         addAppointment, updateAppointment,

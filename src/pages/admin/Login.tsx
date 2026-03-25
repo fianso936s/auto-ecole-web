@@ -11,14 +11,19 @@ const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (login(email, password)) {
+    setIsLoading(true);
+    const success = await login(email, password);
+    if (success) {
       navigate("/admin");
     } else {
       setError("Email ou mot de passe incorrect");
     }
+    setIsLoading(false);
   };
 
   return (
@@ -81,9 +86,10 @@ const Login: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-rose-dark px-4 py-3 font-medium text-white transition-all hover:bg-rose-nude hover:shadow-lg hover:shadow-rose-dark/25 active:scale-[0.98]"
+              disabled={isLoading}
+              className="w-full rounded-lg bg-rose-dark px-4 py-3 font-medium text-white transition-all hover:bg-rose-nude hover:shadow-lg hover:shadow-rose-dark/25 active:scale-[0.98] disabled:opacity-60"
             >
-              Se connecter
+              {isLoading ? "Connexion..." : "Se connecter"}
             </button>
           </form>
 
