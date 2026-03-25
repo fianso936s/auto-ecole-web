@@ -59,7 +59,7 @@ const Agenda: React.FC = () => {
   );
 
   const handleEventClick = (info: { event: { extendedProps: Record<string, unknown> } }) => {
-    setSelectedApt(info.event.extendedProps as AppointmentWithClient);
+    setSelectedApt(info.event.extendedProps as unknown as AppointmentWithClient);
   };
 
   const handleDateClick = (info: { dateStr: string; date: Date }) => {
