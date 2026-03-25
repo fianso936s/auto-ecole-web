@@ -13,7 +13,7 @@ const soinCategories = [
           "La tendance n°1 — ongles translucides nacrés, effet verre dépoli. Un rendu lumineux et aérien.",
         price: "30 — 45€",
         image:
-          "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=400&q=80",
+          "https://images.pexels.com/photos/6941115/pexels-photo-6941115.jpeg?auto=compress&cs=tinysrgb&w=400",
       },
       {
         name: "Glazed Donut",
@@ -21,7 +21,7 @@ const soinCategories = [
           "Le glow doux et nacré inspiré Hailey Bieber. Finition miroir perlée, élégance absolue.",
         price: "35 — 50€",
         image:
-          "https://images.unsplash.com/photo-1610992015732-2449b0e0df30?w=400&q=80",
+          "https://images.pexels.com/photos/939836/pexels-photo-939836.jpeg?auto=compress&cs=tinysrgb&w=400",
       },
       {
         name: "French Revisitée",
@@ -29,7 +29,7 @@ const soinCategories = [
           "Micro french, colorée ou glazed — la french classique réinventée avec modernité et audace.",
         price: "35 — 55€",
         image:
-          "https://images.unsplash.com/photo-1625247661636-bac1e69c33e7?w=400&q=80",
+          "https://images.pexels.com/photos/1164339/pexels-photo-1164339.jpeg?auto=compress&cs=tinysrgb&w=400",
       },
     ],
   },
@@ -43,7 +43,7 @@ const soinCategories = [
           "Reflets velours qui bougent avec la lumière. Un effet magnétique hypnotique et premium.",
         price: "40 — 55€",
         image:
-          "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80",
+          "https://images.pexels.com/photos/3060257/pexels-photo-3060257.jpeg?auto=compress&cs=tinysrgb&w=400",
       },
       {
         name: "Blooming Gel Japonais",
@@ -51,7 +51,7 @@ const soinCategories = [
           "Effets aquarelle et marbre organiques, technique japonaise raffinée. Chaque ongle est unique.",
         price: "45 — 65€",
         image:
-          "https://images.unsplash.com/photo-1571290274554-6a2eaa74d75b?w=400&q=80",
+          "https://images.pexels.com/photos/704815/pexels-photo-704815.jpeg?auto=compress&cs=tinysrgb&w=400",
       },
     ],
   },
@@ -65,7 +65,7 @@ const soinCategories = [
           "Champagne, rose gold, opale — une finition chrome douce et sophistiquée pour un éclat subtil.",
         price: "+5 — 15€",
         image:
-          "https://images.unsplash.com/photo-1583255448430-17c5eda08e5c?w=400&q=80",
+          "https://images.pexels.com/photos/1121230/pexels-photo-1121230.jpeg?auto=compress&cs=tinysrgb&w=400",
       },
       {
         name: "Nail Art 3D Miniature",
@@ -73,7 +73,7 @@ const soinCategories = [
           "Micro-perles, bijoux et relief subtil — des créations miniatures sculptées avec précision.",
         price: "+10 — 20€",
         image:
-          "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80",
+          "https://images.pexels.com/photos/7664093/pexels-photo-7664093.jpeg?auto=compress&cs=tinysrgb&w=400",
       },
     ],
   },
@@ -109,8 +109,8 @@ const Tarifs: React.FC = () => {
             className="relative overflow-hidden rounded-xl"
           >
             <img
-              src="https://images.unsplash.com/photo-1604654894610-df63bc536371?w=700&q=80"
-              srcSet="https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80 400w, https://images.unsplash.com/photo-1604654894610-df63bc536371?w=700&q=80 700w, https://images.unsplash.com/photo-1604654894610-df63bc536371?w=1200&q=80 1200w"
+              src="https://images.pexels.com/photos/3060257/pexels-photo-3060257.jpeg?auto=compress&cs=tinysrgb&w=700"
+              srcSet="https://images.pexels.com/photos/3060257/pexels-photo-3060257.jpeg?auto=compress&cs=tinysrgb&w=400 400w, https://images.pexels.com/photos/3060257/pexels-photo-3060257.jpeg?auto=compress&cs=tinysrgb&w=700 700w, https://images.pexels.com/photos/3060257/pexels-photo-3060257.jpeg?auto=compress&cs=tinysrgb&w=1200 1200w"
               sizes="(max-width: 1024px) 100vw, 50vw"
               alt="Pose signature bayaNail — vernis gel finition miroir"
               className="aspect-[4/3] w-full object-cover"

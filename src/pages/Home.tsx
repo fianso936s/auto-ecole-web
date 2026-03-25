@@ -21,7 +21,7 @@ const services = [
       "La tendance n°1 — ongles translucides nacrés, effet verre dépoli. Un rendu lumineux et aérien.",
     price: "30 — 45€",
     image:
-      "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=600&q=80",
+      "https://images.pexels.com/photos/6941115/pexels-photo-6941115.jpeg?auto=compress&cs=tinysrgb&w=600",
   },
   {
     icon: Gem,
@@ -30,7 +30,7 @@ const services = [
       "Reflets velours qui bougent avec la lumière. Un effet magnétique hypnotique et premium.",
     price: "40 — 55€",
     image:
-      "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=80",
+      "https://images.pexels.com/photos/3060257/pexels-photo-3060257.jpeg?auto=compress&cs=tinysrgb&w=600",
   },
   {
     icon: Heart,
@@ -39,7 +39,7 @@ const services = [
       "Le glow doux et nacré inspiré Hailey Bieber. Finition miroir perlée, élégance absolue.",
     price: "35 — 50€",
     image:
-      "https://images.unsplash.com/photo-1610992015732-2449b0e0df30?w=600&q=80",
+      "https://images.pexels.com/photos/939836/pexels-photo-939836.jpeg?auto=compress&cs=tinysrgb&w=600",
   },
 ];
 
@@ -68,8 +68,8 @@ const Home: React.FC = () => {
       <section className="relative flex min-h-screen items-center">
         <div className="absolute inset-0 z-0">
           <ParallaxImage
-            src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=1600&q=80"
-            srcSet="https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=800&q=80 800w, https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=1200&q=80 1200w, https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=1600&q=80 1600w"
+            src="https://images.pexels.com/photos/6940364/pexels-photo-6940364.jpeg?auto=compress&cs=tinysrgb&w=1600"
+            srcSet="https://images.pexels.com/photos/6940364/pexels-photo-6940364.jpeg?auto=compress&cs=tinysrgb&w=800 800w, https://images.pexels.com/photos/6940364/pexels-photo-6940364.jpeg?auto=compress&cs=tinysrgb&w=1200 1200w, https://images.pexels.com/photos/6940364/pexels-photo-6940364.jpeg?auto=compress&cs=tinysrgb&w=1600 1600w"
             sizes="100vw"
             alt="Salon de manucure bayaNail — Aubervilliers"
             speed={0.2}

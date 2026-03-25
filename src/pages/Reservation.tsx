@@ -9,7 +9,7 @@ const services = [
     price: 38,
     duration: "1h",
     image:
-      "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=500&q=80",
+      "https://images.pexels.com/photos/6941115/pexels-photo-6941115.jpeg?auto=compress&cs=tinysrgb&w=500",
     description: "Ongles translucides nacrés, effet verre dépoli lumineux.",
   },
   {
@@ -18,7 +18,7 @@ const services = [
     price: 48,
     duration: "1h15",
     image:
-      "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=80",
+      "https://images.pexels.com/photos/3060257/pexels-photo-3060257.jpeg?auto=compress&cs=tinysrgb&w=500",
     description: "Reflets velours hypnotiques qui bougent avec la lumière.",
   },
   {
@@ -27,7 +27,7 @@ const services = [
     price: 42,
     duration: "1h",
     image:
-      "https://images.unsplash.com/photo-1610992015732-2449b0e0df30?w=500&q=80",
+      "https://images.pexels.com/photos/939836/pexels-photo-939836.jpeg?auto=compress&cs=tinysrgb&w=500",
     description: "Glow nacré inspiré Hailey Bieber, finition miroir perlée.",
   },
   {
@@ -36,7 +36,7 @@ const services = [
     price: 55,
     duration: "1h30",
     image:
-      "https://images.unsplash.com/photo-1571290274554-6a2eaa74d75b?w=500&q=80",
+      "https://images.pexels.com/photos/704815/pexels-photo-704815.jpeg?auto=compress&cs=tinysrgb&w=500",
     description: "Effets aquarelle et marbre organiques, technique japonaise.",
   },
 ];
