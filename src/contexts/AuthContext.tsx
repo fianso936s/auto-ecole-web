@@ -104,13 +104,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [buildUser, fetchUsers]);
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       console.error("Login error:", error.message);
       return false;
     }
+    if (data.user) {
+      const u = await buildUser(data.user);
+      setUser(u);
+    }
     return true;
-  }, []);
+  }, [buildUser]);
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
