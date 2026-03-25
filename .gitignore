@@ -32,3 +32,4 @@ dist-ssr
 
 # Moniteur1D API (FORCE VISIBILITY)
 !moniteur1d-api/
+.vercel

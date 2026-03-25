@@ -43,7 +43,7 @@ const soinCategories = [
           "Reflets velours qui bougent avec la lumière. Un effet magnétique hypnotique et premium.",
         price: "40 — 55€",
         image:
-          "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80",
+          "https://images.unsplash.com/photo-1595867818082-083862f3d630?w=400&q=80",
       },
       {
         name: "Blooming Gel Japonais",
@@ -52,14 +52,6 @@ const soinCategories = [
         price: "45 — 65€",
         image:
           "https://images.unsplash.com/photo-1571290274554-6a2eaa74d75b?w=400&q=80",
-      },
-      {
-        name: "Aura Nails",
-        description:
-          "Dégradé circulaire lumineux — l'effet aura qui capture la lumière. Tendance et mystique.",
-        price: "40 — 55€",
-        image:
-          "https://images.unsplash.com/photo-1595867818082-083862f3d630?w=400&q=80",
       },
     ],
   },
@@ -105,7 +97,7 @@ const Tarifs: React.FC = () => {
               Menu des Soins
             </h1>
             <p className="mt-6 max-w-md font-body text-lg leading-relaxed text-gris-moyen">
-              Huit prestations signatures conçues pour sublimer vos ongles.
+              Six prestations signatures conçues pour sublimer vos ongles.
               Techniques tendance, finitions haute couture.
             </p>
           </motion.div>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ParallaxImage } from "../components/ui/ScrollAnimation";
 
-const categories = ["Tout", "Milky", "Cat Eye", "Blooming", "Chrome", "French", "Glazed", "3D Art", "Aura"];
+const categories = ["Tout", "Milky", "Cat Eye", "Blooming", "Chrome", "French", "Glazed", "3D Art"];
 
 const galleryItems = [
   {
@@ -48,22 +48,10 @@ const galleryItems = [
     span: "",
   },
   {
-    src: "https://images.unsplash.com/photo-1595867818082-083862f3d630?w=600&q=80",
-    title: "Aura Sunset",
-    category: "Aura",
-    span: "",
-  },
-  {
     src: "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=800&q=80",
     title: "Jelly Translucide",
     category: "Milky",
     span: "md:col-span-2",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=600&q=80",
-    title: "French Glazed",
-    category: "French",
-    span: "",
   },
 ];
 
