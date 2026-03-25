@@ -5,72 +5,83 @@ import { Link } from "react-router-dom";
 const soinCategories = [
   {
     number: "01",
-    title: "Classic Care",
+    title: "Signature Styles",
     items: [
       {
-        name: "Manucure",
+        name: "Milky & Jelly Nails",
         description:
-          "Limage, soin des cuticules et pose de vernis classique. Finition soignée.",
-        price: "25€",
+          "La tendance n°1 — ongles translucides nacrés, effet verre dépoli. Un rendu lumineux et aérien.",
+        price: "30 — 45€",
+        image:
+          "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=400&q=80",
       },
       {
-        name: "Pédicure",
+        name: "Glazed Donut",
         description:
-          "Soin complet des pieds : gommage, cuticules et vernis pour des pieds sublimés.",
-        price: "35€",
+          "Le glow doux et nacré inspiré Hailey Bieber. Finition miroir perlée, élégance absolue.",
+        price: "35 — 50€",
+        image:
+          "https://images.unsplash.com/photo-1610992015732-2449b0e0df30?w=400&q=80",
       },
       {
-        name: "Manucure Express",
-        description: "Limage et vernis express en 20 minutes. Idéal pause déjeuner.",
-        price: "20€",
+        name: "French Revisitée",
+        description:
+          "Micro french, colorée ou glazed — la french classique réinventée avec modernité et audace.",
+        price: "35 — 55€",
+        image:
+          "https://images.unsplash.com/photo-1625247661636-bac1e69c33e7?w=400&q=80",
       },
     ],
   },
   {
     number: "02",
-    title: "Advanced Techniques",
+    title: "Techniques d'Exception",
     items: [
       {
-        name: "Pose Semi-Permanent",
+        name: "Cat Eye Magnétique",
         description:
-          "Vernis gel longue tenue jusqu'à 3 semaines. Large choix de couleurs tendance.",
-        price: "35€",
+          "Reflets velours qui bougent avec la lumière. Un effet magnétique hypnotique et premium.",
+        price: "40 — 55€",
+        image:
+          "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80",
       },
       {
-        name: "Dépose + Repose",
+        name: "Blooming Gel Japonais",
         description:
-          "Dépose soigneuse et repose semi-permanent. Vos ongles restent en bonne santé.",
-        price: "45€",
+          "Effets aquarelle et marbre organiques, technique japonaise raffinée. Chaque ongle est unique.",
+        price: "45 — 65€",
+        image:
+          "https://images.unsplash.com/photo-1571290274554-6a2eaa74d75b?w=400&q=80",
       },
       {
-        name: "Gel Extensions",
+        name: "Aura Nails",
         description:
-          "Capsules gel, construction soignée, design sur-mesure. Tenue optimale.",
-        price: "à partir de 55€",
-      },
-      {
-        name: "Nail Art Custom",
-        description:
-          "French, milky, chrome, 3D, strass — votre design unique réalisé sur-mesure.",
-        price: "dès 5€/ongle",
+          "Dégradé circulaire lumineux — l'effet aura qui capture la lumière. Tendance et mystique.",
+        price: "40 — 55€",
+        image:
+          "https://images.unsplash.com/photo-1595867818082-083862f3d630?w=400&q=80",
       },
     ],
   },
   {
     number: "03",
-    title: "Wellness Rituals",
+    title: "Finitions Précieuses",
     items: [
       {
-        name: "Soin Mains Complet",
+        name: "Chrome Nacré Soft",
         description:
-          "Gommage, masque hydratant, massage relaxant. Vos mains retrouvent douceur et éclat.",
-        price: "25€",
+          "Champagne, rose gold, opale — une finition chrome douce et sophistiquée pour un éclat subtil.",
+        price: "+5 — 15€",
+        image:
+          "https://images.unsplash.com/photo-1583255448430-17c5eda08e5c?w=400&q=80",
       },
       {
-        name: "Soin Paraffine",
+        name: "Nail Art 3D Miniature",
         description:
-          "Bain de paraffine chaude pour hydrater en profondeur. Sensation de velours.",
-        price: "15€",
+          "Micro-perles, bijoux et relief subtil — des créations miniatures sculptées avec précision.",
+        price: "+10 — 20€",
+        image:
+          "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80",
       },
     ],
   },
@@ -94,8 +105,8 @@ const Tarifs: React.FC = () => {
               Menu des Soins
             </h1>
             <p className="mt-6 max-w-md font-body text-lg leading-relaxed text-gris-moyen">
-              Une collection de soins experts et d'expressions artistiques
-              conçus pour sublimer vos ongles et révéler votre style.
+              Huit prestations signatures conçues pour sublimer vos ongles.
+              Techniques tendance, finitions haute couture.
             </p>
           </motion.div>
 
@@ -119,7 +130,7 @@ const Tarifs: React.FC = () => {
             />
             <div className="absolute bottom-4 left-4 rounded-lg bg-white/90 px-4 py-2 backdrop-blur-sm">
               <p className="font-display text-sm italic text-charcoal">
-                The Signature Glow
+                Cat Eye Magnétique
               </p>
               <p className="font-body text-xs text-gris-moyen">
                 Notre soin iconique
@@ -130,13 +141,13 @@ const Tarifs: React.FC = () => {
       </section>
 
       {/* Services List */}
-      <section className="mx-auto max-w-4xl px-6 pb-20 lg:px-12">
-        {soinCategories.map((category, catIndex) => (
+      <section className="mx-auto max-w-5xl px-6 pb-20 lg:px-12">
+        {soinCategories.map((category) => (
           <div
             key={category.number}
-            className="mb-16"
+            className="mb-20"
           >
-            <div className="mb-8 flex items-baseline gap-4">
+            <div className="mb-10 flex items-baseline gap-4">
               <span className="font-display text-sm text-or-discret">
                 {category.number}
               </span>
@@ -145,16 +156,24 @@ const Tarifs: React.FC = () => {
               </h2>
             </div>
 
-            <div className="space-y-0">
+            <div className="space-y-6">
               {category.items.map((item, i) => (
                 <div
                   key={item.name}
-                  className={`flex items-start justify-between gap-8 py-6 ${
+                  className={`flex flex-col gap-6 py-8 sm:flex-row sm:items-center ${
                     i < category.items.length - 1
                       ? "border-b border-gris-chaud"
                       : ""
                   }`}
                 >
+                  <div className="shrink-0 overflow-hidden rounded-lg">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="h-24 w-24 object-cover transition-transform duration-500 hover:scale-110 sm:h-28 sm:w-28"
+                      loading="lazy"
+                    />
+                  </div>
                   <div className="flex-1">
                     <h3 className="font-heading text-base font-semibold text-charcoal">
                       {item.name}
@@ -178,8 +197,8 @@ const Tarifs: React.FC = () => {
         <div className="mx-auto max-w-3xl px-6 text-center lg:px-12">
           <blockquote>
             <p className="font-display text-xl italic leading-relaxed text-charcoal md:text-2xl">
-              "La beauté est un dialogue intime entre soi et l'artisan. Nous
-              sommes simplement le médium de votre expression."
+              "Chaque ongle est une toile. Nous y apposons notre signature
+              avec précision, créativité et passion."
             </p>
             <p className="mt-6 font-heading text-xs font-medium uppercase tracking-[0.2em] text-gris-moyen">
               — L'équipe bayaNail

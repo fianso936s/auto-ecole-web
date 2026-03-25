@@ -4,40 +4,40 @@ import { Check, ChevronLeft, ChevronRight, Gift } from "lucide-react";
 
 const services = [
   {
-    id: "semi-permanent",
-    name: "Pose Semi-Permanent",
-    price: 35,
-    duration: "45 min",
+    id: "milky-jelly",
+    name: "Milky & Jelly Nails",
+    price: 38,
+    duration: "1h",
     image:
-      "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=80",
-    description: "Vernis gel longue tenue, couleurs tendance, finition miroir.",
+      "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=500&q=80",
+    description: "Ongles translucides nacrés, effet verre dépoli lumineux.",
   },
   {
-    id: "gel-extensions",
-    name: "Gel Extensions",
+    id: "cat-eye",
+    name: "Cat Eye Magnétique",
+    price: 48,
+    duration: "1h15",
+    image:
+      "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=80",
+    description: "Reflets velours hypnotiques qui bougent avec la lumière.",
+  },
+  {
+    id: "glazed-donut",
+    name: "Glazed Donut",
+    price: 42,
+    duration: "1h",
+    image:
+      "https://images.unsplash.com/photo-1610992015732-2449b0e0df30?w=500&q=80",
+    description: "Glow nacré inspiré Hailey Bieber, finition miroir perlée.",
+  },
+  {
+    id: "blooming-gel",
+    name: "Blooming Gel Japonais",
     price: 55,
     duration: "1h30",
     image:
-      "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=500&q=80",
-    description: "Capsules gel, construction sur-mesure, design personnalisé.",
-  },
-  {
-    id: "manucure",
-    name: "Manucure Classique",
-    price: 25,
-    duration: "30 min",
-    image:
-      "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=500&q=80",
-    description: "Limage, cuticules, vernis classique. Soin express et soigné.",
-  },
-  {
-    id: "nail-art",
-    name: "Nail Art Custom",
-    price: 65,
-    duration: "1h30",
-    image:
-      "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=500&q=80",
-    description: "French, milky, chrome, 3D — votre design unique sur-mesure.",
+      "https://images.unsplash.com/photo-1571290274554-6a2eaa74d75b?w=500&q=80",
+    description: "Effets aquarelle et marbre organiques, technique japonaise.",
   },
 ];
 

@@ -16,27 +16,30 @@ const fadeInUp = {
 const services = [
   {
     icon: Sparkles,
-    title: "Pose Semi-Permanent",
+    title: "Milky & Jelly Nails",
     description:
-      "Une tenue impeccable jusqu'à 3 semaines. Couleurs tendance, finition miroir.",
-    image:
-      "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=80",
-  },
-  {
-    icon: Gem,
-    title: "Nail Art Sur-Mesure",
-    description:
-      "French, milky, chrome, 3D — chaque ongle devient une toile d'expression unique.",
+      "La tendance n°1 — ongles translucides nacrés, effet verre dépoli. Un rendu lumineux et aérien.",
+    price: "30 — 45€",
     image:
       "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=600&q=80",
   },
   {
-    icon: Heart,
-    title: "Soin & Beauté",
+    icon: Gem,
+    title: "Cat Eye Magnétique",
     description:
-      "Manucure express, soin des cuticules, massage des mains. Le rituel bien-être complet.",
+      "Reflets velours qui bougent avec la lumière. Un effet magnétique hypnotique et premium.",
+    price: "40 — 55€",
     image:
-      "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=600&q=80",
+      "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=80",
+  },
+  {
+    icon: Heart,
+    title: "Glazed Donut",
+    description:
+      "Le glow doux et nacré inspiré Hailey Bieber. Finition miroir perlée, élégance absolue.",
+    price: "35 — 50€",
+    image:
+      "https://images.unsplash.com/photo-1610992015732-2449b0e0df30?w=600&q=80",
   },
 ];
 
@@ -54,7 +57,7 @@ const testimonials = [
   {
     name: "Léa D.",
     rating: 5,
-    text: "French milky parfait. Ça fait 6 mois que j'y vais et la qualité est constante. Rapport qualité-prix imbattable.",
+    text: "Glazed donut parfait. Ça fait 6 mois que j'y vais et la qualité est constante. Rapport qualité-prix imbattable.",
   },
 ];
 
@@ -107,9 +110,8 @@ const Home: React.FC = () => {
               variants={fadeInUp}
               className="mb-10 max-w-md font-body text-lg leading-relaxed text-gris-moyen"
             >
-              Découvrez un espace où chaque ongle est une oeuvre d'art.
-              Techniques de pointe, finitions haute couture et un service
-              d'exception.
+              Milky, glazed donut, cat eye, aura — découvrez les tendances
+              les plus prisées sublimées par nos artisans.
             </motion.p>
 
             <motion.div
@@ -133,12 +135,12 @@ const Home: React.FC = () => {
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
           <div className="mb-16 text-center">
             <p className="mb-3 font-heading text-xs font-medium uppercase tracking-[0.3em] text-or-discret">
-              Nos prestations
+              Nos signatures
             </p>
-            <h2 className="font-display text-charcoal">Curated Services</h2>
+            <h2 className="font-display text-charcoal">Trending Now</h2>
             <p className="mx-auto mt-4 max-w-lg font-body text-gris-moyen">
-              Chaque prestation est pensée comme un moment de soin unique,
-              alliant technique experte et créativité.
+              Les techniques les plus demandées, réalisées avec une
+              précision d'orfèvre et des produits premium.
             </p>
           </div>
 
@@ -160,11 +162,16 @@ const Home: React.FC = () => {
                       }}
                     />
                   </div>
-                  <div className="mb-3 flex items-center gap-3">
-                    <service.icon className="h-5 w-5 text-or-discret" />
-                    <h3 className="font-heading text-base font-semibold tracking-wide text-charcoal">
-                      {service.title}
-                    </h3>
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <service.icon className="h-5 w-5 text-or-discret" />
+                      <h3 className="font-heading text-base font-semibold tracking-wide text-charcoal">
+                        {service.title}
+                      </h3>
+                    </div>
+                    <span className="font-display text-sm text-rose-dark">
+                      {service.price}
+                    </span>
                   </div>
                   <p className="font-body text-sm leading-relaxed text-gris-moyen">
                     {service.description}
@@ -179,7 +186,7 @@ const Home: React.FC = () => {
               to="/soins"
               className="inline-flex items-center gap-2 font-heading text-xs font-medium uppercase tracking-[0.2em] text-charcoal transition-colors hover:text-or-discret"
             >
-              Voir tous nos soins
+              Voir toutes nos prestations
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

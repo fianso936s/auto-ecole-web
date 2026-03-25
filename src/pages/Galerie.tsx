@@ -2,66 +2,66 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ParallaxImage } from "../components/ui/ScrollAnimation";
 
-const categories = ["Tout", "French", "Milky", "Chrome", "Nail Art", "Natural"];
+const categories = ["Tout", "Milky", "Cat Eye", "Blooming", "Chrome", "French", "Glazed", "3D Art", "Aura"];
 
 const galleryItems = [
   {
-    src: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800&q=80",
-    title: "French Classique",
-    category: "French",
+    src: "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=800&q=80",
+    title: "Milky Opalescent",
+    category: "Milky",
     span: "md:col-span-2 md:row-span-2",
   },
   {
-    src: "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=600&q=80",
-    title: "Milky Opalescent",
-    category: "Milky",
+    src: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=80",
+    title: "Cat Eye Velours",
+    category: "Cat Eye",
     span: "",
   },
   {
-    src: "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&q=80",
-    title: "Chrome Doré",
-    category: "Chrome",
-    span: "",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=600&q=80",
-    title: "Baby Boomer",
-    category: "French",
-    span: "",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1571290274554-6a2eaa74d75b?w=800&q=80",
-    title: "Nail Art Floral",
-    category: "Nail Art",
-    span: "md:col-span-2",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1610992015732-2449b0e0df30?w=600&q=80",
-    title: "Nude Naturel",
-    category: "Natural",
+    src: "https://images.unsplash.com/photo-1571290274554-6a2eaa74d75b?w=600&q=80",
+    title: "Blooming Aquarelle",
+    category: "Blooming",
     span: "",
   },
   {
     src: "https://images.unsplash.com/photo-1583255448430-17c5eda08e5c?w=600&q=80",
-    title: "Chrome Argenté",
+    title: "Chrome Rose Gold",
     category: "Chrome",
     span: "",
   },
   {
-    src: "https://images.unsplash.com/photo-1595867818082-083862f3d630?w=600&q=80",
-    title: "Milky Rose",
-    category: "Milky",
-    span: "",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80",
-    title: "Art Géométrique",
-    category: "Nail Art",
+    src: "https://images.unsplash.com/photo-1625247661636-bac1e69c33e7?w=800&q=80",
+    title: "Micro French Colorée",
+    category: "French",
     span: "md:col-span-2",
   },
   {
-    src: "https://images.unsplash.com/photo-1625247661636-bac1e69c33e7?w=600&q=80",
-    title: "French Moderne",
+    src: "https://images.unsplash.com/photo-1610992015732-2449b0e0df30?w=600&q=80",
+    title: "Glazed Donut Classic",
+    category: "Glazed",
+    span: "",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    title: "3D Micro-Perles",
+    category: "3D Art",
+    span: "",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1595867818082-083862f3d630?w=600&q=80",
+    title: "Aura Sunset",
+    category: "Aura",
+    span: "",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=800&q=80",
+    title: "Jelly Translucide",
+    category: "Milky",
+    span: "md:col-span-2",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=600&q=80",
+    title: "French Glazed",
     category: "French",
     span: "",
   },
@@ -90,8 +90,8 @@ const Galerie: React.FC = () => {
             <span className="italic text-rose-dark">Defined.</span>
           </h1>
           <p className="mt-6 max-w-lg font-body text-lg text-gris-moyen">
-            Une sélection de nos plus belles réalisations. Chaque main raconte
-            une histoire de style et de précision.
+            Milky, cat eye, blooming, glazed donut — découvrez nos plus belles
+            réalisations. Chaque main raconte une histoire de style.
           </p>
         </motion.div>
       </section>
