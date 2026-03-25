@@ -77,44 +77,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialize: check existing session
   useEffect(() => {
+    let cancelled = false;
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const u = await buildUser(session.user);
-        setUser(u);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!cancelled && session?.user) {
+          const u = await buildUser(session.user);
+          if (!cancelled) setUser(u);
+        }
+      } catch (err) {
+        console.error("Init error:", err);
       }
-      await fetchUsers();
-      setLoading(false);
+      if (!cancelled) {
+        await fetchUsers();
+        setLoading(false);
+      }
     };
     init();
 
-    // Listen for auth changes
+    // Listen for auth changes (logout only — login handles user building itself)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (session?.user) {
-          const u = await buildUser(session.user);
-          setUser(u);
-        } else {
+      (_event, session) => {
+        if (!session) {
           setUser(null);
         }
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => { cancelled = true; subscription.unsubscribe(); };
   }, [buildUser, fetchUsers]);
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      console.error("Login error:", error.message);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        console.error("Login error:", error.message);
+        return false;
+      }
+      if (data.user) {
+        const u = await buildUser(data.user);
+        setUser(u);
+        await fetchUsers();
+      }
+      return true;
+    } catch (err) {
+      console.error("Login exception:", err);
       return false;
     }
-    if (data.user) {
-      const u = await buildUser(data.user);
-      setUser(u);
-    }
-    return true;
-  }, [buildUser]);
+  }, [buildUser, fetchUsers]);
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
