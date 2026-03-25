@@ -15,6 +15,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Prospects from "./pages/admin/Prospects";
 import Clients from "./pages/admin/Clients";
 import Comptes from "./pages/admin/Comptes";
+import Agenda from "./pages/admin/Agenda";
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
               }
             >
               <Route index element={<Dashboard />} />
+              <Route path="agenda" element={<Agenda />} />
               <Route path="prospects" element={<Prospects />} />
               <Route path="clients" element={<Clients />} />
               <Route path="comptes" element={<Comptes />} />

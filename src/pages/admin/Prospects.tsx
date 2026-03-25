@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import {
   Plus, Search, Filter, MoreHorizontal, Phone, Mail, ArrowUpRight,
-  Trash2, Edit3, X, Check,
+  Trash2, Edit3, X, Check, Download, FileText, Clock,
 } from "lucide-react";
 import { useCrmData } from "../../contexts/CrmDataContext";
 import type { Prospect } from "../../contexts/CrmDataContext";
+import Timeline from "../../components/admin/Timeline";
+import { exportProspectsCSV } from "../../utils/exportCsv";
+import { printReport } from "../../utils/exportPdf";
 
 const STATUS_CONFIG = {
   nouveau: { label: "Nouveau", color: "bg-blue-100 text-blue-700" },
@@ -37,6 +40,7 @@ const Prospects: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const [timelineProspect, setTimelineProspect] = useState<Prospect | null>(null);
 
   const filtered = prospects
     .filter((p) => {
@@ -89,6 +93,32 @@ const Prospects: React.FC = () => {
     }
   };
 
+  const handleExportCSV = () => {
+    exportProspectsCSV(filtered);
+  };
+
+  const handlePrintPDF = () => {
+    const statusCounts = Object.entries(STATUS_CONFIG).map(([key, { label }]) => ({
+      label,
+      value: filtered.filter((p) => p.status === key).length,
+    }));
+    printReport({
+      title: "Liste des Prospects",
+      subtitle: `${filtered.length} prospects${filterStatus !== "all" ? ` (filtre: ${STATUS_CONFIG[filterStatus as keyof typeof STATUS_CONFIG]?.label})` : ""}`,
+      stats: [
+        { label: "Total", value: prospects.length },
+        ...statusCounts,
+      ],
+      columns: ["Prénom", "Nom", "Email", "Téléphone", "Source", "Statut", "Date"],
+      rows: filtered.map((p) => [
+        p.firstName, p.lastName, p.email, p.phone,
+        SOURCE_LABELS[p.source] || p.source,
+        STATUS_CONFIG[p.status]?.label || p.status,
+        new Date(p.createdAt).toLocaleDateString("fr-FR"),
+      ]),
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -97,12 +127,28 @@ const Prospects: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Prospects</h1>
           <p className="text-sm text-gray-500">{prospects.length} prospects au total</p>
         </div>
-        <button
-          onClick={openAdd}
-          className="inline-flex items-center gap-2 rounded-lg bg-rose-dark px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#a06868]"
-        >
-          <Plus className="h-4 w-4" /> Nouveau prospect
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+            title="Exporter en CSV"
+          >
+            <Download className="h-4 w-4" /> CSV
+          </button>
+          <button
+            onClick={handlePrintPDF}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+            title="Imprimer PDF"
+          >
+            <FileText className="h-4 w-4" /> PDF
+          </button>
+          <button
+            onClick={openAdd}
+            className="inline-flex items-center gap-2 rounded-lg bg-rose-dark px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#a06868]"
+          >
+            <Plus className="h-4 w-4" /> Nouveau prospect
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -201,7 +247,10 @@ const Prospects: React.FC = () => {
                       <MoreHorizontal className="h-4 w-4" />
                     </button>
                     {menuOpen === p.id && (
-                      <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-gray-100 bg-white py-1 shadow-lg">
+                      <div className="absolute right-0 top-full z-10 mt-1 w-48 rounded-lg border border-gray-100 bg-white py-1 shadow-lg">
+                        <button onClick={() => { setTimelineProspect(p); setMenuOpen(null); }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                          <Clock className="h-4 w-4" /> Voir le suivi
+                        </button>
                         <button onClick={() => openEdit(p)} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
                           <Edit3 className="h-4 w-4" /> Modifier
                         </button>
@@ -305,6 +354,28 @@ const Prospects: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Timeline Modal */}
+      {timelineProspect && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">
+                  Suivi - {timelineProspect.firstName} {timelineProspect.lastName}
+                </h2>
+                <span className={`mt-1 inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_CONFIG[timelineProspect.status].color}`}>
+                  {STATUS_CONFIG[timelineProspect.status].label}
+                </span>
+              </div>
+              <button onClick={() => setTimelineProspect(null)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <Timeline entityType="prospect" entityId={timelineProspect.id} />
           </div>
         </div>
       )}

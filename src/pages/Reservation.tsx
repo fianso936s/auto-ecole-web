@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight, Gift } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Gift, CheckCircle } from "lucide-react";
+import { useCrmData } from "../contexts/CrmDataContext";
 
 const services = [
   {
@@ -72,28 +73,100 @@ const steps = [
 ];
 
 const Reservation: React.FC = () => {
+  const { createWebBooking } = useCrmData();
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedArtisan, setSelectedArtisan] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const service = services.find((s) => s.id === selectedService);
 
   const canNext = () => {
     if (currentStep === 0) return !!selectedService;
     if (currentStep === 1) return !!selectedArtisan;
-    if (currentStep === 2) return !!selectedDate && !!selectedTime && !!name && !!phone;
+    if (currentStep === 2) return !!selectedDate && !!selectedTime && !!name && !!email && !!phone;
     return false;
   };
 
   const handleSubmit = () => {
-    alert(
-      `Réservation confirmée !\n\nService : ${service?.name}\nDate : ${selectedDate} à ${selectedTime}\nNom : ${name}\nTéléphone : ${phone}`
-    );
+    if (!service || !selectedTime || !selectedArtisan) return;
+
+    const nameParts = name.trim().split(/\s+/);
+    const firstName = nameParts[0] || name;
+    const lastName = nameParts.slice(1).join(" ") || "";
+
+    createWebBooking({
+      firstName,
+      lastName,
+      email,
+      phone,
+      service: service.name,
+      date: selectedDate,
+      time: selectedTime,
+      amount: service.price,
+      artisan: selectedArtisan,
+    });
+
+    setSubmitted(true);
   };
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-creme pt-28">
+        <div className="mx-auto max-w-3xl px-6 pb-28 lg:px-12">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="rounded-2xl bg-white p-12 text-center shadow-elevation-2"
+          >
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+            <h2 className="font-display text-2xl text-charcoal">
+              Réservation <span className="italic text-rose-dark">enregistrée</span>
+            </h2>
+            <p className="mt-4 font-body text-gris-moyen">
+              Votre demande de rendez-vous pour <strong>{service?.name}</strong> le{" "}
+              <strong>{selectedDate}</strong> à <strong>{selectedTime}</strong> a bien été enregistrée.
+            </p>
+            <p className="mt-2 font-body text-sm text-gris-moyen">
+              Notre équipe va confirmer votre créneau très prochainement. Vous recevrez un message de confirmation.
+            </p>
+            <div className="mt-8 flex justify-center gap-4">
+              <a
+                href="/"
+                className="rounded-lg border border-gray-200 px-6 py-3 font-heading text-xs uppercase tracking-widest text-charcoal transition hover:bg-gray-50"
+              >
+                Retour à l'accueil
+              </a>
+              <button
+                onClick={() => {
+                  setSubmitted(false);
+                  setCurrentStep(0);
+                  setSelectedService(null);
+                  setSelectedArtisan(null);
+                  setSelectedDate("");
+                  setSelectedTime(null);
+                  setName("");
+                  setEmail("");
+                  setPhone("");
+                }}
+                className="btn-gold"
+              >
+                Nouvelle réservation
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-creme pt-28">
@@ -311,6 +384,18 @@ const Reservation: React.FC = () => {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Prénom Nom"
+                        className="w-full rounded-lg border-0 bg-white px-4 py-3 font-body text-sm text-charcoal shadow-elevation-1 outline-none placeholder:text-gris-moyen/50 focus:ring-2 focus:ring-or-discret/40"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block font-heading text-xs uppercase tracking-widest text-gris-moyen">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="votre@email.com"
                         className="w-full rounded-lg border-0 bg-white px-4 py-3 font-body text-sm text-charcoal shadow-elevation-1 outline-none placeholder:text-gris-moyen/50 focus:ring-2 focus:ring-or-discret/40"
                       />
                     </div>

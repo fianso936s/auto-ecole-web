@@ -9,18 +9,24 @@ import {
   Menu,
   X,
   Sparkles,
+  CalendarDays,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { useCrmData } from "../contexts/CrmDataContext";
+import NotificationBadge from "../components/admin/NotificationBadge";
 
 const navItems = [
-  { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
-  { to: "/admin/prospects", icon: UserPlus, label: "Prospects", end: false },
-  { to: "/admin/clients", icon: Users, label: "Clients", end: false },
-  { to: "/admin/comptes", icon: Shield, label: "Comptes", end: false },
+  { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true, badge: false },
+  { to: "/admin/agenda", icon: CalendarDays, label: "Agenda", end: false, badge: true },
+  { to: "/admin/prospects", icon: UserPlus, label: "Prospects", end: false, badge: false },
+  { to: "/admin/clients", icon: Users, label: "Clients", end: false, badge: false },
+  { to: "/admin/comptes", icon: Shield, label: "Comptes", end: false, badge: false },
 ];
 
 const AdminLayout: React.FC = () => {
   const { user, logout } = useAuth();
+  const { getUnconfirmedBookingsCount } = useCrmData();
+  const unconfirmedCount = getUnconfirmedBookingsCount();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -75,6 +81,7 @@ const AdminLayout: React.FC = () => {
             >
               <item.icon className="h-5 w-5" />
               {item.label}
+              {item.badge && <NotificationBadge count={unconfirmedCount} />}
             </NavLink>
           ))}
         </nav>

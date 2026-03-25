@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import {
   Plus, Search, MoreHorizontal, Phone, Mail, Calendar, DollarSign,
-  Trash2, Edit3, X, Check, Eye, ChevronDown, ChevronUp,
+  Trash2, Edit3, X, Check, Eye, ChevronDown, ChevronUp, Download, FileText,
 } from "lucide-react";
 import { useCrmData } from "../../contexts/CrmDataContext";
 import type { Client, Appointment } from "../../contexts/CrmDataContext";
+import Timeline from "../../components/admin/Timeline";
+import { exportClientsCSV } from "../../utils/exportCsv";
+import { printReport } from "../../utils/exportPdf";
 
 const SERVICES = [
   "Milky & Jelly Nails", "Cat Eye Magnétique", "Blooming Gel Japonais",
@@ -93,6 +96,30 @@ const Clients: React.FC = () => {
     }
   };
 
+  const handleExportCSV = () => {
+    exportClientsCSV(filtered);
+  };
+
+  const handlePrintPDF = () => {
+    const totalCA = filtered.reduce((s, c) => s + c.totalSpent, 0);
+    const avgSpend = filtered.length > 0 ? Math.round(totalCA / filtered.length) : 0;
+    printReport({
+      title: "Liste des Clients",
+      subtitle: `${filtered.length} clients`,
+      stats: [
+        { label: "Clients", value: filtered.length },
+        { label: "CA Total", value: `${totalCA}€` },
+        { label: "Panier moyen", value: `${avgSpend}€` },
+        { label: "Total visites", value: filtered.reduce((s, c) => s + c.visitCount, 0) },
+      ],
+      columns: ["Prénom", "Nom", "Email", "Téléphone", "Total dépensé", "Visites", "Service préféré"],
+      rows: filtered.map((c) => [
+        c.firstName, c.lastName, c.email, c.phone,
+        `${c.totalSpent}€`, String(c.visitCount), c.preferredService || "—",
+      ]),
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -101,10 +128,26 @@ const Clients: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
           <p className="text-sm text-gray-500">{clients.length} clients &bull; CA total : {clients.reduce((s, c) => s + c.totalSpent, 0)}€</p>
         </div>
-        <button onClick={openAddClient}
-          className="inline-flex items-center gap-2 rounded-lg bg-rose-dark px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#a06868]">
-          <Plus className="h-4 w-4" /> Nouveau client
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+            title="Exporter en CSV"
+          >
+            <Download className="h-4 w-4" /> CSV
+          </button>
+          <button
+            onClick={handlePrintPDF}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+            title="Imprimer PDF"
+          >
+            <FileText className="h-4 w-4" /> PDF
+          </button>
+          <button onClick={openAddClient}
+            className="inline-flex items-center gap-2 rounded-lg bg-rose-dark px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#a06868]">
+            <Plus className="h-4 w-4" /> Nouveau client
+          </button>
+        </div>
       </div>
 
       {/* Search */}
@@ -171,7 +214,7 @@ const Clients: React.FC = () => {
               </div>
             </div>
 
-            {/* Expanded: appointments + notes */}
+            {/* Expanded: appointments + timeline */}
             {expandedClient === c.id && (
               <div className="border-t border-gray-100 bg-gray-50/50 p-4">
                 <div className="mb-3 flex items-center justify-between">
@@ -201,6 +244,7 @@ const Clients: React.FC = () => {
                         }`} />
                         <span className="text-xs text-gray-400 w-20">{apt.date}</span>
                         <span className="flex-1 font-medium text-gray-700">{apt.service}</span>
+                        {apt.time && <span className="text-xs text-gray-400">{apt.time}</span>}
                         <span className="text-sm font-bold text-gray-900">{apt.amount}€</span>
                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                           apt.status === "termine" ? "bg-green-100 text-green-700"
@@ -209,6 +253,9 @@ const Clients: React.FC = () => {
                         }`}>
                           {apt.status === "termine" ? "Terminé" : apt.status === "planifie" ? "Planifié" : "Annulé"}
                         </span>
+                        {apt.confirmed === false && (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">En attente</span>
+                        )}
                         {apt.status === "planifie" && (
                           <button onClick={() => markAptDone(c.id, apt.id)}
                             className="rounded p-1 text-green-500 hover:bg-green-50" title="Marquer terminé">
@@ -220,6 +267,12 @@ const Clients: React.FC = () => {
                   {c.appointments.length === 0 && (
                     <p className="py-4 text-center text-xs text-gray-400">Aucun rendez-vous enregistré</p>
                   )}
+                </div>
+
+                {/* Timeline / Journal d'activité */}
+                <div className="mt-6 border-t border-gray-200 pt-4">
+                  <h4 className="mb-3 text-sm font-semibold text-gray-700">Journal d'activité</h4>
+                  <Timeline entityType="client" entityId={c.id} />
                 </div>
               </div>
             )}
