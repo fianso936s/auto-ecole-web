@@ -43,7 +43,7 @@ const soinCategories = [
           "Reflets velours qui bougent avec la lumière. Un effet magnétique hypnotique et premium.",
         price: "40 — 55€",
         image:
-          "https://images.unsplash.com/photo-1595867818082-083862f3d630?w=400&q=80",
+          "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80",
       },
       {
         name: "Blooming Gel Japonais",
