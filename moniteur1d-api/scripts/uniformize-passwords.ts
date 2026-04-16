@@ -7,7 +7,10 @@ dotenv.config();
 const prisma = new PrismaClient();
 
 // Mot de passe uniforme pour tous les utilisateurs
-const UNIFORM_PASSWORD = process.env.UNIFORM_PASSWORD || 'lounes92';
+const UNIFORM_PASSWORD = process.env.UNIFORM_PASSWORD;
+if (!UNIFORM_PASSWORD) {
+  throw new Error('UNIFORM_PASSWORD environment variable must be set');
+}
 
 async function uniformizePasswords() {
   console.log('🔐 Uniformisation des mots de passe');

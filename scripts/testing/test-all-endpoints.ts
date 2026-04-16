@@ -15,7 +15,10 @@ const apiModulePath = path.join(rootDir, 'src', 'lib', 'api.ts');
 // Configuration
 const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:3001';
 const TEST_EMAIL = process.env.TEST_EMAIL || 'admin@moniteur1d.com';
-const TEST_PASSWORD = process.env.TEST_PASSWORD || 'lounes92';
+const TEST_PASSWORD = process.env.TEST_PASSWORD;
+if (!TEST_PASSWORD) {
+  throw new Error('TEST_PASSWORD environment variable must be set');
+}
 
 interface TestResult {
   module: string;

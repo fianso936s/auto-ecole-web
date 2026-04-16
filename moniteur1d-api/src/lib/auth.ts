@@ -1,7 +1,11 @@
 import jwt from "jsonwebtoken";
 
-const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET || "access_secret";
-const REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET || "refresh_secret";
+const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET;
+const REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET;
+
+if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
+  throw new Error("JWT_SECRET and JWT_REFRESH_SECRET environment variables must be set");
+}
 
 export const generateAccessToken = (user: { id: string, email: string, role: string }) => {
   return jwt.sign(

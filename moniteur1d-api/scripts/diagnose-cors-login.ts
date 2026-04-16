@@ -17,7 +17,10 @@ import bcrypt from "bcrypt";
 dotenv.config();
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@moniteur1d.com";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.UNIFORM_PASSWORD || "lounes92";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.UNIFORM_PASSWORD;
+if (!ADMIN_PASSWORD) {
+  throw new Error("ADMIN_PASSWORD or UNIFORM_PASSWORD environment variable must be set");
+}
 
 interface DiagnosticResult {
   test: string;

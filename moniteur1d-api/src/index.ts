@@ -219,7 +219,7 @@ const ensureAdminCreated = async () => {
     const adminEmail = process.env.ADMIN_EMAIL || "admin@moniteur1d.com";
     // Utiliser UNIFORM_PASSWORD si défini, sinon ADMIN_PASSWORD, sinon mot de passe par défaut
     const adminPassword =
-      process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || "lounes92";
+      process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD;
 
     if (!adminPassword) {
       console.log(

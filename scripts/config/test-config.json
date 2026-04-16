@@ -5,7 +5,7 @@
   },
   "auth": {
     "testEmail": "admin@moniteur1d.com",
-    "testPassword": "lounes92",
+    "testPassword": "${TEST_PASSWORD}",
     "testUser": {
       "email": "test@example.com",
       "password": "Test123!@#",

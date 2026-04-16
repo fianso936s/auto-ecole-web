@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 
 # Variables d'environnement (peuvent être surchargées)
 ADMIN_EMAIL="${1:-${ADMIN_EMAIL:-admin@moniteur1d.com}}"
-ADMIN_PASSWORD="${2:-${ADMIN_PASSWORD:-lounes92}}"
+ADMIN_PASSWORD="${2:-${ADMIN_PASSWORD:?ADMIN_PASSWORD environment variable must be set}}"
 ADMIN_FIRST_NAME="${3:-${ADMIN_FIRST_NAME:-Admin}}"
 ADMIN_LAST_NAME="${4:-${ADMIN_LAST_NAME:-System}}"
 

@@ -6,7 +6,10 @@ dotenv.config();
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const API_URL = process.env.API_URL || process.env.VITE_API_URL || 'http://localhost:3001';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@moniteur1d.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.UNIFORM_PASSWORD || 'lounes92';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.UNIFORM_PASSWORD;
+if (!ADMIN_PASSWORD) {
+  throw new Error('ADMIN_PASSWORD or UNIFORM_PASSWORD environment variable must be set');
+}
 
 interface TestResult {
   test: string;

@@ -7,7 +7,10 @@ dotenv.config();
 const prisma = new PrismaClient();
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@moniteur1d.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'lounes92';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if (!ADMIN_PASSWORD) {
+  throw new Error('ADMIN_PASSWORD environment variable must be set');
+}
 const ADMIN_FIRST_NAME = process.env.ADMIN_FIRST_NAME || 'Admin';
 const ADMIN_LAST_NAME = process.env.ADMIN_LAST_NAME || 'System';
 

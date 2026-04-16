@@ -304,8 +304,8 @@ async function auditAuthentication() {
   // Test de connexion complète (si serveur disponible)
   try {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@moniteur1d.com';
-    const adminPassword = process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || 'lounes92';
-    
+    const adminPassword = process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || '';
+
     const loginResponse = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -483,7 +483,7 @@ async function auditIntegration() {
   
   try {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@moniteur1d.com';
-    const adminPassword = process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || 'lounes92';
+    const adminPassword = process.env.UNIFORM_PASSWORD || process.env.ADMIN_PASSWORD || '';
 
     // Test de login
     const loginResponse = await fetch(`${API_URL}/auth/login`, {

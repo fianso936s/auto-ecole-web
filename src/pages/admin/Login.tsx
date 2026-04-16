@@ -94,7 +94,7 @@ const Login: React.FC = () => {
           </form>
 
           <p className="mt-6 text-center text-xs text-gray-500">
-            Compte par défaut : admin@bayanail.com / admin123
+            Connectez-vous avec vos identifiants administrateur
           </p>
         </div>
       </div>
